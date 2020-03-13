@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="Root" type="RootType"/>
+    <xs:complexType name="LEGACY.ITEM_MVType">
+        <xs:sequence>
+            <xs:element type="xs:string" name="SKU.CROSS.IDS"/>
+            <xs:element type="xs:string" name="SKU.CROSS.IDS.UDATE"/>
+            <xs:element type="xs:string" name="SKU.CROSS.IDS.UTIME"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="BRAND.SET_MVType">
+        <xs:sequence>
+            <xs:element type="xs:string" name="HOME.STORE.BRAND"/>
+            <xs:element type="xs:string" name="HOME.STORE.BRAND.UDATE"/>
+            <xs:element type="xs:string" name="HOME.STORE.BRAND.UTIME"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="itemcodeType">
+        <xs:sequence>
+            <xs:element type="xs:string" name="_ID"/>
+            <xs:element type="xs:string" name="ActionType"/>
+            <xs:element type="xs:string" name="Company"/>
+            <xs:element type="xs:string" name="ItemType"/>
+            <xs:element type="xs:string" name="VendorStyle"/>
+            <xs:element type="xs:string" name="GiftCardIndicator"/>
+            <xs:element type="xs:string" name="TicketName"/>
+            <xs:element type="xs:string" name="CLASS.DESC"/>
+            <xs:element type="xs:string" name="CLASS.DESC.UDATE"/>
+            <xs:element type="xs:string" name="CLASS.DESC.UTIME"/>
+            <xs:element type="xs:string" name="COLOR.DESC"/>
+            <xs:element type="xs:string" name="COLOR.DESC.UDATE"/>
+            <xs:element type="xs:string" name="COLOR.DESC.UTIME"/>
+            <xs:element type="xs:string" name="COMP"/>
+            <xs:element type="xs:string" name="COMP.UDATE"/>
+            <xs:element type="xs:string" name="COMP.UTIME"/>
+            <xs:element type="xs:string" name="DEPT"/>
+            <xs:element type="xs:string" name="DEPT.UDATE"/>
+            <xs:element type="xs:string" name="DEPT.UTIME"/>
+            <xs:element type="xs:string" name="DIMENSION"/>
+            <xs:element type="xs:string" name="DIMENSION.UDATE"/>
+            <xs:element type="xs:string" name="DIMENSION.UTIME"/>
+            <xs:element type="xs:string" name="FLAT.OR.GOH"/>
+            <xs:element type="xs:string" name="FLAT.OR.GOH.UDATE"/>
+            <xs:element type="xs:string" name="FLAT.OR.GOH.UTIME"/>
+            <xs:element type="xs:string" name="GROUP"/>
+            <xs:element type="xs:string" name="GROUP.UDATE"/>
+            <xs:element type="xs:string" name="GROUP.UTIME"/>
+            <xs:element type="xs:string" name="LEGACY.RETAIL"/>
+            <xs:element type="xs:string" name="LEGACY.RETAIL.UDATE"/>
+            <xs:element type="xs:string" name="LEGACY.RETAIL.UTIME"/>
+            <xs:element type="xs:string" name="LONG.DESC"/>
+            <xs:element type="xs:string" name="LONG.DESC.UDATE"/>
+            <xs:element type="xs:string" name="LONG.DESC.UTIME"/>
+            <xs:element type="xs:string" name="PERM.PROMO.RETL"/>
+            <xs:element type="xs:string" name="PERM.PROMO.RETL.UDATE"/>
+            <xs:element type="xs:string" name="PERM.PROMO.RETL.UTIME"/>
+            <xs:element type="xs:string" name="PERM.START.DATE"/>
+            <xs:element type="xs:string" name="PERM.START.DATE.UDATE"/>
+            <xs:element type="xs:string" name="PERM.START.DATE.UTIME"/>
+            <xs:element type="xs:string" name="PO.COST"/>
+            <xs:element type="xs:string" name="PO.COST.UDATE"/>
+            <xs:element type="xs:string" name="PO.COST.UTIME"/>
+            <xs:element type="xs:string" name="PRIMARY.SIZE"/>
+            <xs:element type="xs:string" name="PRIMARY.SIZE.UDATE"/>
+            <xs:element type="xs:string" name="PRIMARY.SIZE.UTIME"/>
+            <xs:element type="xs:string" name="PSEUDIV"/>
+            <xs:element type="xs:string" name="PSEUDIV.UDATE"/>
+            <xs:element type="xs:string" name="PSEUDIV.UTIME"/>
+            <xs:element type="xs:string" name="RECORD.ADD.DATE"/>
+            <xs:element type="xs:string" name="RECORD.ADD.TIME"/>
+            <xs:element type="xs:string" name="RECORD.OBSOLETE.DATE"/>
+            <xs:element type="xs:string" name="RECORD.OBSOLETE.TIME"/>
+            <xs:element type="xs:string" name="RECORD.TO.WM.ECM.DATE"/>
+            <xs:element type="xs:string" name="RECORD.TO.WM.ECM.TIME"/>
+            <xs:element type="xs:string" name="RECORD.TO.WM.RET.DATE"/>
+            <xs:element type="xs:string" name="RECORD.TO.WM.RET.TIME"/>
+            <xs:element type="xs:string" name="RECORD.UDATE"/>
+            <xs:element type="xs:string" name="RECORD.UTIME"/>
+            <xs:element type="xs:string" name="REPLENISHMENT.SOURCE"/>
+            <xs:element type="xs:string" name="REPLENISHMENT.SOURCE.UDATE"/>
+            <xs:element type="xs:string" name="REPLENISHMENT.SOURCE.UTIME"/>
+            <xs:element type="xs:string" name="ReplenishServiceGroup"/>
+            <xs:element type="xs:string" name="RETAIL"/>
+            <xs:element type="xs:string" name="RETAIL.UDATE"/>
+            <xs:element type="xs:string" name="RETAIL.UTIME"/>
+            <xs:element type="xs:string" name="SEASON.CODE"/>
+            <xs:element type="xs:string" name="SEASON.CODE.UDATE"/>
+            <xs:element type="xs:string" name="SEASON.CODE.UTIME"/>
+            <xs:element type="xs:string" name="SIZE.DESC.MEDIUM"/>
+            <xs:element type="xs:string" name="SIZE.DESC.MEDIUM.UDATE"/>
+            <xs:element type="xs:string" name="SIZE.DESC.MEDIUM.UTIME"/>
+            <xs:element type="xs:string" name="SIZE.DESC.SHORT"/>
+            <xs:element type="xs:string" name="SIZE.DESC.SHORT.UDATE"/>
+            <xs:element type="xs:string" name="SIZE.DESC.SHORT.UTIME"/>
+            <xs:element type="xs:string" name="TAG.FORMAT"/>
+            <xs:element type="xs:string" name="TAG.FORMAT.UDATE"/>
+            <xs:element type="xs:string" name="TAG.FORMAT.UTIME"/>
+            <xs:element type="xs:string" name="VENDOR.NUM"/>
+            <xs:element type="xs:string" name="VENDOR.NUM.UDATE"/>
+            <xs:element type="xs:string" name="VENDOR.NUM.UTIME"/>
+            <xs:element type="xs:string" name="SIZE.DESC.DIMENSION"/>
+            <xs:element type="xs:string" name="DIV"/>
+            <xs:element type="xs:string" name="VM.FOURGEN.ID"/>
+            <xs:element type="xs:string" name="VM.FOURGEN.ID.UDATE"/>
+            <xs:element type="xs:string" name="VM.FOURGEN.ID.UTIME"/>
+            <xs:element type="xs:string" name="COLOR.FAMILY"/>
+            <xs:element type="xs:string" name="COLOR.FAMILY.UDATE"/>
+            <xs:element type="xs:string" name="COLOR.FAMILY.UTIME"/>
+            <xs:element type="xs:string" name="BUYER.SHORTNAME"/>
+            <xs:element type="xs:string" name="BUYER.SHORTNAME.UDATE"/>
+            <xs:element type="xs:string" name="BUYER.SHORTNAME.UTIME"/>
+            <xs:element type="xs:string" name="STYLE.VENDOR.DESC"/>
+            <xs:element type="xs:string" name="STYLE.VENDOR.DESC.UDATE"/>
+            <xs:element type="xs:string" name="STYLE.VENDOR.DESC.UTIME"/>
+            <xs:element type="LEGACY.ITEM_MVType" name="LEGACY.ITEM_MV"/>
+            <xs:element type="xs:string" name="COUNTRY.OF.ORIGIN"/>
+            <xs:element type="xs:string" name="COUNTRY.OF.ORIGIN.UDATE"/>
+            <xs:element type="xs:string" name="COUNTRY.OF.ORIGIN.UTIME"/>
+            <xs:element type="xs:string" name="HAZARDOUS.FLAG"/>
+            <xs:element type="xs:string" name="HAZARDOUS.FLAG.UDATE"/>
+            <xs:element type="xs:string" name="HAZARDOUS.FLAG.UTIME"/>
+            <xs:element type="xs:string" name="COMMODITY.CODE"/>
+            <xs:element type="xs:string" name="COMMODITY.CODE.UDATE"/>
+            <xs:element type="xs:string" name="COMMODITY.CODE.UTIME"/>
+            <xs:element type="xs:string" name="CALC.COST"/>
+            <xs:element type="xs:string" name="CALC.COST.UDATE"/>
+            <xs:element type="xs:string" name="CALC.COST.UTIME"/>
+            <xs:element type="xs:string" name="WEIGHT.IN.LBS"/>
+            <xs:element type="xs:string" name="WEIGHT.IN.LBS.UDATE"/>
+            <xs:element type="xs:string" name="WEIGHT.IN.LBS.UTIME"/>
+            <xs:element type="xs:string" name="AES.UOM1"/>
+            <xs:element type="xs:string" name="AES.UOM1.UDATE"/>
+            <xs:element type="xs:string" name="AES.UOM1.UTIME"/>
+            <xs:element type="xs:string" name="AES.UOM1.CONVERSION"/>
+            <xs:element type="xs:string" name="AES.UOM1.CONVERSION.UDATE"/>
+            <xs:element type="xs:string" name="AES.UOM1.CONVERSION.UTIME"/>
+            <xs:element type="xs:string" name="AES.UOM2"/>
+            <xs:element type="xs:string" name="AES.UOM2.UDATE"/>
+            <xs:element type="xs:string" name="AES.UOM2.UTIME"/>
+            <xs:element type="xs:string" name="AES.UOM2.CONVERSION"/>
+            <xs:element type="xs:string" name="AES.UOM2.CONVERSION.UDATE"/>
+            <xs:element type="xs:string" name="AES.UOM2.CONVERSION.UTIME"/>
+            <xs:element type="xs:string" name="VENDOR.LABEL.ID"/>
+            <xs:element type="xs:string" name="VENDOR.LABEL.ID.UDATE"/>
+            <xs:element type="xs:string" name="VENDOR.LABEL.ID.UTIME"/>
+            <xs:element type="BRAND.SET_MVType" name="BRAND.SET_MV"/>
+            <xs:element type="xs:string" name="CDF.FIT"/>
+            <xs:element type="xs:string" name="CDF.FIT.UDATE"/>
+            <xs:element type="xs:string" name="CDF.FIT.UTIME"/>
+            <xs:element type="xs:string" name="MOST.RECENT.GROUP.PREVIOUS.VALUE"/>
+            <xs:element type="xs:string" name="CDF.SUPERGROUP"/>
+            <xs:element type="xs:string" name="CDF.SUPERGROUP.UDATE"/>
+            <xs:element type="xs:string" name="CDF.SUPERGROUP.UTIME"/>
+            <xs:element type="xs:string" name="CDF.SUPERGROUP.DESCRIPTION"/>
+            <xs:element type="xs:string" name="SUBDIVISION"/>
+            <xs:element type="xs:string" name="SUBDIVISION.UDATE"/>
+            <xs:element type="xs:string" name="SUBDIVISION.UTIME"/>
+            <xs:element type="xs:string" name="SUBDIVISION.DESCRIPTION"/>
+            <xs:element type="xs:string" name="SUPERDIVISION"/>
+            <xs:element type="xs:string" name="SUPERDIVISION.UDATE"/>
+            <xs:element type="xs:string" name="SUPERDIVISION.UTIME"/>
+            <xs:element type="xs:string" name="SUPERDIVISION.DESCRIPTION"/>
+            <xs:element type="xs:string" name="DIVISION.DESCRIPTION"/>
+            <xs:element type="xs:string" name="PACK.QTY"/>
+            <xs:element type="xs:string" name="PACK.QTY.UDATE"/>
+            <xs:element type="xs:string" name="PACK.QTY.UTIME"/>
+            <xs:element type="xs:string" name="REGULAR.CLASS"/>
+            <xs:element type="xs:string" name="REGULAR.CLASS.UDATE"/>
+            <xs:element type="xs:string" name="REGULAR.CLASS.UTIME"/>
+            <xs:element type="xs:string" name="BIG.TALL.CLASS"/>
+            <xs:element type="xs:string" name="BIG.TALL.CLASS.UDATE"/>
+            <xs:element type="xs:string" name="BIG.TALL.CLASS.UTIME"/>
+            <xs:element type="xs:string" name="BIG.TALL.FLAG"/>
+            <xs:element type="xs:string" name="BIG.TALL.FLAG.UDATE"/>
+            <xs:element type="xs:string" name="BIG.TALL.FLAG.UTIME"/>
+            <xs:element type="xs:string" name="VENDOR.NAME"/>
+            <xs:element type="xs:string" name="VENDOR.NAME.UDATE"/>
+            <xs:element type="xs:string" name="VENDOR.NAME.UTIME"/>
+            <xs:element type="xs:string" name="LABEL.NAME"/>
+            <xs:element type="xs:string" name="LABEL.NAME.UDATE"/>
+            <xs:element type="xs:string" name="LABEL.NAME.UTIME"/>
+            <xs:element type="xs:string" name="CUSTOM.CLOTHING.FLAG"/>
+            <xs:element type="xs:string" name="CUSTOM.CLOTHING.FLAG.UDATE"/>
+            <xs:element type="xs:string" name="CUSTOM.CLOTHING.FLAG.UTIME"/>
+            <xs:element type="xs:string" name="PRODUCT.LABEL"/>
+            <xs:element type="xs:string" name="PRODUCT.LABEL.UDATE"/>
+            <xs:element type="xs:string" name="PRODUCT.LABEL.UTIME"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="RootType">
+        <xs:sequence>
+            <xs:element type="itemcodeType" name="itemcode"/>
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>

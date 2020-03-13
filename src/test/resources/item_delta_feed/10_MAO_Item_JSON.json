@@ -1,0 +1,71 @@
+{
+  "Extended": {
+    "FlatOrGOH": "FLAT",
+    "Group": "51CSOLSPRDTRD",
+    "Division": "50",
+    "SizeDescriptionMedium": "16 1/2 34/35",
+    "FourgenId": "1013207",
+    "CDFSuperGroup": "5A2SOLIDSPRDCLR",
+    "CDFSuperGroupDesc": "SOLIDSPRDCLR",
+    "SubDivision": "5A1LS.SOLIDS",
+    "SubDivisionDesc": "LS.SOLIDS",
+    "SuperDivision": "3",
+    "SuperDivisionDesc": "MEN",
+    "VendorName": "TMW - DIRECT SOURCING"
+  },
+  "BaseUOM": "U",
+  "Brand": "TMW",
+  "Color": "BLU/TAUPE",
+  "Weight": 1.5,
+  "WeightUOM": "LB",
+  "DepartmentName": "DRESS SHIRTS",
+  "DepartmentNumber": "50",
+  "Description": "JAC S17 DRESS SHIRT BLUE/BROWN STRIPE AND GREY WINDOWPANE",
+  "IsGiftCard": false,
+  "IsScanOnly": true,
+  "IsGiftwithPurchase": false,
+  "ItemId": "TMW52R465567",
+  "ProductClass": "52R4",
+  "Season": "S17",
+  "SeasonYear": 2019,
+  "ShortDescription": "JAC S17 DRSSHRT",
+  "Size": "16 1/2 34/35",
+  "Style": "TMW",
+  "HandlingAttributes": {
+    "IsHazmat": false,
+    "IsParcelShippingAllowed": true,
+    "IsAirShippingAllowed": true,
+    "Description": "JAC S17 DRSSHRT"
+  },
+  "SellingAttributes": {
+    "ActivationRequired": false,
+    "DigitalGoods": false,
+    "IsDiscountable": false,
+    "IsExchangeable": false,
+    "IsPriceOverrideable": true,
+    "IsReturnableAtDC": true,
+    "ShipToAddress": true,
+    "PickUpInStore": true,
+    "SoldOnline": true,
+    "PriceStatusId": "CLEARANCE"
+  },
+  "ItemCode": [
+    {
+      "Type": "Primary_UPC",
+      "CodeTypeId": {
+        "CodeTypeId": "Primary_UPC"
+      },
+      "Value": "52R465567"
+    },
+    {
+      "Type": "UPC2",
+      "CodeTypeId": {
+        "CodeTypeId": "UPC2"
+      }
+    }
+  ],
+  "ManufacturingAttribute": {
+    "CountryofOrigin": "HN",
+    "VendorStyleNumber": "9900"
+  }
+}

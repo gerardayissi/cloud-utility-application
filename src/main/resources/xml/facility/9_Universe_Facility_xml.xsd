@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns="http://www.tmw.com/universe/store/getresponse/1.0.0"
+            targetNamespace="http://www.tmw.com/universe/store/getresponse/1.0.0"
+            elementFormDefault="qualified"
+            attributeFormDefault="unqualified">
+    <xsd:annotation>
+        <xsd:documentation xml:lang="en">
+            account: /uvdata/PROD
+            command: LIST CO @XML_GetStore TOXML ELEMENTS XMLMAPPING GetStore.map WITHSCHEMA SCHEMAONLY TO GetStore
+        </xsd:documentation>
+    </xsd:annotation>
+    <xsd:element name="GetStoreResponse" type="GetStoreResponseType"/>
+    <xsd:complexType name="COType">
+        <xsd:sequence>
+            <xsd:element name="ID" type="xsd:string"/>
+            <xsd:element name="AbaNumber" type="xsd:string"/>
+            <xsd:element name="ActionType" type="xsd:string" minOccurs="0"/>
+            <xsd:element name="ActivityType" type="xsd:string"/>
+            <xsd:element name="Addr" type="xsd:string"/>
+            <xsd:element name="AltSched" type="xsd:string"/>
+            <xsd:element name="AmexMerchNo" type="xsd:string"/>
+            <xsd:element name="AreaCode" type="xsd:string"/>
+            <xsd:element name="AreaMgrSsno" type="xsd:string"/>
+            <xsd:element name="AreaMgrShortName" type="xsd:string"/>
+            <xsd:element name="AsstMgr_MV" type="AsstMgr_MVType" minOccurs="0"/>
+            <xsd:element name="BagFees_MV" type="BagFees_MVType" minOccurs="0"/>
+            <xsd:element name="BankAcctNo" type="xsd:string"/>
+            <xsd:element name="BcrdMerchNo" type="xsd:string"/>
+            <xsd:element name="BlockTransfers" type="xsd:string"/>
+            <xsd:element name="Brand" type="xsd:string"/>
+            <xsd:element name="Carrier" type="xsd:string"/>
+            <xsd:element name="City" type="xsd:string"/>
+            <xsd:element name="ExtHours_MV" type="ExtHours_MVType" minOccurs="0"/>
+            <xsd:element name="RegHours_MV" type="RegHours_MVType" minOccurs="0"/>
+            <xsd:element name="ClosingPhysical" type="xsd:string"/>
+            <xsd:element name="CompanyCode" type="xsd:string"/>
+            <xsd:element name="CompanyRcptName" type="xsd:string"/>
+            <xsd:element name="CornerExclusive" type="xsd:string"/>
+            <xsd:element name="Country" type="xsd:string"/>
+            <xsd:element name="County" type="xsd:string"/>
+            <xsd:element name="DSTimeAdj" type="xsd:string"/>
+            <xsd:element name="DateClose" type="xsd:string"/>
+            <xsd:element name="DateOpen" type="xsd:string"/>
+            <xsd:element name="DbHomestore" type="xsd:string"/>
+            <xsd:element name="DbRadius" type="xsd:string"/>
+            <xsd:element name="Demographics" type="xsd:string"/>
+            <xsd:element name="DiscMerchNo" type="xsd:string"/>
+            <xsd:element name="DistTailorSsno" type="xsd:string"/>
+            <xsd:element name="DistTailorShortName" type="xsd:string"/>
+            <xsd:element name="District" type="xsd:string"/>
+            <xsd:element name="DmSsno" type="xsd:string"/>
+            <xsd:element name="DmShortName" type="xsd:string"/>
+            <xsd:element name="DrawerFund" type="xsd:string"/>
+            <xsd:element name="ECareTurnFee" type="xsd:string"/>
+            <xsd:element name="EcrFwdtoStore" type="xsd:string"/>
+            <xsd:element name="EmailAddress" type="xsd:string"/>
+            <xsd:element name="EReceiptAllowed" type="xsd:string"/>
+            <xsd:element name="Fax" type="xsd:string"/>
+            <xsd:element name="FeatureSet_MV" type="FeatureSet_MVType" minOccurs="0"/>
+            <xsd:element name="FinditStage" type="xsd:string"/>
+            <xsd:element name="GeocodeTaxware" type="xsd:string"/>
+            <xsd:element name="GiftCardBuyBack" type="xsd:string"/>
+            <xsd:element name="GohHub" type="xsd:string"/>
+            <xsd:element name="GohOtrSort" type="xsd:string"/>
+            <xsd:element name="GohStoreSort" type="xsd:string"/>
+            <xsd:element name="HighVolumeTux" type="xsd:string"/>
+            <xsd:element name="Hub" type="xsd:string"/>
+            <xsd:element name="IcSsno" type="xsd:string"/>
+            <xsd:element name="IcShortName" type="xsd:string"/>
+            <xsd:element name="IneligibleForSplits" type="xsd:string"/>
+            <xsd:element name="InsideMall" type="xsd:string"/>
+            <xsd:element name="Latitude" type="xsd:string"/>
+            <xsd:element name="LocalAddress" type="xsd:string" minOccurs="0"/>
+            <xsd:element name="LoginCount" type="xsd:string"/>
+            <xsd:element name="LogoBrand" type="xsd:string"/>
+            <xsd:element name="Longitude" type="xsd:string"/>
+            <xsd:element name="LossPreventionSsno" type="xsd:string"/>
+            <xsd:element name="LossPreventionShortName" type="xsd:string"/>
+            <xsd:element name="MaintainsInventory" type="xsd:string"/>
+            <xsd:element name="MerchandiseType" type="xsd:string"/>
+            <xsd:element name="MobilePhoneNumber" type="xsd:string"/>
+            <xsd:element name="Mode" type="xsd:string"/>
+            <xsd:element name="Name" type="xsd:string"/>
+            <xsd:element name="OpeningPhysical" type="xsd:string"/>
+            <xsd:element name="OpsMgrSsno" type="xsd:string"/>
+            <xsd:element name="OpsMgrShortName" type="xsd:string"/>
+            <xsd:element name="OtherMgrTwoSsno" type="xsd:string"/>
+            <xsd:element name="OtherMgrTwoShortName" type="xsd:string"/>
+            <xsd:element name="OtherMgrSsno" type="xsd:string"/>
+            <xsd:element name="OtherMgrShortName" type="xsd:string"/>
+            <xsd:element name="Phone" type="xsd:string"/>
+            <xsd:element name="PickupInStore" type="xsd:string"/>
+            <xsd:element name="Ramping" type="xsd:string"/>
+            <xsd:element name="RedistributionHub" type="xsd:string"/>
+            <xsd:element name="Region" type="xsd:string"/>
+            <xsd:element name="RelocationDate" type="xsd:string"/>
+            <xsd:element name="RmSsno" type="xsd:string"/>
+            <xsd:element name="RmShortName" type="xsd:string"/>
+            <xsd:element name="RmmSsno" type="xsd:string"/>
+            <xsd:element name="RmmShortName" type="xsd:string"/>
+            <xsd:element name="Route" type="xsd:string"/>
+            <xsd:element name="RtSsno" type="xsd:string"/>
+            <xsd:element name="RtShortName" type="xsd:string"/>
+            <xsd:element name="SaleMkt" type="xsd:string"/>
+            <xsd:element name="ServiceLevel" type="xsd:string"/>
+            <xsd:element name="ShipFromFacility" type="xsd:string"/>
+            <xsd:element name="ShipLane" type="xsd:string" minOccurs="0"/>
+            <xsd:element name="ShipPos" type="xsd:string" minOccurs="0"/>
+            <xsd:element name="ShipToStore" type="xsd:string"/>
+            <xsd:element name="SingleDivTransfers" type="xsd:string"/>
+            <xsd:element name="SpecialInsCode2" type="xsd:string" minOccurs="0"/>
+            <xsd:element name="SqFeet" type="xsd:string"/>
+            <xsd:element name="SrOpsMgrSsno" type="xsd:string"/>
+            <xsd:element name="SrOpsMgrShortName" type="xsd:string"/>
+            <xsd:element name="SrStoreMgrSsno" type="xsd:string"/>
+            <xsd:element name="SrStoreMgrShortName" type="xsd:string"/>
+            <xsd:element name="SrVpSsno" type="xsd:string"/>
+            <xsd:element name="SrVpShortName" type="xsd:string"/>
+            <xsd:element name="SrtSsno" type="xsd:string"/>
+            <xsd:element name="SrtShortName" type="xsd:string"/>
+            <xsd:element name="SrvmSsno" type="xsd:string"/>
+            <xsd:element name="SrvmShortName" type="xsd:string"/>
+            <xsd:element name="St" type="xsd:string"/>
+            <xsd:element name="Store" type="xsd:string"/>
+            <xsd:element name="StoreType" type="xsd:string"/>
+            <xsd:element name="StrMgrFname" type="xsd:string"/>
+            <xsd:element name="StrMgrLname" type="xsd:string"/>
+            <xsd:element name="StrMgrSsno" type="xsd:string"/>
+            <xsd:element name="StrMgrShortName" type="xsd:string"/>
+            <xsd:element name="SuperRmSsno" type="xsd:string"/>
+            <xsd:element name="SuperRmShortName" type="xsd:string"/>
+            <xsd:element name="Tax_MV" type="Tax_MVType" minOccurs="0"/>
+            <xsd:element name="TimeZone" type="xsd:string"/>
+            <xsd:element name="TrainingMgrSsno" type="xsd:string"/>
+            <xsd:element name="TrainingMgrShortName" type="xsd:string"/>
+            <xsd:element name="TransferAllowed" type="xsd:string"/>
+            <xsd:element name="TruckDepDow_MV" type="TruckDepDow_MVType" minOccurs="0"/>
+            <xsd:element name="TuxOpenDate" type="xsd:string"/>
+            <xsd:element name="TvMarket" type="xsd:string"/>
+            <xsd:element name="UPSAccountIdStore" type="xsd:string" minOccurs="0"/>
+            <xsd:element name="ValidFindItStore" type="xsd:string"/>
+            <xsd:element name="VisualSsno" type="xsd:string"/>
+            <xsd:element name="VisualShortName" type="xsd:string"/>
+            <xsd:element name="Volume" type="xsd:string"/>
+            <xsd:element name="VpSsno" type="xsd:string"/>
+            <xsd:element name="VpShortName" type="xsd:string"/>
+            <xsd:element name="Warehouse" type="xsd:string"/>
+            <xsd:element name="WebStore" type="xsd:string"/>
+            <xsd:element name="WebStoreNum" type="xsd:string"/>
+            <xsd:element name="XferPwdRequired" type="xsd:string"/>
+            <xsd:element name="XfersTransitStore" type="xsd:string"/>
+            <xsd:element name="Zip" type="xsd:string"/>
+            <xsd:element name="ZoneOpsEmplid" type="xsd:string"/>
+            <xsd:element name="ShippingPolicy_MV" type="ShippingPolicy_MVType" minOccurs="0"/>
+            <xsd:element name="TemporaryCloseInfo_MV" type="TemporaryCloseInfo_MVType" minOccurs="0"/>
+            <xsd:element name="FindItBrands_MV" type="FindItBrands_MVType" minOccurs="0"/>
+            <xsd:element ref="GOH.SHIP.HUB" minOccurs="0"/>
+            <xsd:element ref="FLAT.SHIP.HUB" minOccurs="0"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="AsstMgr_MVType">
+        <xsd:sequence>
+            <xsd:element name="AsstMgrSsno" type="xsd:string"/>
+            <xsd:element name="AsstMgrShortName" type="xsd:string"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="BagFees_MVType">
+        <xsd:sequence>
+            <xsd:element name="BagFeeCharge" type="xsd:string"/>
+            <xsd:element name="BagFeeType" type="xsd:string"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="ExtHours_MVType">
+        <xsd:sequence>
+            <xsd:element name="CloseExtHours" type="xsd:string"/>
+            <xsd:element name="ExtDayOfTheWeek" type="xsd:string"/>
+            <xsd:element name="OpenExtHours" type="xsd:string"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="RegHours_MVType">
+        <xsd:sequence>
+            <xsd:element name="CloseRegHours" type="xsd:string"/>
+            <xsd:element name="OpenRegHours" type="xsd:string"/>
+            <xsd:element name="RegDayOfTheWeek" type="xsd:string"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="FeatureSet_MVType">
+        <xsd:sequence>
+            <xsd:element name="FeatureCodes" type="xsd:string"/>
+            <xsd:element name="FeatureDesc" type="xsd:string"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="Tax_MVType">
+        <xsd:sequence>
+            <xsd:element name="TaxPct" type="xsd:string"/>
+            <xsd:element name="TaxPctType" type="xsd:string"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="TruckDepDow_MVType">
+        <xsd:sequence>
+            <xsd:element name="TruckDepDow" type="xsd:string"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="ShippingPolicy_MVType">
+        <xsd:sequence>
+            <xsd:element name="DayOfWeek" type="xsd:string"/>
+            <xsd:element name="CutOffTime" type="xsd:string"/>
+            <xsd:element name="IsNoShipping" type="xsd:string"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="TemporaryCloseInfo_MVType">
+        <xsd:sequence>
+            <xsd:element name="TempCloseStartDate" type="xsd:string"/>
+            <xsd:element name="TempCloseEndDate" type="xsd:string"/>
+            <xsd:element name="TempCloseReason" type="xsd:string"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="FindItBrands_MVType">
+        <xsd:sequence>
+            <xsd:element name="FindItBrands" type="xsd:string"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:element name="GOH.SHIP.HUB" type="xsd:string"/>
+    <xsd:element name="FLAT.SHIP.HUB" type="xsd:string"/>
+    <xsd:complexType name="GetStoreResponseType">
+        <xsd:sequence>
+            <xsd:element name="CO" type="COType" minOccurs="0"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:schema>

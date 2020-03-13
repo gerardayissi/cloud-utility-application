@@ -1,0 +1,115 @@
+{
+  "ServiceLevelCode": null,
+  "IsVASRequired": "false",
+  "OrderCaptureDate": "2020-02-20T04:45:00.000",
+  "ShipFromLocationId": "3321",
+  "Extended": {
+    "IsResidential": "false",
+    "PerfectFitNumber": null,
+    "PaymentMethod": null,
+    "GiftMessage": null
+  },
+  "OrganizationId": "TMW",
+  "Source": "CS",
+  "FulfillmentId": "24078473",
+  "FulfillmentStatusId": "1000.000",
+  "FulfillmentAddress": [
+    {
+      "AddressTypeId": {
+        "AddressTypeId": "Billing"
+      },
+      "Address": {
+        "Email": "rishabhpatel1234@gmail.com",
+        "FirstName": "Rishabh",
+        "State": "FL",
+        "Phone": "201-657-4456",
+        "PostalCode": "32902",
+        "Country": "US",
+        "LastName": "Patel",
+        "Address1": "3151 S Babcock St Apt 161",
+        "City": "Melbourne"
+      },
+      "FulfillmentAddressId": "1"
+    }
+  ],
+  "CustomerPhone": null,
+  "IsGift": "false",
+  "CustomerFirstName": "Rishabh",
+  "CustomerEmail": "rishabhpatel1234@gmail.com",
+  "FulfillmentLine": [
+    {
+      "ItemUnitPrice": "19.99",
+      "WeightUOM": "LB",
+      "IsHazmat": "false",
+      "Extended": {
+        "Comments": null
+      },
+      "OrderId": "113245070",
+      "ItemId": "TMW234R30098",
+      "ItemDescription": "JOE 5PKT TWILL",
+      "ItemUnitWeight": "1",
+      "SupplyTypeId": "OnHand",
+      "FulfillmentLineStatusId": "1000.000",
+      "ItemColor": "98",
+      "FulfillmentLineId": "1",
+      "OrderLineId": "209412509",
+      "ItemStyle": "234R",
+      "PipelineId": "FULFILLMENT_EXECUTION",
+      "ItemSize": "300",
+      "OrderedQty": "1",
+      "QuantityUom": "U"
+    }
+  ],
+  "OrderTypeId": "MWD",
+  "DocTypeId": "Customer Order",
+  "ShipToLocationId": "3315",
+  "IsReturnLabelRequired": "false",
+  "FulfillmentPackages": [
+    {
+      "ShipToAddress": {
+        "FirstName": "Rishabh",
+        "State": "FL",
+        "Address2": "The Men's Wearhouse",
+        "PostalCode": "32904",
+        "Country": "US",
+        "LastName": "Patel",
+        "Address1": "1745 W NEW HAVEN AVE",
+        "City": "MELBOURNE",
+        "County": "BREYARD"
+      },
+      "ServiceLevelCode": "UGRD",
+      "ShipToLocationId": "3315",
+      "TrackingNumber": null,
+      "ShippedDate": null,
+      "PackageDetail": {
+        "FulfillmentLineId": "1",
+        "Quantity": {
+          "UOM": {
+            "Code": "U"
+          },
+          "Qty": "1"
+        },
+        "PackageDetailId": null,
+        "ItemId": "TMW234R30098",
+        "FulfillmentId": "24078473"
+      },
+      "ShipFromLocationId": "3321",
+      "PackageStatus": "1000.000",
+      "PackageTypeId": null,
+      "FulfillmentId": null,
+      "CurrentLocationId": "3321",
+      "ReceiptType": "ReceiveByPackage",
+      "PackageId": null,
+      "DeliveryType": null
+    }
+  ],
+  "DeliveryMethodId": "ShipToStore",
+  "DestinationActionId": "MERGE",
+  "ShipViaId": "UGRD",
+  "ShippingDueDate": "2020-02-29T18:58:00.000",
+  "CustomerLastName": "Patel",
+  "DeliveryDueDate": "2020-02-29T18:51:00.000",
+  "FulfillmentLineInstruction": [
+    {}
+  ]
+}

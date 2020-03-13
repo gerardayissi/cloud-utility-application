@@ -1,0 +1,12 @@
+{
+  "LocationId": "0775",
+  "DisplayId": "0775",
+  "LocationStatusId": "0",
+  "LocationTypeId": "Stores",
+  "LocationName": "0775",
+  "LaborCost": "1.0",
+  "CapacityUtilizationLevel": "Order",
+  "PickupAtStore": "true",
+  "ShipFromStore": "true",
+  "ShipToStore": "true"
+}

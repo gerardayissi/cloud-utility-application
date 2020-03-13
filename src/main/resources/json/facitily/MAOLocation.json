@@ -1,0 +1,32 @@
+{
+  "LocationId": "0775",
+  "OrganizationId": "JAB",
+  "DisplayId": "0775",
+  "LocationName": "#0775 THE MEADOWS",
+  "ParentOrgId": "JAB",
+  "LocationTimeZone": "America/Chicago",
+  "Address": {
+    "FirstName": "Store",
+    "LastName": "Manager",
+    "Address1": "11 MEADOWS CIRCLE DR STE 426",
+    "City": "LAKE SAINT LOUIS",
+    "State": "MO",
+    "PostalCode": "63367",
+    "Country": "US",
+    "County": "SAINT CHARLES",
+    "Phone": "636-695-4400",
+    "Email": null
+  },
+  "LocationType": {
+    "LocationTypeId": "Store"
+  },
+  "LocationFulfillmentAttr": {
+    "PickupAtStore": "true",
+    "ShipFromStore": "true",
+    "ShipToStore": "true"
+  },
+  "LocationStatus": {
+    "LocationStatusId": "Operational"
+  },
+  "LocationSubType": null
+}

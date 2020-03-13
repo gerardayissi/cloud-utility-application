@@ -1,0 +1,542 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="tXML" type="tXMLType"/>
+    <xs:complexType name="HeaderType">
+        <xs:sequence>
+            <xs:element type="xs:string" name="Source"/>
+            <xs:element type="xs:string" name="Action_Type"/>
+            <xs:element type="xs:string" name="Sequence_Number"/>
+            <xs:element type="xs:string" name="Batch_ID"/>
+            <xs:element type="xs:string" name="Reference_ID"/>
+            <xs:element type="xs:string" name="User_ID"/>
+            <xs:element type="xs:string" name="Password"/>
+            <xs:element type="xs:string" name="Message_Type"/>
+            <xs:element type="xs:string" name="Company_ID"/>
+            <xs:element type="xs:string" name="Msg_Locale"/>
+            <xs:element type="xs:string" name="Msg_Time_Zone"/>
+            <xs:element type="xs:string" name="Version"/>
+            <xs:element type="xs:string" name="Internal_Reference_ID"/>
+            <xs:element type="xs:string" name="Internal_Date_Time_Stamp"/>
+            <xs:element type="xs:string" name="External_Reference_ID"/>
+            <xs:element type="xs:string" name="External_Date_Time_Stamp"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="ProcessInfoType">
+        <xs:sequence>
+            <xs:element type="xs:string" name="RefTextField1"/>
+            <xs:element type="xs:string" name="RefTextField2"/>
+            <xs:element type="xs:string" name="RefTextField3"/>
+            <xs:element type="xs:string" name="RefTextField4"/>
+            <xs:element type="xs:string" name="RefTextField5"/>
+            <xs:element type="xs:string" name="RefTextField6"/>
+            <xs:element type="xs:string" name="RefTextField7"/>
+            <xs:element type="xs:string" name="RefTextField8"/>
+            <xs:element type="xs:string" name="RefTextField9"/>
+            <xs:element type="xs:string" name="RefTextField10"/>
+            <xs:element type="xs:string" name="RefNumberField1"/>
+            <xs:element type="xs:string" name="RefNumberField2"/>
+            <xs:element type="xs:string" name="RefNumberField3"/>
+            <xs:element type="xs:string" name="RefNumberField4"/>
+            <xs:element type="xs:string" name="RefNumberField5"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="CustomFieldType">
+        <xs:sequence>
+            <xs:element type="xs:string" name="Name"/>
+            <xs:element name="Value">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="FL"/>
+                        <xs:enumeration value="32902"/>
+                        <xs:enumeration value="0.0"/>
+                        <xs:enumeration value=""/>
+                        <xs:enumeration value="3151 S Babcock St Apt 161"/>
+                        <xs:enumeration value="Melbourne"/>
+                        <xs:enumeration value="US"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="CustomFieldListType">
+        <xs:sequence>
+            <xs:element type="CustomFieldType" name="CustomField" maxOccurs="unbounded" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="QuantityType">
+        <xs:sequence>
+            <xs:element type="xs:string" name="OrderQty"/>
+            <xs:element type="xs:string" name="ShippedQty"/>
+            <xs:element type="xs:string" name="ReceivedQty"/>
+            <xs:element type="xs:string" name="QtyUOM"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="WeightType">
+        <xs:sequence>
+            <xs:element type="xs:string" name="PlannedWeight"/>
+            <xs:element type="xs:string" name="ShippedWeight"/>
+            <xs:element type="xs:string" name="ReceivedWeight"/>
+            <xs:element type="xs:string" name="WeightUOM"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="VolumeType">
+        <xs:sequence>
+            <xs:element type="xs:string" name="PlannedVolume"/>
+            <xs:element type="xs:string" name="ShippedVolume"/>
+            <xs:element type="xs:string" name="ReceivedVolume"/>
+            <xs:element type="xs:string" name="VolumeUOM"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="Size1Type">
+        <xs:sequence>
+            <xs:element type="xs:string" name="PlannedSize1"/>
+            <xs:element type="xs:string" name="ShippedSize1"/>
+            <xs:element type="xs:string" name="ReceivedSize1"/>
+            <xs:element type="xs:string" name="Size1UOM"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="Size2Type">
+        <xs:sequence>
+            <xs:element type="xs:string" name="PlannedSize2"/>
+            <xs:element type="xs:string" name="ShippedSize2"/>
+            <xs:element type="xs:string" name="ReceivedSize2"/>
+            <xs:element type="xs:string" name="Size2UOM"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="SizeType">
+        <xs:sequence>
+            <xs:element type="xs:string" name="SizeUomCode"/>
+            <xs:element type="xs:string" name="SizeValue"/>
+            <xs:element type="xs:string" name="ShippedSizeValue"/>
+            <xs:element type="xs:string" name="ReceivedSizeValue"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="LineProcessInfoType">
+        <xs:sequence>
+            <xs:element type="xs:string" name="LineRefTextField1"/>
+            <xs:element type="xs:string" name="LineRefTextField2"/>
+            <xs:element type="xs:string" name="LineRefTextField3"/>
+            <xs:element type="xs:string" name="LineRefTextField4"/>
+            <xs:element type="xs:string" name="LineRefTextField5"/>
+            <xs:element type="xs:string" name="LineRefTextField6"/>
+            <xs:element type="xs:string" name="LineRefTextField7"/>
+            <xs:element type="xs:string" name="LineRefTextField8"/>
+            <xs:element type="xs:string" name="LineRefTextField9"/>
+            <xs:element type="xs:string" name="LineRefTextField10"/>
+            <xs:element type="xs:string" name="LineRefNumberField1"/>
+            <xs:element type="xs:string" name="LineRefNumberField2"/>
+            <xs:element type="xs:string" name="LineRefNumberField3"/>
+            <xs:element type="xs:string" name="LineRefNumberField4"/>
+            <xs:element type="xs:string" name="LineRefNumberField5"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="InventoryAttributesType">
+        <xs:sequence>
+            <xs:element type="xs:string" name="InventoryType"/>
+            <xs:element type="xs:string" name="ProductStatus"/>
+            <xs:element type="xs:string" name="BatchNbr"/>
+            <xs:element type="xs:string" name="CountryOfOrigin"/>
+            <xs:element type="xs:string" name="ItemAttribute1"/>
+            <xs:element type="xs:string" name="ItemAttribute2"/>
+            <xs:element type="xs:string" name="ItemAttribute3"/>
+            <xs:element type="xs:string" name="ItemAttribute4"/>
+            <xs:element type="xs:string" name="ItemAttribute5"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="LineItemType">
+        <xs:sequence>
+            <xs:element type="xs:string" name="DoLineNbr"/>
+            <xs:element type="xs:string" name="ItemName"/>
+            <xs:element type="xs:string" name="Description"/>
+            <xs:element type="xs:string" name="UpdateActionType"/>
+            <xs:element type="xs:string" name="PackageType"/>
+            <xs:element type="xs:string" name="DoLineStatus"/>
+            <xs:element type="xs:string" name="IsCancelled"/>
+            <xs:element type="xs:string" name="Length"/>
+            <xs:element type="xs:string" name="LengthUOM"/>
+            <xs:element type="xs:string" name="Width"/>
+            <xs:element type="xs:string" name="WidthUOM"/>
+            <xs:element type="xs:string" name="Height"/>
+            <xs:element type="xs:string" name="HeightUOM"/>
+            <xs:element type="xs:string" name="Diameter"/>
+            <xs:element type="xs:string" name="DiameterUOM"/>
+            <xs:element type="xs:string" name="CustomerItemNbr"/>
+            <xs:element type="xs:string" name="ChuteAssignType"/>
+            <xs:element type="xs:string" name="AllocationSourceType"/>
+            <xs:element type="xs:string" name="TotalMonetaryValue"/>
+            <xs:element type="xs:string" name="MonetaryValueCurrencyCode"/>
+            <xs:element type="xs:string" name="OriginalBudgetedCost"/>
+            <xs:element type="xs:string" name="BudgetedCost"/>
+            <xs:element type="xs:string" name="BudgetedCostCurrencyCode"/>
+            <xs:element type="xs:string" name="ActualCost"/>
+            <xs:element type="xs:string" name="ActualCostCurrencyCode"/>
+            <xs:element type="xs:string" name="FreightRevenue"/>
+            <xs:element type="xs:string" name="FreightRevenueCurrencyCode"/>
+            <xs:element type="xs:string" name="UserCanceledQty"/>
+            <xs:element type="xs:string" name="PickupStartDttm"/>
+            <xs:element type="xs:string" name="PickupEndDttm"/>
+            <xs:element type="xs:string" name="DeliveryStartDttm"/>
+            <xs:element type="xs:string" name="DeliveryEndDttm"/>
+            <xs:element type="xs:string" name="ActualShippedDttm"/>
+            <xs:element type="xs:string" name="PickupReferenceNbr"/>
+            <xs:element type="xs:string" name="DeliveryReferenceNbr"/>
+            <xs:element type="xs:string" name="ReferenceField1"/>
+            <xs:element type="xs:string" name="ReferenceField2"/>
+            <xs:element type="xs:string" name="ReferenceField3"/>
+            <xs:element type="xs:string" name="ReferenceField4"/>
+            <xs:element type="xs:string" name="ReferenceField5"/>
+            <xs:element type="xs:string" name="ReferenceField6"/>
+            <xs:element type="xs:string" name="ReferenceField7"/>
+            <xs:element type="xs:string" name="ReferenceField8"/>
+            <xs:element type="xs:string" name="ReferenceField9"/>
+            <xs:element type="xs:string" name="ReferenceField10"/>
+            <xs:element type="xs:string" name="ReferenceNumber1"/>
+            <xs:element type="xs:string" name="ReferenceNumber2"/>
+            <xs:element type="xs:string" name="ReferenceNumber3"/>
+            <xs:element type="xs:string" name="ReferenceNumber4"/>
+            <xs:element type="xs:string" name="ReferenceNumber5"/>
+            <xs:element type="xs:string" name="ProductClassCode"/>
+            <xs:element type="xs:string" name="ProtectionLevelCode"/>
+            <xs:element type="xs:string" name="NmfcFreightClass"/>
+            <xs:element type="xs:string" name="CommodityCode"/>
+            <xs:element type="xs:string" name="IsHazmat"/>
+            <xs:element type="xs:string" name="DangerousGoodsCode"/>
+            <xs:element type="xs:string" name="MerchandizingDepartment"/>
+            <xs:element type="xs:string" name="ItemGtin"/>
+            <xs:element type="xs:string" name="ItemSubstituitionCode"/>
+            <xs:element type="xs:string" name="ItemSubstituitionCodeValue"/>
+            <xs:element type="xs:string" name="SerialNbrRequiredIndicator"/>
+            <xs:element type="xs:string" name="ExportInformationCode"/>
+            <xs:element type="xs:string" name="MonetaryValueSizeUom"/>
+            <xs:element type="xs:string" name="UnitMonetaryValue"/>
+            <xs:element type="xs:string" name="ItemBreakAttribute"/>
+            <xs:element type="xs:string" name="StandardLpnWeight"/>
+            <xs:element type="xs:string" name="StandardLpnVolume"/>
+            <xs:element type="xs:string" name="StandardSubPackQty"/>
+            <xs:element type="xs:string" name="StandardPackQty"/>
+            <xs:element type="xs:string" name="StandardBundleQty"/>
+            <xs:element type="xs:string" name="StandardLpnQty"/>
+            <xs:element type="xs:string" name="StandardPalletQty"/>
+            <xs:element type="xs:string" name="CubeMultipleQty"/>
+            <xs:element type="xs:string" name="WaveAllocationType"/>
+            <xs:element type="xs:string" name="WaveProcessingType"/>
+            <xs:element type="xs:string" name="VasProcessType"/>
+            <xs:element type="xs:string" name="LineType"/>
+            <xs:element type="xs:string" name="PickLocationSubLocationId"/>
+            <xs:element type="xs:string" name="PickLocationAssignmentType"/>
+            <xs:element type="xs:string" name="PrepackGroupCode"/>
+            <xs:element type="xs:string" name="PrepackQty"/>
+            <xs:element type="xs:string" name="LpnType"/>
+            <xs:element type="xs:string" name="LpnSize"/>
+            <xs:element type="xs:string" name="PalletType"/>
+            <xs:element type="xs:string" name="AssortmentNbr"/>
+            <xs:element type="xs:string" name="OrderConsolidationAttr"/>
+            <xs:element type="xs:string" name="LpnBreakAttribute"/>
+            <xs:element type="xs:string" name="PackRate"/>
+            <xs:element type="xs:string" name="Price"/>
+            <xs:element type="xs:string" name="RetailPrice"/>
+            <xs:element type="xs:string" name="PriceTicketType"/>
+            <xs:element type="xs:string" name="CriticalDimension1"/>
+            <xs:element type="xs:string" name="CriticalDimension2"/>
+            <xs:element type="xs:string" name="CriticalDimension3"/>
+            <xs:element type="xs:string" name="CustomsTag"/>
+            <xs:element type="xs:string" name="PurchaseOrderNbr"/>
+            <xs:element type="xs:string" name="PurchaseOrderLineNbr"/>
+            <xs:element type="xs:string" name="ExternalSystemPurchaseOrderNbr"/>
+            <xs:element type="xs:string" name="ExternalSystemPoLineNbr"/>
+            <xs:element type="xs:string" name="StoreDepartment"/>
+            <xs:element type="xs:string" name="MerchandizeGroup"/>
+            <xs:element type="xs:string" name="MerchandizeType"/>
+            <xs:element type="xs:string" name="EventCode"/>
+            <xs:element type="xs:string" name="ParentLineId"/>
+            <xs:element type="xs:string" name="Priority"/>
+            <xs:element type="xs:string" name="UnitTaxAmount"/>
+            <xs:element type="xs:string" name="RtsId"/>
+            <xs:element type="xs:string" name="RtsLineId"/>
+            <xs:element type="xs:string" name="PartialFill"/>
+            <xs:element type="xs:string" name="SingleUnit"/>
+            <xs:element type="xs:string" name="UnitVolume"/>
+            <xs:element type="xs:string" name="UnitWeight"/>
+            <xs:element type="xs:string" name="POSeq"/>
+            <xs:element type="xs:string" name="ShelfDays"/>
+            <xs:element type="xs:string" name="StackRank"/>
+            <xs:element type="xs:string" name="ReferenceOrderId"/>
+            <xs:element type="xs:string" name="ReferenceLineItemId"/>
+            <xs:element type="xs:string" name="SubstitutedParentLineNbr"/>
+            <xs:element type="xs:string" name="IsStackable"/>
+            <xs:element type="xs:string" name="AllocationSourceLineId"/>
+            <xs:element type="xs:string" name="AllocationSourceId"/>
+            <xs:element type="xs:string" name="ManufacturingDttm"/>
+            <xs:element type="xs:string" name="BatchRequirementType"/>
+            <xs:element type="xs:string" name="FulfillmentType"/>
+            <xs:element type="xs:string" name="RRC"/>
+            <xs:element type="xs:string" name="IsFromSplitter"/>
+            <xs:element type="xs:string" name="OriginalOrderedItemName"/>
+            <xs:element type="xs:string" name="SubstitutionType"/>
+            <xs:element type="xs:string" name="BackorderReason"/>
+            <xs:element type="xs:string" name="WaveAllocLogRsn"/>
+            <xs:element type="QuantityType" name="Quantity"/>
+            <xs:element type="WeightType" name="Weight"/>
+            <xs:element type="VolumeType" name="Volume"/>
+            <xs:element type="Size1Type" name="Size1"/>
+            <xs:element type="Size2Type" name="Size2"/>
+            <xs:element type="SizeType" name="Size"/>
+            <xs:element type="CustomFieldListType" name="CustomFieldList"/>
+            <xs:element type="LineProcessInfoType" name="LineProcessInfo"/>
+            <xs:element type="InventoryAttributesType" name="InventoryAttributes"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="DistributionOrderType">
+        <xs:sequence>
+            <xs:element type="xs:string" name="DistributionOrderId"/>
+            <xs:element type="xs:string" name="OrderType"/>
+            <xs:element type="xs:string" name="OrderedDttm"/>
+            <xs:element type="xs:string" name="DoTransportationStatus"/>
+            <xs:element type="xs:string" name="DoFulfillmentStatus"/>
+            <xs:element type="xs:string" name="SynchGroupId"/>
+            <xs:element type="xs:string" name="SynchronizeLock"/>
+            <xs:element type="xs:string" name="UpdateActionType"/>
+            <xs:element type="xs:string" name="ActualShippedDttm"/>
+            <xs:element type="xs:string" name="IsCancelled"/>
+            <xs:element type="xs:string" name="BusinessUnit"/>
+            <xs:element type="xs:string" name="MerchandizingDept"/>
+            <xs:element type="xs:string" name="MonetaryValue"/>
+            <xs:element type="xs:string" name="MonetaryValueCurrencyCode"/>
+            <xs:element type="xs:string" name="TransportationResponsibilityCode"/>
+            <xs:element type="xs:string" name="BillingMethodCode"/>
+            <xs:element type="xs:string" name="BusinessPartnerId"/>
+            <xs:element type="xs:string" name="MustReleaseByDttm"/>
+            <xs:element type="xs:string" name="IsOriginalOrder"/>
+            <xs:element type="xs:string" name="HasSplit"/>
+            <xs:element type="xs:string" name="ParentOrderId"/>
+            <xs:element type="xs:string" name="ProductClassCode"/>
+            <xs:element type="xs:string" name="IsPerishable"/>
+            <xs:element type="xs:string" name="ProtectionLevelCode"/>
+            <xs:element type="xs:string" name="IsHazmat"/>
+            <xs:element type="xs:string" name="DangerousGoodsCode"/>
+            <xs:element type="xs:string" name="ProductionScheduleRefNbr"/>
+            <xs:element type="xs:string" name="Priority"/>
+            <xs:element type="xs:string" name="OriginalBudgetedCost"/>
+            <xs:element type="xs:string" name="BudgetedCost"/>
+            <xs:element type="xs:string" name="ActualCost"/>
+            <xs:element type="xs:string" name="TotalActualCost"/>
+            <xs:element type="xs:string" name="FreightRevenue"/>
+            <xs:element type="xs:string" name="FreightRevenueCurrencyCode"/>
+            <xs:element type="xs:string" name="ReferenceField1"/>
+            <xs:element type="xs:string" name="ReferenceField2"/>
+            <xs:element type="xs:string" name="ReferenceField3"/>
+            <xs:element type="xs:string" name="ReferenceField4"/>
+            <xs:element type="xs:string" name="ReferenceField5"/>
+            <xs:element type="xs:string" name="ReferenceField6"/>
+            <xs:element type="xs:string" name="ReferenceField7"/>
+            <xs:element type="xs:string" name="ReferenceField8"/>
+            <xs:element type="xs:string" name="ReferenceField9"/>
+            <xs:element type="xs:string" name="ReferenceField10"/>
+            <xs:element type="xs:string" name="ReferenceNumber1"/>
+            <xs:element type="xs:string" name="ReferenceNumber2"/>
+            <xs:element type="xs:string" name="ReferenceNumber3"/>
+            <xs:element type="xs:string" name="ReferenceNumber4"/>
+            <xs:element type="xs:string" name="ReferenceNumber5"/>
+            <xs:element type="xs:string" name="NmfcFreightClass"/>
+            <xs:element type="xs:string" name="OriginalEstimatedNbrOfPalletsBridged"/>
+            <xs:element type="xs:string" name="OriginalEstimatedNbrOfLpnsBridged"/>
+            <xs:element type="xs:string" name="FinalEstimatedNbrOfLpns"/>
+            <xs:element type="xs:string" name="PlanningOriginFacilityId"/>
+            <xs:element type="xs:string" name="PlanningDestinationFacilityId"/>
+            <xs:element type="xs:string" name="MoveType"/>
+            <xs:element type="xs:string" name="MovementOption"/>
+            <xs:element type="xs:string" name="TransportationWaveId"/>
+            <xs:element type="xs:string" name="TransportationWaveOptionId"/>
+            <xs:element type="xs:string" name="ResidentialDeliveryRequired"/>
+            <xs:element type="xs:string" name="DropoffOrPickup"/>
+            <xs:element type="xs:string" name="Packaging"/>
+            <xs:element type="xs:string" name="IncotermName"/>
+            <xs:element type="xs:string" name="IncotermLocationAvailabilityDttm"/>
+            <xs:element type="xs:string" name="DistributionShipVia"/>
+            <xs:element type="xs:string" name="BlockAutoCreateFlag"/>
+            <xs:element type="xs:string" name="BlockAutoConsolidateFlag"/>
+            <xs:element type="xs:string" name="IsPartiallyPlanned"/>
+            <xs:element type="xs:string" name="AssignedModeCode"/>
+            <xs:element type="xs:string" name="AssignedCarrierCode"/>
+            <xs:element type="xs:string" name="AssignedServiceLevelCode"/>
+            <xs:element type="xs:string" name="AssignedEquipmentCode"/>
+            <xs:element type="xs:string" name="DesignatedModeCode"/>
+            <xs:element type="xs:string" name="DesignatedCarrierCode"/>
+            <xs:element type="xs:string" name="DesignatedServiceLevelCode"/>
+            <xs:element type="xs:string" name="DesignatedEquipmentCode"/>
+            <xs:element type="xs:string" name="DesignatedTractorCode"/>
+            <xs:element type="xs:string" name="DesignatedDriverType"/>
+            <xs:element type="xs:string" name="DesignatedVoyageOrFlightNumber"/>
+            <xs:element type="xs:string" name="ExternalSystemPurchaseOrderNbr"/>
+            <xs:element type="xs:string" name="DistroNumber"/>
+            <xs:element type="xs:string" name="SalesOrderNbr"/>
+            <xs:element type="xs:string" name="IsBackOrdered"/>
+            <xs:element type="xs:string" name="AdvertizingDate"/>
+            <xs:element type="xs:string" name="CustomerCode"/>
+            <xs:element type="xs:string" name="CustomerName"/>
+            <xs:element type="xs:string" name="DcCenterNbr"/>
+            <xs:element type="xs:string" name="FederatedStoreNbr"/>
+            <xs:element type="xs:string" name="OriginFacilityAliasId"/>
+            <xs:element type="xs:string" name="OriginDockId"/>
+            <xs:element type="xs:string" name="OriginFacilityName"/>
+            <xs:element type="xs:string" name="OriginAddressLine1"/>
+            <xs:element type="xs:string" name="OriginAddressLine2"/>
+            <xs:element type="xs:string" name="OriginAddressLine3"/>
+            <xs:element type="xs:string" name="OriginCity"/>
+            <xs:element type="xs:string" name="OriginCounty"/>
+            <xs:element type="xs:string" name="OriginCountry"/>
+            <xs:element type="xs:string" name="OriginStateOrProvince"/>
+            <xs:element type="xs:string" name="OriginPostalCode"/>
+            <xs:element type="xs:string" name="HazmatOfferorName"/>
+            <xs:element type="xs:string" name="PickupStartDttm"/>
+            <xs:element type="xs:string" name="PickupEndDttm"/>
+            <xs:element type="xs:string" name="OriginShipThruFacilityAliasId"/>
+            <xs:element type="xs:string" name="ScheduledDayOfWeek"/>
+            <xs:element type="xs:string" name="DestinationFacilityAliasId"/>
+            <xs:element type="xs:string" name="DestinationDockId"/>
+            <xs:element type="xs:string" name="DestinationFacilityName"/>
+            <xs:element type="xs:string" name="DestinationAddressLine1"/>
+            <xs:element type="xs:string" name="DestinationAddressLine2"/>
+            <xs:element type="xs:string" name="DestinationAddressLine3"/>
+            <xs:element type="xs:string" name="DestinationCity"/>
+            <xs:element type="xs:string" name="DestinationCounty"/>
+            <xs:element type="xs:string" name="DestinationCountry"/>
+            <xs:element type="xs:string" name="DestinationStateOrProvince"/>
+            <xs:element type="xs:string" name="DestinationPostalCode"/>
+            <xs:element type="xs:string" name="POBox"/>
+            <xs:element type="xs:string" name="DeliveryStartDttm"/>
+            <xs:element type="xs:string" name="DeliveryEndDttm"/>
+            <xs:element type="xs:string" name="DestinationContactName"/>
+            <xs:element type="xs:string" name="DestinationContactTelephoneNbr"/>
+            <xs:element type="xs:string" name="DestinationContactFaxNbr"/>
+            <xs:element type="xs:string" name="DestinationContactEmailAddress"/>
+            <xs:element type="xs:string" name="DestinationShipThruFacilityAliasId"/>
+            <xs:element type="xs:string" name="DestinationGlobalLocationNbr"/>
+            <xs:element type="xs:string" name="DestinationPrimaryMaxiAddressNbr"/>
+            <xs:element type="xs:string" name="DestinationSecondaryMaxiAddressNbr"/>
+            <xs:element type="xs:string" name="PackAndHoldFlag"/>
+            <xs:element type="xs:string" name="PreStickerCode"/>
+            <xs:element type="xs:string" name="MajorOrderGroupAttribute"/>
+            <xs:element type="xs:string" name="PrintedDttm"/>
+            <xs:element type="xs:string" name="LpnCubingIndicator"/>
+            <xs:element type="xs:string" name="PalletCubingIndicator"/>
+            <xs:element type="xs:string" name="PrepackCubingIndicator"/>
+            <xs:element type="xs:string" name="PalletLpnOption"/>
+            <xs:element type="xs:string" name="ShipGroupId"/>
+            <xs:element type="xs:string" name="ShipGroupSequence"/>
+            <xs:element type="xs:string" name="RefShipmentNbr"/>
+            <xs:element type="xs:string" name="RefShipmentStopSeqNbr"/>
+            <xs:element type="xs:string" name="BillOfLadingNbr"/>
+            <xs:element type="xs:string" name="BolBreakAttribute"/>
+            <xs:element type="xs:string" name="DesignatedZoneSkip"/>
+            <xs:element type="xs:string" name="CompartmentNbr"/>
+            <xs:element type="xs:string" name="Importer"/>
+            <xs:element type="xs:string" name="CustomsBrokerAccountNbr"/>
+            <xs:element type="xs:string" name="HasDocumentsOnly"/>
+            <xs:element type="xs:string" name="RelatedPartiesFlag"/>
+            <xs:element type="xs:string" name="InternationalGoodsDescription"/>
+            <xs:element type="xs:string" name="FtsrNbr"/>
+            <xs:element type="xs:string" name="ShippingCharges"/>
+            <xs:element type="xs:string" name="CodFundsIndicator"/>
+            <xs:element type="xs:string" name="BillingAccountNbr"/>
+            <xs:element type="xs:string" name="DutyAndTaxCharges"/>
+            <xs:element type="xs:string" name="DutyAndTaxPaymentType"/>
+            <xs:element type="xs:string" name="DutyAndTaxAccountNbr"/>
+            <xs:element type="xs:string" name="BillToName"/>
+            <xs:element type="xs:string" name="BillToTitle"/>
+            <xs:element type="xs:string" name="BillToFacilityAliasId"/>
+            <xs:element type="xs:string" name="BillToFacilityName"/>
+            <xs:element type="xs:string" name="BillToAddressLine1"/>
+            <xs:element type="xs:string" name="BillToAddressLine2"/>
+            <xs:element type="xs:string" name="BillToAddressLine3"/>
+            <xs:element type="xs:string" name="BillToCity"/>
+            <xs:element type="xs:string" name="BillToCounty"/>
+            <xs:element type="xs:string" name="BillToCountryCode"/>
+            <xs:element type="xs:string" name="BillToStateOrProv"/>
+            <xs:element type="xs:string" name="BillToPostalCode"/>
+            <xs:element type="xs:string" name="BillToEmailAddress"/>
+            <xs:element type="xs:string" name="BillToFaxNbr"/>
+            <xs:element type="xs:string" name="BillToTelephoneNbr"/>
+            <xs:element type="xs:string" name="RouteTo"/>
+            <xs:element type="xs:string" name="RouteType1"/>
+            <xs:element type="xs:string" name="RouteType2"/>
+            <xs:element type="xs:string" name="RoutingShipGroupNumber"/>
+            <xs:element type="xs:string" name="NbrOfPackingSlipsPrinted"/>
+            <xs:element type="xs:string" name="DefaultLanguageCode"/>
+            <xs:element type="xs:string" name="MarkFor"/>
+            <xs:element type="xs:string" name="ARAcctNbr"/>
+            <xs:element type="xs:string" name="ARCode"/>
+            <xs:element type="xs:string" name="AddressCode"/>
+            <xs:element type="xs:string" name="AdvertisingCode"/>
+            <xs:element type="xs:string" name="FrtFwdrAcctNbr"/>
+            <xs:element type="xs:string" name="OrderGenerationDate"/>
+            <xs:element type="xs:string" name="SchedDlvryEndDate"/>
+            <xs:element type="xs:string" name="ZoneSkip"/>
+            <xs:element type="xs:string" name="CustomerRouting"/>
+            <xs:element type="xs:string" name="IsCustomerPickup"/>
+            <xs:element type="xs:string" name="IsDirectAllowed"/>
+            <xs:element type="xs:string" name="ManifestNbr"/>
+            <xs:element type="xs:string" name="OrderConsolidationProfile"/>
+            <xs:element type="xs:string" name="DistributionOrderType"/>
+            <xs:element type="xs:string" name="RoutingAttribute"/>
+            <xs:element type="xs:string" name="SchedPickupDttm"/>
+            <xs:element type="xs:string" name="NonMachinable"/>
+            <xs:element type="xs:string" name="CodReturnCompanyName"/>
+            <xs:element type="xs:string" name="IncotermFacilityId"/>
+            <xs:element type="xs:string" name="DsgShipVia"/>
+            <xs:element type="xs:string" name="DsgStaticRouteId"/>
+            <xs:element type="xs:string" name="DeliveryChannel"/>
+            <xs:element type="xs:string" name="PartlShipConfFlag"/>
+            <xs:element type="xs:string" name="AllowPreBilling"/>
+            <xs:element type="xs:string" name="LaneName"/>
+            <xs:element type="xs:string" name="DeclaredValue"/>
+            <xs:element type="xs:string" name="DeclaredValueCurrencyCode"/>
+            <xs:element type="xs:string" name="TaxId"/>
+            <xs:element type="xs:string" name="OrderReceived"/>
+            <xs:element type="xs:string" name="CommodityCode"/>
+            <xs:element type="xs:string" name="OrderSplitSeq"/>
+            <xs:element type="xs:string" name="NumSplits"/>
+            <xs:element type="xs:string" name="LoadingSequence"/>
+            <xs:element type="xs:string" name="DestinationAction"/>
+            <xs:element type="xs:string" name="DeliveryOptions"/>
+            <xs:element type="xs:string" name="TransportationPlanningOwner"/>
+            <xs:element type="xs:string" name="TransportationPlanningDirection"/>
+            <xs:element type="xs:string" name="PreBillStatus"/>
+            <xs:element type="xs:string" name="LpnLabelType"/>
+            <xs:element type="xs:string" name="NbrOfShippingLabelsToPrint"/>
+            <xs:element type="xs:string" name="PalletContentLabelType"/>
+            <xs:element type="xs:string" name="ContentLabelType"/>
+            <xs:element type="xs:string" name="NbrOfContentLabelsToPrint"/>
+            <xs:element type="xs:string" name="PackingSlipType"/>
+            <xs:element type="xs:string" name="NbrOfPackingSlipsToPrint"/>
+            <xs:element type="xs:string" name="BolType"/>
+            <xs:element type="xs:string" name="ManifestType"/>
+            <xs:element type="xs:string" name="PrintCertificateOfOrigin"/>
+            <xs:element type="xs:string" name="PrintCommercialInvoice"/>
+            <xs:element type="xs:string" name="PrintExportDeclaration"/>
+            <xs:element type="xs:string" name="PrintCanadianCustomsInvoice"/>
+            <xs:element type="xs:string" name="PrintDockReceipt"/>
+            <xs:element type="xs:string" name="PrintNaftaCertificateOfOrigin"/>
+            <xs:element type="xs:string" name="PrintOceanBillOfLading"/>
+            <xs:element type="xs:string" name="PrintExportPackingList"/>
+            <xs:element type="xs:string" name="PrintLetterOfInstructions"/>
+            <xs:element type="xs:string" name="OrderShipmentSeq"/>
+            <xs:element type="xs:string" name="MovementType"/>
+            <xs:element type="ProcessInfoType" name="ProcessInfo"/>
+            <xs:element type="CustomFieldListType" name="CustomFieldList"/>
+            <xs:element type="LineItemType" name="LineItem"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="MessageType">
+        <xs:sequence>
+            <xs:element type="DistributionOrderType" name="DistributionOrder"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="tXMLType">
+        <xs:sequence>
+            <xs:element type="HeaderType" name="Header"/>
+            <xs:element type="MessageType" name="Message"/>
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>

@@ -1,0 +1,70 @@
+{
+  "BaseUOM": "U",
+  "Brand": "TMW",
+  "Color": "RED",
+  "Weight": ".3",
+  "WeightUOM": "LB",
+  "DepartmentName": "ACCESSORIES",
+  "DepartmentNumber": "80",
+  "Description": "PRONTO UOMO TIE",
+  "IsGiftCard": "false",
+  "IsScanOnly": "true",
+  "IsGiftwithPurchase": "false",
+  "ItemId": "TMW882D80054",
+  "ProductClass": "882D",
+  "Season": "S15",
+  "SeasonYear": "2019",
+  "ShortDescription": "PRONTO UOMO TIE",
+  "Size": "ACC",
+  "Style": "TMW",
+  "HandlingAttributes": {
+    "IsHazmat": "false",
+    "IsParcelShippingAllowed": "true",
+    "IsAirShippingAllowed": "true",
+    "Description": "PRONTO UOMO TIE"
+  },
+  "SellingAttributes": {
+    "ActivationRequired": "false",
+    "DigitalGoods": "false",
+    "IsDiscountable": "false",
+    "IsExchangeable": "false",
+    "IsPriceOverrideable": "true",
+    "IsReturnableAtDC": "true",
+    "ShipToAddress": "true",
+    "PickUpInStore": "true",
+    "SoldOnline": "true",
+    "PriceStatusId": "CLEARANCE"
+  },
+  "ItemCode": [
+    {
+      "Type": "Primary_UPC",
+      "CodeTypeId": {
+        "CodeTypeId": "Primary_UPC"
+      },
+      "Value": "882D80054"
+    }
+  ],
+  "ManufacturingAttribute": {
+    "CountryofOrigin": "CN",
+    "VendorStyleNumber": "9116"
+  },
+  "Extended": {
+    "FlatOrGOH": "FLAT",
+    "Group": "80AREGPRIVLABEL",
+    "Division": "81",
+    "SizeDescriptionMedium": "ACC",
+    "FourgenId": "1001368",
+    "CDFSuperGroup": "801REGULARTIES",
+    "CDFSuperGroupDesc": "REGULARTIES",
+    "SubDivision": "81ANECKWEAR",
+    "SubDivisionDesc": "NECKWEAR",
+    "SuperDivision": "3",
+    "SuperDivisionDesc": "MEN",
+    "VendorName": "COURAGE USA",
+    "CustomClothingFlag": "true",
+    "EcomDescription": "null",
+    "EcomProductName": "null",
+    "EcomColor": "null",
+    "EcomSize": "null"
+  }
+}

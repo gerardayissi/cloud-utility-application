@@ -1,0 +1,6 @@
+{
+  "LocationId": "0775",
+  "MaintainOHSupply": "true",
+  "MaintainOHByCountryOfOrigin": "true",
+  "MaintainOHByInventoryType": "true"
+}
