@@ -20,4 +20,4 @@ jmsUser=${JMS_USER}--\
 jmsPassword=${JMS_PASSWORD}--\
 jmsQueue=${JMS_QUEUE}--\
 jmsServerUrl=${JMS_SERVER}--\
-jmsToPubsubPipelineType=${PROVIDER}
+jmsProvider=${PROVIDER}

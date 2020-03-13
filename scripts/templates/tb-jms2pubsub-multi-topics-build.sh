@@ -8,17 +8,17 @@ export TEMPLATE_DIR=${BUCKET}/pipeline/template
 export JOB_NAME=jsm-to-pubsub-$USER-`date +"%Y-%m-%d_%H:%M:%S%z"`
 
 # all params
-export JMS_TYPE=tibco
+export JMS_PROVIDER=tibco
 export JMS_URL=tcp://35.204.30.82:7222
 export JMS_USER=admin
 export JMS_PASSWORD=
 export JMS_QUEUE=facility
-export JMS_TO_PUBSUB_TYPE=facility
+export JMS_TO_PUBSUB_INTERFACE=facility
 export OUTPUT_TOPICS=projects/tailoredbrandsresearch/topics/facility-location,projects/tailoredbrandsresearch/topics/facility-inventory-location,projects/tailoredbrandsresearch/topics/facility-location-attributes
 export RUNNER=DataflowRunner
 
 mvn compile exec:java \
-      -Dexec.mainClass=JMSToPubSubMultiTopicsPipeline \
+      -Dexec.mainClass=com.tailoredbrands.pipeline.pattern.jms_to_pub_sub.JmsToPubSubMultiTopicsPipeline \
       -Dexec.args=" \
       --project=${PROJECT_ID} \
       --region=${REGION} \
@@ -29,11 +29,11 @@ mvn compile exec:java \
       --maxNumWorkers=5 \
       --workerMachineType=n1-standard-1 \
       --autoscalingAlgorithm=THROUGHPUT_BASED \
-      --jmsQueueType=${JMS_TYPE} \
+      --jmsProvider=${JMS_PROVIDER} \
       --jmsServerUrl=${JMS_URL} \
       --jmsUser=${JMS_USER} \
       --jmsPassword=${JMS_PASSWORD} \
       --jmsQueue=${JMS_QUEUE} \
-      --jmsToPubsubPipelineType=${JMS_TO_PUBSUB_TYPE} \
+      --jmsToPubsubPipelineType=${JMS_TO_PUBSUB_INTERFACE} \
       --outputTopics=${OUTPUT_TOPICS} \
       --runner=${RUNNER}"
