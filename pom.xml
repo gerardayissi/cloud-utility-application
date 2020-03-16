@@ -137,13 +137,26 @@
                             <shadedClassifierName>shaded</shadedClassifierName>
                             <transformers>
                                 <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                    implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                             </transformers>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>3.6.0.1398</version>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.4</version>
+            </plugin>
         </plugins>
+
+        
     </build>
 
     <properties>
@@ -154,6 +167,11 @@
         <vavr.version>0.10.2</vavr.version>
         <tibco.version>8.5.1</tibco.version>
         <websphere.version>9.1.4.0</websphere.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <sonar.host.url>http://35.221.54.31</sonar.host.url>
+        <sonar.login>user</sonar.login>
+        <sonar.password>TestPass$$$</sonar.password>
     </properties>
 
     <dependencies>
@@ -284,6 +302,13 @@
             <version>1.11.1</version>
         </dependency>
 
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <repositories>
@@ -299,5 +324,36 @@
             <url>http://35.221.54.31:8081/repository/df-pipe/</url>
         </repository>
     </repositories>
+
+    <profiles>
+        <profile>
+        <id>coverage</id>
+        <activation>
+            <activeByDefault>true</activeByDefault>
+        </activation>
+        <build>
+            <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <executions>
+                <execution>
+                    <id>prepare-agent</id>
+                    <goals>
+                    <goal>prepare-agent</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>report</id>
+                    <goals>
+                    <goal>report</goal>
+                    </goals>
+                </execution>
+                </executions>
+            </plugin>
+            </plugins>
+        </build>
+        </profile>
+    </profiles>
 
 </project>
