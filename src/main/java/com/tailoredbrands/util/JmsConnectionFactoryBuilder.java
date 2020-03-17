@@ -18,7 +18,7 @@ public class JmsConnectionFactoryBuilder {
     private static final Logger LOG = LoggerFactory.getLogger(JmsConnectionFactoryBuilder.class);
 
     public static ConnectionFactory build(JmsToPubSubOptions options, String appName) throws JMSException {
-        switch (JmsConnectionProvider.valueOf(options.getJmsToPubsubPipelineType().toUpperCase())) {
+        switch (JmsConnectionProvider.valueOf(options.getJmsProvider().toUpperCase())) {
             case TIBCO:
                 LOG.info("TIBCO is used: {}", options);
                 TibjmsConnectionFactory tibjmsConnectionFactory = new TibjmsConnectionFactory();

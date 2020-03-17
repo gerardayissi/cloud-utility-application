@@ -8,7 +8,7 @@ export TEMPLATE_DIR=${BUCKET}/pipeline/template
 export JOB_NAME=jsm-to-pubsub-$USER-`date +"%Y-%m-%d_%H:%M:%S%z"`
 
 # required params
-export JMS_TO_PUBSUB_TYPE=facility
+export JMS_TO_PUBSUB_INTERFACE=facility
 export OUTPUT_TOPICS=projects/tailoredbrandsresearch/topics/facility-location,projects/tailoredbrandsresearch/topics/facility-inventory-location,projects/tailoredbrandsresearch/topics/facility-location-attributes
 
 echo "# RUN TEMPLATE"
@@ -17,5 +17,5 @@ gcloud --project=${PROJECT_ID} dataflow jobs run "${JOB_NAME}" \
 --region=${REGION} \
 --zone=${ZONE} \
 --parameters=^--^\
-jmsToPubsubPipelineType=${JMS_TO_PUBSUB_TYPE}--\
+jmsToPubsubPipelineType=${JMS_TO_PUBSUB_INTERFACE}--\
 outputTopics=${OUTPUT_TOPICS}
