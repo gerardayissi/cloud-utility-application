@@ -1,0 +1,37 @@
+{
+  "SyncSupplyEvent": {
+    "TransactionNumber": "109110142019",
+    "TransactionTypeId": "SyncDetail",
+    "LocationId": "1091",
+    "SyncTransactionDate": "2016-09-01T00:00:00",
+    "FullSync": true,
+    "CountRecords": "2",
+    "SupplyDetails": [
+      {
+        "SupplyDefinition": {
+          "ItemId": "9593872",
+          "SupplyType": {
+            "SupplyTypeId": "On Hand Unavailable"
+          },
+          "SupplyData": {
+            "Quantity": "134",
+            "UOM": "U"
+          }
+        }
+      },
+      {
+        "SupplyDefinition": {
+          "ItemId": "9593872",
+          "SupplyType": {
+
+            "SupplyTypeId": "On Hand Available"
+          },
+          "SupplyData": {
+            "Quantity": "1128",
+            "UOM": "U"
+          }
+        }
+      }
+    ]
+  }
+}

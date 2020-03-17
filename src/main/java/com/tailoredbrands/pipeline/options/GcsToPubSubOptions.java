@@ -15,4 +15,16 @@ public interface GcsToPubSubOptions extends BusinessInterfaceOptions, CsvOptions
     String getOrganization();
 
     void setOrganization(String value);
+
+    @Validation.Required
+    @Description("The duration in seconds ex: 60")
+    Long getDurationSeconds();
+
+    void setDurationSeconds(Long value);
+
+    @Validation.Required
+    @Description("The error threshold in percentage ex: 10")
+    Integer getErrorThreshold();
+
+    void setErrorThreshold(Integer value);
 }

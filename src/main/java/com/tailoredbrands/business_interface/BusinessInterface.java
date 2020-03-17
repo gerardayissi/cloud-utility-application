@@ -9,7 +9,8 @@ public enum BusinessInterface {
 
     FACILITY("facility"),
     ITEM_DELTA_FEED("item_delta_feed"),
-    ITEM_FULL_FEED("item_full_feed");
+    ITEM_FULL_FEED("item_full_feed"),
+    STORE_INVENTORY_FULL_FEED("store_inventory_full_feed");
 
     private final String name;
 }

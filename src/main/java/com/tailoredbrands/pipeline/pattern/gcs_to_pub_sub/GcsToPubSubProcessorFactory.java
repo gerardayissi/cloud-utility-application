@@ -2,6 +2,7 @@ package com.tailoredbrands.pipeline.pattern.gcs_to_pub_sub;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.tailoredbrands.business_interface.item_full_feed.ItemFullFeedProcessor;
+import com.tailoredbrands.business_interface.store_inventory_full_feed.StoreInventoryFullFeedProcessor;
 import com.tailoredbrands.pipeline.options.BusinessInterfaceOptions;
 import io.vavr.API;
 import io.vavr.Tuple2;
@@ -21,8 +22,10 @@ public class GcsToPubSubProcessorFactory {
             PCollection<Tuple2<Map<String, String>, Try<JsonNode>>>> from(BusinessInterfaceOptions options) {
 
         val businessInterface = options.getBusinessInterface();
+
         return Match(businessInterface).of(
-                API.Case(API.$(ITEM_FULL_FEED.getName()), new ItemFullFeedProcessor(options))
+                API.Case(API.$(ITEM_FULL_FEED.getName()), new ItemFullFeedProcessor(options)),
+                API.Case(API.$(STORE_INVENTORY_FULL_FEED.getName()), new StoreInventoryFullFeedProcessor(options))
         );
     }
 }

@@ -1,84 +1,129 @@
 package com.tailoredbrands.pipeline.pattern.gcs_to_pub_sub;
 
-import com.google.cloud.hadoop.util.AbstractGoogleAsyncWriteChannel;
-import com.tailoredbrands.util.DurationUtils;
-import com.tailoredbrands.util.ReadFilesOptions;
-import org.apache.beam.runners.dataflow.options.DataflowWorkerLoggingOptions;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.tailoredbrands.pipeline.error.ProcessingException;
+import com.tailoredbrands.pipeline.function.CsvFileToRowsFn;
+import com.tailoredbrands.pipeline.options.GcsToPubSubOptions;
+import com.tailoredbrands.util.Peek;
+import com.tailoredbrands.util.json.JsonUtils;
+import io.vavr.Tuple2;
+import io.vavr.control.Try;
+import lombok.val;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.PipelineResult;
-import org.apache.beam.sdk.io.TextIO;
+import org.apache.beam.sdk.io.FileIO;
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO;
-import org.apache.beam.sdk.options.Default;
-import org.apache.beam.sdk.options.Description;
-import org.apache.beam.sdk.options.PipelineOptions;
+import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessage;
+import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessageWithAttributesCoder;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
-import org.apache.beam.sdk.options.StreamingOptions;
-import org.apache.beam.sdk.options.Validation;
-import org.apache.beam.sdk.options.ValueProvider;
-import org.apache.beam.sdk.transforms.windowing.FixedWindows;
-import org.apache.beam.sdk.transforms.windowing.Window;
+import org.apache.beam.sdk.transforms.DoFn;
+import org.apache.beam.sdk.transforms.MapElements;
+import org.apache.beam.sdk.transforms.ParDo;
+import org.apache.beam.sdk.transforms.Watch;
+import org.apache.beam.sdk.values.PCollectionTuple;
+import org.apache.beam.sdk.values.TupleTag;
+import org.apache.beam.sdk.values.TupleTagList;
+import org.apache.beam.sdk.values.TypeDescriptor;
+import org.joda.time.Duration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.tailoredbrands.pipeline.error.ErrorType.*;
+import static com.tailoredbrands.util.Peek.increment;
+import static io.vavr.API.*;
+import static java.lang.String.format;
 
 public class GcsToPubSubStreamingPipeline {
 
-    /**
-     * Main entry point for executing the pipeline.
-     *
-     * @param args The command-line arguments to the pipeline.
-     */
-    @SuppressWarnings({"deprecation", "squid:CallToDeprecatedMethod"})
+    private static final Logger LOG = LoggerFactory.getLogger(GcsToPubSubBatchPipeline.class);
+
     public static void main(String[] args) {
-        Options options = PipelineOptionsFactory
-                .fromArgs(args)
-                .withValidation()
-                .as(Options.class);
-
-        options.setStreaming(true);
-
-        DataflowWorkerLoggingOptions loggingOptions = options.as(DataflowWorkerLoggingOptions.class);
-        loggingOptions.setWorkerLogLevelOverrides(
-                new DataflowWorkerLoggingOptions.WorkerLogLevelOverrides().addOverrideForClass(AbstractGoogleAsyncWriteChannel.class,
-                        DataflowWorkerLoggingOptions.Level.OFF));
+        GcsToPubSubOptions options = PipelineOptionsFactory
+            .fromArgs(args)
+            .withValidation()
+            .as(GcsToPubSubOptions.class);
         run(options);
     }
 
-    /**
-     * Runs the pipeline with the supplied options.
-     *
-     * @param options The execution parameters to the pipeline.
-     * @return The result of the pipeline execution.
-     */
-    private static PipelineResult run(Options options) {
-        // Create the pipeline
-        Pipeline pipeline = Pipeline.create(options);
-        /*
-         * Steps:
-         *   1) Read file data from GCS
-         *   2) Window the messages into minute intervals specified by the executor.
-         *   3) Output the windowed data to PubSub
-         */
-        pipeline
-                .apply("Read CSV Files", TextIO.read().from(options.getInputFilePattern()))
-                .apply(options.getWindowDuration() + " Window",
-                        Window.into(FixedWindows.of(DurationUtils.parseDuration(options.getWindowDuration()))))
-                .apply("Write to PubSub topic", PubsubIO.writeStrings().to(options.getOutputTopic()));
+    public static PipelineResult run(GcsToPubSubOptions options) {
+        val pipeline = Pipeline.create(options);
+        val counter = new GcsToPubSubCounter(options.getBusinessInterface());
+        val successTag = new TupleTag<PubsubMessage>() {
+        };
+        val failureTag = new TupleTag<Tuple2<Map<String, String>, Try<PubsubMessage>>>() {
+        };
 
-        // Execute the pipeline and return the result.
+        PCollectionTuple processed = pipeline
+
+            .apply("Match Files on GCS", FileIO.match()
+                .filepattern(options.getInputFilePattern())
+                .continuously(Duration.standardSeconds(options.getDurationSeconds()), Watch.Growth.never()))
+            .apply("Read Files from GCS", FileIO.readMatches())
+            .apply("Count Files", increment(counter.gcsFilesRead))
+            .apply("Parse Files to Rows", ParDo.of(new CsvFileToRowsFn(options.getDelimiter())))
+            .apply("Count Rows", increment(counter.csvRowsRead))
+            .apply("Process Business Interface", GcsToPubSubProcessorFactory.from(options))
+            .apply("Convert Json To PubSub Message", toPubSubMessage())
+
+            .apply("Success | Failure", split(successTag, failureTag));
+
+        processed
+            .get(failureTag)
+            .apply("Log & Count Failures", logAndCountFailures(counter));
+
+        processed
+            .get(successTag)
+            .setCoder(PubsubMessageWithAttributesCoder.of())
+            .apply("Count Messages to PubSub", increment(counter.pubsubMessagesWritten))
+            .apply("Write Messages to Pubsub", PubsubIO.writeMessages().to(options.getOutputPubsubTopic()));
+
         return pipeline.run();
     }
 
-    public interface Options extends PipelineOptions, StreamingOptions, ReadFilesOptions {
+    @SuppressWarnings("unchecked")
+    static MapElements<Tuple2<Map<String, String>, Try<JsonNode>>, Tuple2<Map<String, String>, Try<PubsubMessage>>> toPubSubMessage() {
+        return MapElements
+            .into(new TypeDescriptor<Tuple2<Map<String, String>, Try<PubsubMessage>>>() {
+            })
+            .via(tuple -> tuple.map2(
+                maybeJson -> maybeJson.map(jsonNode -> new PubsubMessage(JsonUtils.serializeToBytes(jsonNode), new HashMap<>()))
+                    .mapFailure(Case($(e -> !(e instanceof ProcessingException)),
+                        exc -> new ProcessingException(JSON_TO_PUBSUB_MESSAGE_CONVERSION_ERROR, exc))))
+            );
+    }
 
-        @Description("The window duration in which data will be written. Defaults to 5 minutes. " + DurationUtils.USAGE)
-        @Default.String("5m")
-        String getWindowDuration();
+    static ParDo.MultiOutput<Tuple2<Map<String, String>, Try<PubsubMessage>>, PubsubMessage> split(
+        TupleTag<PubsubMessage> success,
+        TupleTag<Tuple2<Map<String, String>, Try<PubsubMessage>>> failure) {
 
-        void setWindowDuration(String value);
+        return ParDo.of(new DoFn<Tuple2<Map<String, String>, Try<PubsubMessage>>, PubsubMessage>() {
+            @ProcessElement
+            public void processElement(ProcessContext context) {
+                val element = context.element();
+                if (element._2.isSuccess()) {
+                    context.output(element._2.get());
+                } else {
+                    context.output(failure, element);
+                }
+            }
+        }).withOutputTags(success, TupleTagList.of(failure));
+    }
 
-        @Description("The name of the topic which data should be published to. "
-                + "The name should be in the format of projects/<project-id>/topics/<topic-name>.")
-        @Validation.Required
-        ValueProvider<String> getOutputTopic();
-
-        void setOutputTopic(ValueProvider<String> value);
+    private static Peek<Tuple2<Map<String, String>, Try<PubsubMessage>>> logAndCountFailures(GcsToPubSubCounter counter) {
+        return Peek.each(failure -> {
+            ProcessingException err = (ProcessingException) failure._2.failed().get();
+            val detailedCounter = Match(err.getType()).of(
+                Case($(CSV_ROW_TO_OBJECT_CONVERSION_ERROR), counter.csvRowToObjectErrors),
+                Case($(OBJECT_TO_JSON_CONVERSION_ERROR), counter.objectToJsonErrors),
+                Case($(JSON_TO_PUBSUB_MESSAGE_CONVERSION_ERROR), counter.jsonToPubSubErrors),
+                Case($(), counter.untypedErrors)
+            );
+            detailedCounter.inc();
+            counter.totalErrors.inc();
+            LOG.error(format("Failed to process Row: %s", failure._1), err);
+        });
     }
 }
