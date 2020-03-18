@@ -4,17 +4,17 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.tailoredbrands</groupId>
   <artifactId>cloud-integrations</artifactId>
-  <version>0.2-SNAPSHOT</version>
+  <version>0.3-SNAPSHOT</version>
   <properties>
     <vavr.version>0.10.2</vavr.version>
-    <sonar.login>user</sonar.login>
     <websphere.version>9.1.4.0</websphere.version>
-    <sonar.host.url>http://35.221.54.31</sonar.host.url>
+    <sonar.login>user</sonar.login>
     <maven.compiler.target>1.8</maven.compiler.target>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <sonar.host.url>http://35.221.54.31</sonar.host.url>
     <tibco.version>8.5.1</tibco.version>
-    <sonar.password>TestPass$$$</sonar.password>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <beam.version>2.19.0</beam.version>
+    <sonar.password>TestPass$$$</sonar.password>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jackson.version>2.10.2</jackson.version>
     <maven.compiler.source>1.8</maven.compiler.source>
