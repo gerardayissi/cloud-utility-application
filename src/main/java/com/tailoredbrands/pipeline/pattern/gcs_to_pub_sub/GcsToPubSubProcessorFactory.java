@@ -24,8 +24,7 @@ public class GcsToPubSubProcessorFactory {
         val businessInterface = options.getBusinessInterface();
 
         return Match(businessInterface).of(
-                API.Case(API.$(ITEM_FULL_FEED.getName()), new ItemFullFeedProcessor(options)),
-                API.Case(API.$(STORE_INVENTORY_FULL_FEED.getName()), new StoreInventoryFullFeedProcessor(options))
+                API.Case(API.$(ITEM_FULL_FEED.getName()), new ItemFullFeedProcessor(options))
         );
     }
 }
