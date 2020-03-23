@@ -16,19 +16,14 @@ import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO;
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessage;
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessageWithAttributesCoder;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
-import org.apache.beam.sdk.transforms.DoFn;
-import org.apache.beam.sdk.transforms.MapElements;
-import org.apache.beam.sdk.transforms.ParDo;
-import org.apache.beam.sdk.transforms.Watch;
-import org.apache.beam.sdk.values.PCollectionTuple;
-import org.apache.beam.sdk.values.TupleTag;
-import org.apache.beam.sdk.values.TupleTagList;
-import org.apache.beam.sdk.values.TypeDescriptor;
+import org.apache.beam.sdk.transforms.*;
+import org.apache.beam.sdk.values.*;
 import org.joda.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.tailoredbrands.pipeline.error.ErrorType.*;
@@ -36,7 +31,7 @@ import static com.tailoredbrands.util.Peek.increment;
 import static io.vavr.API.*;
 import static java.lang.String.format;
 
-public class GcsToPubSubStreamingPipeline {
+public class GcsToPubSubWithSyncPipeline {
 
     private static final Logger LOG = LoggerFactory.getLogger(GcsToPubSubBatchPipeline.class);
 
@@ -53,10 +48,10 @@ public class GcsToPubSubStreamingPipeline {
         val counter = new GcsToPubSubCounter(options.getBusinessInterface());
         val successTag = new TupleTag<PubsubMessage>() {
         };
-        val failureTag = new TupleTag<Tuple2<Map<String, String>, Try<PubsubMessage>>>() {
+        val failureTag = new TupleTag<Tuple2<List<Map<String, String>>, Try<PubsubMessage>>>() {
         };
 
-        PCollectionTuple processed = pipeline
+        PCollectionList<Tuple2<List<Map<String, String>>, Try<JsonNode>>> pcl = pipeline
 
             .apply("Match Files on GCS", FileIO.match()
                 .filepattern(options.getInputFilePattern())
@@ -65,28 +60,47 @@ public class GcsToPubSubStreamingPipeline {
             .apply("Count Files", increment(counter.gcsFilesRead))
             .apply("Parse Files to Rows", ParDo.of(new CsvFileToRowsFn(options.getDelimiter())))
             .apply("Count Rows", increment(counter.csvRowsRead))
-            .apply("Process Business Interface", GcsToPubSubProcessorFactory.from(options))
-            .apply("Convert Json To PubSub Message", toPubSubMessage())
+            .apply("Process Business Interface", GCsToPubSubWithSyncProcessorFactory.from(options));
 
-            .apply("Success | Failure", split(successTag, failureTag));
+        io.vavr.collection.List.ofAll(pcl.getAll())
+            .map(pc -> pc
+                .apply("Convert Json To PubSubMessage", toPubSubMessage())
+                .apply("Success | Failure", split(successTag, failureTag)))
 
-        processed
-            .get(failureTag)
-            .apply("Log & Count Failures", logAndCountFailures(counter));
+            .map(successPc -> successPc
+                .get(successTag)
+                .setCoder(PubsubMessageWithAttributesCoder.of())
+                .apply("Count Messages to PubSub", increment(counter.pubsubMessagesWritten))
+                .apply("Write Messages to Pubsub", PubsubIO.writeMessages().to(options.getOutputPubsubTopic())));
 
-        processed
-            .get(successTag)
-            .setCoder(PubsubMessageWithAttributesCoder.of())
-            .apply("Count Messages to PubSub", increment(counter.pubsubMessagesWritten))
-            .apply("Write Messages to Pubsub", PubsubIO.writeMessages().to(options.getOutputPubsubTopic()));
+//        processed
+//            .apply("Convert Json To PubSub Message", toPubSubMessage());
+//            .apply("Success | Failure", split(successTag, failureTag));
+//
+//        processed
+//            .get(failureTag)
+//            .apply("Log & Count Failures", logAndCountFailures(counter));
+//
+//        processed
+//            .get(successTag)
+//            .setCoder(PubsubMessageWithAttributesCoder.of())
+//            .apply("Count Messages to PubSub", increment(counter.pubsubMessagesWritten))
+//            .apply("Write Messages to Pubsub", PubsubIO.writeMessages().to(options.getOutputPubsubTopic()));
 
         return pipeline.run();
     }
 
+    static class PrintResultsFn extends DoFn<Tuple2<List<Map<String, String>>, Try<PubsubMessage>>, Void> {
+        @ProcessElement
+        public void processElement(@Element Tuple2<List<Map<String, String>>, Try<PubsubMessage>> words) {
+            LOG.info(words.toString());
+        }
+    }
+
     @SuppressWarnings("unchecked")
-    static MapElements<Tuple2<Map<String, String>, Try<JsonNode>>, Tuple2<Map<String, String>, Try<PubsubMessage>>> toPubSubMessage() {
+    static MapElements<Tuple2<List<Map<String, String>>, Try<JsonNode>>, Tuple2<List<Map<String, String>>, Try<PubsubMessage>>> toPubSubMessage() {
         return MapElements
-            .into(new TypeDescriptor<Tuple2<Map<String, String>, Try<PubsubMessage>>>() {
+            .into(new TypeDescriptor<Tuple2<List<Map<String, String>>, Try<PubsubMessage>>>() {
             })
             .via(tuple -> tuple.map2(
                 maybeJson -> maybeJson.map(jsonNode -> new PubsubMessage(JsonUtils.serializeToBytes(jsonNode), new HashMap<>()))
@@ -95,11 +109,11 @@ public class GcsToPubSubStreamingPipeline {
             );
     }
 
-    static ParDo.MultiOutput<Tuple2<Map<String, String>, Try<PubsubMessage>>, PubsubMessage> split(
+    static ParDo.MultiOutput<Tuple2<List<Map<String, String>>, Try<PubsubMessage>>, PubsubMessage> split(
         TupleTag<PubsubMessage> success,
-        TupleTag<Tuple2<Map<String, String>, Try<PubsubMessage>>> failure) {
+        TupleTag<Tuple2<List<Map<String, String>>, Try<PubsubMessage>>> failure) {
 
-        return ParDo.of(new DoFn<Tuple2<Map<String, String>, Try<PubsubMessage>>, PubsubMessage>() {
+        return ParDo.of(new DoFn<Tuple2<List<Map<String, String>>, Try<PubsubMessage>>, PubsubMessage>() {
             @ProcessElement
             public void processElement(ProcessContext context) {
                 val element = context.element();

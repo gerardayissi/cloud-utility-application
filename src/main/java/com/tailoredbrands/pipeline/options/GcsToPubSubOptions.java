@@ -16,7 +16,6 @@ public interface GcsToPubSubOptions extends BusinessInterfaceOptions, CsvOptions
 
     void setOrganization(String value);
 
-    @Validation.Required
     @Description("The duration in seconds ex: 60")
     Long getDurationSeconds();
 
