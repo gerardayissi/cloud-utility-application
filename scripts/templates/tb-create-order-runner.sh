@@ -16,4 +16,8 @@ mvn -Pdataflow-runner compile exec:java \
       --businessInterface=create_order \
       --patternFullName=create_order_ecom \
       --tbUser=admin@tbi.com \
+      --autoscalingAlgorithm=THROUGHPUT_BASED \
+      --workerMachineType=n1-standard-2 \
+      --enableStreamingEngine=true \
+      --maxNumWorkers=10 \
       --runner=DataflowRunner"
