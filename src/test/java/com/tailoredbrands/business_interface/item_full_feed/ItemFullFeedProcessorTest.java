@@ -280,6 +280,16 @@ public class ItemFullFeedProcessorTest implements Serializable {
             }
 
             @Override
+            public ValueProvider<String> getDeadletterPubsubTopic() {
+                return null;
+            }
+
+            @Override
+            public void setDeadletterPubsubTopic(ValueProvider<String> value) {
+
+            }
+
+            @Override
             public <T extends PipelineOptions> T as(Class<T> kls) {
                 return null;
             }

@@ -242,7 +242,8 @@
             </goals>
             <configuration>
               <sources>
-                <source>target/generated-sources</source>
+                <source>target/generated-sources/json</source>
+                <source>target/generated-sources/xml</source>
               </sources>
             </configuration>
           </execution>

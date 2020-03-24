@@ -34,10 +34,10 @@ public class MqSenderPipeline {
                 .fromArgs(args)
                 .withValidation()
                 .as(SendToTibcoOptions.class);
-        final JmsToPubSubCounter counter = new JmsToPubSubCounter("SendTo" + options.getJmsToPubsubPipelineType());
+        final JmsToPubSubCounter counter = new JmsToPubSubCounter("SendTo" + options.getBusinessInterface());
 
         final ConnectionFactory connectionFactory = JmsConnectionFactoryBuilder
-                .build(options, options.getJmsToPubsubPipelineType());
+                .build(options, options.getBusinessInterface());
 
         final Pipeline pipeline = Pipeline.create(options);
         pipeline
