@@ -63,17 +63,26 @@ public class ErrorHandlingPipeline {
         )
         .apply("Partition by output bucket", Partition.of(
             tags.size() + 1,
-            (elem, numPartitions) -> tags.get(elem.getFullPatternId()).map(Tuple2::_2).getOrElse(tags.size())
+            (elem, numPartitions) -> {
+              val buck2index = tags.get(elem.getFullPatternId());
+              LOG.info(
+                  "Will write errors for type {} to bucket {}, partition number {}",
+                  elem.getFullPatternId(),
+                  buck2index.map(t -> t._1).getOrElse("default"),
+                  buck2index.map(t -> t._2).getOrElse(tags.size())
+              );
+              return buck2index.map(Tuple2::_2).getOrElse(tags.size());
+            }
             )
         );
 
-    List
-        .ofAll(list.getAll())
-        .zipWithIndex()
-        .forEach(pcol2index -> pcol2index._1
-            .apply("Map to strings", MapElements.into(TypeDescriptor.of(String.class)).via(ErrorMessage::getRawMessage))
-            .apply("Window", Window.into(FixedWindows.of(Duration.standardSeconds(5L))))
-            .apply(TextIO.write().to(buckets.getOrElse(pcol2index._2, options.getDefaultBucket())).withWindowedWrites().withNumShards(Runtime.getRuntime().availableProcessors())));
+    for(int i = 0; i < tags.size() + 1; i++){
+      list
+          .get(i)
+          .apply("Map to strings", MapElements.into(TypeDescriptor.of(String.class)).via(ErrorMessage::getRawMessage))
+          .apply("Window", Window.into(FixedWindows.of(Duration.standardSeconds(5L))))
+          .apply("Write to GCS", TextIO.write().to(buckets.getOrElse(i, options.getDefaultBucket())).withWindowedWrites().withoutSharding());
+    }
     return pipeline.run();
   }
 
