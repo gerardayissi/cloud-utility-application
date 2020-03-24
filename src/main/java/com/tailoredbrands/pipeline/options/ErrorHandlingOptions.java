@@ -13,14 +13,8 @@ public interface ErrorHandlingOptions extends PipelineOptions {
   void setDeadletterPubsubSubscription(ValueProvider<String> value);
 
   @Validation.Required
-  @Description("Comma-delimited map of pattern|GCS bucket pairs")
-  String getPatternToBucketMap();
+  @Description("GCS bucket")
+  String getBucket();
 
-  void setPatternToBucketMap(String value);
-
-  @Validation.Required
-  @Description("Default GCS bucket")
-  String getDefaultBucket();
-
-  void setDefaultBucket(String value);
+  void setBucket(String value);
 }

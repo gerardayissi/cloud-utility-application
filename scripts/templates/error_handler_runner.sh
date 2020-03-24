@@ -6,9 +6,8 @@ mvn -Pdataflow-runner compile exec:java \
       --stagingLocation=gs://tst1-integration-3ca6-jms-pubsub-df-staging/staging/ \
       --serviceAccount=project-service-account@tst1-integration-3ca6.iam.gserviceaccount.com \
       --subnetwork=https://www.googleapis.com/compute/v1/projects/network-b2b9/regions/us-east1/subnetworks/np-integration4 \
-      --defaultBucket=gs://tst1-integration-3ca6-default-deadletter/ \
+      --bucket=gs://tst1-integration-3ca6-errors/ \
       --deadletterPubsubSubscription=projects/tst1-integration-3ca6/subscriptions/deadletter_subscription \
-      --patternToBucketMap=create_order_ecom|gs://tst1-integration-3ca6-create-order-ecom-errors/  \
       --autoscalingAlgorithm=THROUGHPUT_BASED \
       --workerMachineType=n1-standard-2 \
       --enableStreamingEngine=true \
