@@ -21,7 +21,11 @@ import static com.tailoredbrands.pipeline.error.ErrorType.*;
 import static io.vavr.API.*;
 
 public class CreateOrderProcessor extends PTransform<PCollection<Tuple2<JmsRecord, Try<String>>>, PCollection<Tuple2<JmsRecord, Try<JsonNode>>>> {
-  private static final String USER = "admin@tbi.com";
+  private static String USER;
+
+  public static void setUser(String user){
+    USER = user;
+  }
 
   @Override
   public PCollection<Tuple2<JmsRecord, Try<JsonNode>>> expand(PCollection<Tuple2<JmsRecord, Try<String>>> input) {

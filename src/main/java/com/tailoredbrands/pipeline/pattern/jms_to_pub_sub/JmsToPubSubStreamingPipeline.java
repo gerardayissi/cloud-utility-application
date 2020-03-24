@@ -67,7 +67,7 @@ public class JmsToPubSubStreamingPipeline {
                     ).withQueue(options.getJmsQueue()))
             .apply("JMS records counter", increment(counter.jmsRecordsRead))
             .apply("Extract and log inbound JMS message payload", extractAndLogJmsPayload())
-            .apply("Process Message", JmsToPubSubProcessorFactory.forType(options.getBusinessInterface()))
+            .apply("Process Message", JmsToPubSubProcessorFactory.forType(options.getBusinessInterface(), options))
             .apply("To PubSub Message", toPubSubMessage())
             .apply("Success | Failure", split(successTag, failureTag));
 
@@ -159,7 +159,7 @@ public class JmsToPubSubStreamingPipeline {
                 errorMessage.setJobId(jobName);
                 errorMessage.setShortPatternId(businessInterface);
                 errorMessage.setStacktrace(List(err.getCause().getStackTrace()).take(10).map(StackTraceElement::toString).mkString("\n"));
-                return new PubsubMessage(JsonUtils.serializeToBytes(JsonUtils.serializeToBytes(JsonUtils.toJsonNode(errorMessage))), new HashMap<>());
+                return new PubsubMessage(JsonUtils.serializeToBytes(JsonUtils.toJsonNode(errorMessage)), new HashMap<>());
                 }
             );
     }

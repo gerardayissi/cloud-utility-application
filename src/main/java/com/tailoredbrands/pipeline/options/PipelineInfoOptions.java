@@ -10,4 +10,9 @@ public interface PipelineInfoOptions extends PipelineOptions {
   String getPatternFullName();
 
   void setPatternFullName(String value);
+
+  @Description("TB user")
+  String getTbUser();
+
+  void setTbUser(String value);
 }

@@ -15,4 +15,5 @@ mvn -Pdataflow-runner compile exec:java \
       --deadletterPubsubTopic=projects/tst1-integration-3ca6/topics/deadletter \
       --businessInterface=create_order \
       --patternFullName=create_order_ecom \
+      --tbUser=admin@tbi.com \
       --runner=DataflowRunner"
