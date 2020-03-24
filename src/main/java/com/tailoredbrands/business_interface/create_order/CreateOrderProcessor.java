@@ -6,6 +6,7 @@ import com.tailoredbrands.generated.json.create_order.CreateOrderInput;
 import com.tailoredbrands.generated.json.create_order.CreateOrderOutput;
 import com.tailoredbrands.generated.json.create_order.Message;
 import com.tailoredbrands.pipeline.error.ProcessingException;
+import com.tailoredbrands.pipeline.options.JmsToPubSubOptions;
 import com.tailoredbrands.util.json.JsonUtils;
 import io.vavr.Tuple2;
 import io.vavr.control.Try;
@@ -21,17 +22,12 @@ import static com.tailoredbrands.pipeline.error.ErrorType.*;
 import static io.vavr.API.*;
 
 public class CreateOrderProcessor extends PTransform<PCollection<Tuple2<JmsRecord, Try<String>>>, PCollection<Tuple2<JmsRecord, Try<JsonNode>>>> {
-  private static String USER;
-
-  public static void setUser(String user){
-    USER = user;
-  }
 
   @Override
   public PCollection<Tuple2<JmsRecord, Try<JsonNode>>> expand(PCollection<Tuple2<JmsRecord, Try<String>>> input) {
     return input
         .apply("Convert JSON string to POJO", convertJSONtoObject())
-        .apply("Transform POJO", transform())
+        .apply("Transform POJO", transform(input.getPipeline().getOptions().as(JmsToPubSubOptions.class).getTbUser()))
         .apply("Convert POJO to JSON", convertObjectToJson());
   }
 
@@ -48,7 +44,7 @@ public class CreateOrderProcessor extends PTransform<PCollection<Tuple2<JmsRecor
         ));
   }
 
-  static MapElements<Tuple2<JmsRecord, Try<CreateOrderInput>>, Tuple2<JmsRecord, Try<CreateOrderOutput>>> transform() {
+  static MapElements<Tuple2<JmsRecord, Try<CreateOrderInput>>, Tuple2<JmsRecord, Try<CreateOrderOutput>>> transform(String tbUser) {
     return MapElements
         .into(new TypeDescriptor<Tuple2<JmsRecord, Try<CreateOrderOutput>>>() {
         })
@@ -57,7 +53,7 @@ public class CreateOrderProcessor extends PTransform<PCollection<Tuple2<JmsRecor
                 input.map(inp -> {
                   Message message = new Message(
                       new Attributes(
-                          USER,
+                          tbUser,
                           inp.getOrgId()
                       ),
                       Base64.getEncoder().encodeToString(JsonUtils.serializeToBytes(inp))

@@ -67,7 +67,7 @@ public class JmsToPubSubStreamingPipeline {
                     ).withQueue(options.getJmsQueue()))
             .apply("JMS records counter", increment(counter.jmsRecordsRead))
             .apply("Extract and log inbound JMS message payload", extractAndLogJmsPayload())
-            .apply("Process Message", JmsToPubSubProcessorFactory.forType(options.getBusinessInterface(), options))
+            .apply("Process Message", JmsToPubSubProcessorFactory.forType(options.getBusinessInterface()))
             .apply("To PubSub Message", toPubSubMessage())
             .apply("Success | Failure", split(successTag, failureTag));
 
@@ -167,7 +167,7 @@ public class JmsToPubSubStreamingPipeline {
     private static Peek<PubsubMessage> countAndLogOutbound(Counter counter) {
         return Peek.each(pubsubMessage -> {
             counter.inc();
-            LOG.info(JsonUtils.serializeToString(JsonUtils.deserialize(pubsubMessage.getPayload())));
+            LOG.info(new String(pubsubMessage.getPayload()));
         });
     }
 }
