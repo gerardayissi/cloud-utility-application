@@ -2,6 +2,7 @@ package com.tailoredbrands.business_interface.store_inventory_full_feed;
 
 import com.tailoredbrands.business_interface.store_inventory_full_feed.accumulators.StoreInventoryFullFeedAccum;
 import com.tailoredbrands.generated.json.store_inventory_full_feed.SupplyDetail;
+import com.tailoredbrands.util.FileRowMetadata;
 import com.tailoredbrands.util.coder.TryCoder;
 import com.tailoredbrands.util.coder.Tuple2Coder;
 import io.vavr.Tuple2;
@@ -10,9 +11,8 @@ import org.apache.beam.sdk.coders.*;
 import org.apache.beam.sdk.transforms.Combine;
 
 import java.util.List;
-import java.util.Map;
 
-public class CombineRowsFn extends Combine.CombineFn<Tuple2<Map<String, String>, Try<SupplyDetail>>, StoreInventoryFullFeedAccum, Tuple2<List<Map<String, String>>, Try<List<SupplyDetail>>>> {
+public class CombineRowsFn extends Combine.CombineFn<Tuple2<FileRowMetadata, Try<SupplyDetail>>, StoreInventoryFullFeedAccum, Tuple2<List<FileRowMetadata>, Try<List<SupplyDetail>>>> {
 
     @Override
     public StoreInventoryFullFeedAccum createAccumulator() {
@@ -20,7 +20,7 @@ public class CombineRowsFn extends Combine.CombineFn<Tuple2<Map<String, String>,
     }
 
     @Override
-    public StoreInventoryFullFeedAccum addInput(StoreInventoryFullFeedAccum accumulator, Tuple2<Map<String, String>, Try<SupplyDetail>> input) {
+    public StoreInventoryFullFeedAccum addInput(StoreInventoryFullFeedAccum accumulator, Tuple2<FileRowMetadata, Try<SupplyDetail>> input) {
         accumulator.add(input);
         return accumulator;
     }
@@ -35,13 +35,13 @@ public class CombineRowsFn extends Combine.CombineFn<Tuple2<Map<String, String>,
     }
 
     @Override
-    public Tuple2<List<Map<String, String>>, Try<List<SupplyDetail>>> extractOutput(StoreInventoryFullFeedAccum accumulator) {
+    public Tuple2<List<FileRowMetadata>, Try<List<SupplyDetail>>> extractOutput(StoreInventoryFullFeedAccum accumulator) {
         return accumulator.get();
     }
 
     @Override
-    public Tuple2Coder<List<Map<String, String>>, Try<List<SupplyDetail>>> getDefaultOutputCoder(CoderRegistry registry, Coder<Tuple2<Map<String, String>, Try<SupplyDetail>>> inputCoder) {
-        return Tuple2Coder.of(ListCoder.of(MapCoder.of(StringUtf8Coder.of(), StringUtf8Coder.of())),
+    public Tuple2Coder<List<FileRowMetadata>, Try<List<SupplyDetail>>> getDefaultOutputCoder(CoderRegistry registry, Coder<Tuple2<FileRowMetadata, Try<SupplyDetail>>> inputCoder) {
+        return Tuple2Coder.of(ListCoder.of(SerializableCoder.of(FileRowMetadata.class)),
             TryCoder.of(ListCoder.of(SerializableCoder.of(SupplyDetail.class))));
     }
 }

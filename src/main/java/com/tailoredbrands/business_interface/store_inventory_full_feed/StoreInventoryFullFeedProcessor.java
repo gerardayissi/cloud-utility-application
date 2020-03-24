@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.tailoredbrands.generated.json.store_inventory_full_feed.*;
 import com.tailoredbrands.pipeline.error.ProcessingException;
 import com.tailoredbrands.pipeline.options.GcsToPubSubOptions;
+import com.tailoredbrands.util.FileRowMetadata;
 import com.tailoredbrands.util.json.JsonUtils;
 import io.vavr.Tuple2;
 import io.vavr.control.Try;
@@ -34,29 +35,29 @@ import static io.vavr.API.$;
 import static io.vavr.API.Case;
 import static java.util.Collections.singletonList;
 
-public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<Map<String, String>>,
-    PCollectionList<Tuple2<List<Map<String, String>>, Try<JsonNode>>>> {
+public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<FileRowMetadata>,
+    PCollectionList<Tuple2<List<FileRowMetadata>, Try<JsonNode>>>> {
 
     private String user;
     private String organization;
-    private Integer THRESHOLD;
+//    private Integer THRESHOLD;
 
     public StoreInventoryFullFeedProcessor(PipelineOptions options) {
         if (options instanceof GcsToPubSubOptions) {
             val gcsToPubSubOptions = (GcsToPubSubOptions) options;
             user = gcsToPubSubOptions.getUser();
             organization = gcsToPubSubOptions.getOrganization();
-            THRESHOLD = gcsToPubSubOptions.getErrorThreshold();
+//            THRESHOLD = gcsToPubSubOptions.getErrorThreshold();
         } else {
             throw new IllegalArgumentException("Invalid Store Inventory Full Feed options: " + options.getClass().getSimpleName());
         }
     }
 
     @Override
-    public PCollectionList<Tuple2<List<Map<String, String>>, Try<JsonNode>>> expand(PCollection<Map<String, String>> rows) {
+    public PCollectionList<Tuple2<List<FileRowMetadata>, Try<JsonNode>>> expand(PCollection<FileRowMetadata> rows) {
 
         Duration windowDuration = Duration.standardSeconds(3);
-        Window<Tuple2<Map<String, String>, Try<SupplyDetail>>> window = Window.into(FixedWindows.of(windowDuration));
+        Window<Tuple2<FileRowMetadata, Try<SupplyDetail>>> window = Window.into(FixedWindows.of(windowDuration));
 
         val mainPC = rows
             .apply("CSV row to DTO", csvRowToSupplyDetailsDto())
@@ -77,25 +78,25 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<Map<
         return pc;
     }
 
-    MapElements<Map<String, String>, Tuple2<Map<String, String>, Try<SupplyDetail>>> csvRowToSupplyDetailsDto() {
+    MapElements<FileRowMetadata, Tuple2<FileRowMetadata, Try<SupplyDetail>>> csvRowToSupplyDetailsDto() {
         return MapElements
-            .into(new TypeDescriptor<Tuple2<Map<String, String>, Try<SupplyDetail>>>() {
+            .into(new TypeDescriptor<Tuple2<FileRowMetadata, Try<SupplyDetail>>>() {
             })
-            .via(csvRow -> new Tuple2<>(csvRow, Try.of(() -> toPayloadSync(csvRow))
+            .via(csvRow -> new Tuple2<>(csvRow, Try.of(() -> toSupplyDetailDto(csvRow))
                 .mapFailure(Case($(e -> !(e instanceof ProcessingException)),
                     exc -> new ProcessingException(CSV_ROW_TO_OBJECT_CONVERSION_ERROR, exc))))
             );
     }
 
-    MapElements<Tuple2<List<Map<String, String>>, Try<List<SupplyDetail>>>, Tuple2<List<Map<String, String>>, Try<JsonNode>>> dtoToJson(String syncType) {
+    MapElements<Tuple2<List<FileRowMetadata>, Try<List<SupplyDetail>>>, Tuple2<List<FileRowMetadata>, Try<JsonNode>>> dtoToJson(String syncType) {
         return MapElements
-            .into(new TypeDescriptor<Tuple2<List<Map<String, String>>, Try<JsonNode>>>() {
+            .into(new TypeDescriptor<Tuple2<List<FileRowMetadata>, Try<JsonNode>>>() {
             })
             .via(tuple -> tuple
                 .map2(maybeDto -> maybeDto
                     .map(JsonUtils::serializeObject)
                     .map(JsonUtils::deserialize)
-                    .map(jsonNode -> toJsonWithAttributes(jsonNode, syncType))
+                    .map(jsonNode -> toJsonWithAttributes(jsonNode, syncType, tuple._1))
                     .mapFailure(
                         Case($(e -> !(e instanceof ProcessingException)),
                             exc -> new ProcessingException(OBJECT_TO_JSON_CONVERSION_ERROR, exc))
@@ -104,7 +105,8 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<Map<
             );
     }
 
-    private SupplyDetail toPayloadSync(Map<String, String> csvRow) {
+    private SupplyDetail toSupplyDetailDto(FileRowMetadata data) {
+        val csvRow = data.getRecord();
         val supplyDetails = new SupplyDetail();
         val supplyDefinition = new SupplyDefinition();
         supplyDefinition.setItemId(csvRow.get("Itemcode"));
@@ -123,7 +125,7 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<Map<
         return supplyDetails;
     }
 
-    private JsonNode toJsonWithAttributes(JsonNode json, String type) {
+    private JsonNode toJsonWithAttributes(JsonNode payload, String type, List<FileRowMetadata> fileMeta) {
         val attributes = new LinkedHashMap<String, String>(2);
         attributes.put("User", user);
         attributes.put("Organization", organization);
@@ -131,40 +133,46 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<Map<
         val message = new LinkedHashMap<String, Object>(2);
         message.put("attributes", attributes);
 
-        val transactionNumber = "LocationId" + getDatetime("yyyymmddhhmss");
-        val jsonNode = getJsonToPush(type, transactionNumber, json);
+        val filename = fileMeta.get(0).getSourceName();
+        val fileWithoutExt = filename.split("\\.(?=[^\\.]+$)")[0];
+        val splittedFile = fileWithoutExt.split("_");
+        val locationId = splittedFile[splittedFile.length - 1];
+
+        val transactionNumber = locationId + getDatetime("yyyymmddhhmss");
+
+        val syncDTO = toSupplyEventDto(type, payload, transactionNumber, locationId);
+        val syncSupplyEvent = getSyncSupplyEventJson(type, syncDTO, payload);
 
         val event = new LinkedHashMap<String, Object>(2);
-        event.put("SyncSupplyEvent", jsonNode);
+        event.put("SyncSupplyEvent", syncSupplyEvent);
 
         message.put("data", event);
 
-        val payload = new HashMap<String, List<Map<String, Object>>>(1);
-        payload.put("messages", singletonList(message));
+        val resPayload = new HashMap<String, List<Map<String, Object>>>(1);
+        resPayload.put("messages", singletonList(message));
 
-        return JsonUtils.toJsonNode(payload);
+        return JsonUtils.toJsonNode(resPayload);
     }
 
-    private JsonNode getJsonToPush(String type, String transactionNumber, JsonNode json) {
-        val syncDTO = toDtoSync(type, transactionNumber, json);
-        val jsonMain = JsonUtils.toJsonNode(syncDTO);
+    private JsonNode getSyncSupplyEventJson(String type, SyncSupplyEvent dto, JsonNode payload) {
+        val jsonMain = JsonUtils.toJsonNode(dto);
         ObjectNode objectNode = (ObjectNode) jsonMain;
         if (type.equals("SyncDetail")) {
-            objectNode.set("SupplyDetails", json);
+            objectNode.set("SupplyDetails", payload);
         } else {
             objectNode.remove("SupplyDetails");
         }
         return objectNode;
     }
 
-    private SyncSupplyEvent toDtoSync(String type, String transactionNumber, JsonNode json) {
+    private SyncSupplyEvent toSupplyEventDto(String type, JsonNode payload, String transactionNumber, String locationId) {
         val supplyEvent = new SyncSupplyEvent();
         supplyEvent.setTransactionNumber(transactionNumber);
         supplyEvent.setTransactionTypeId(type);
-        supplyEvent.setLocationId("Location_id");
+        supplyEvent.setLocationId(locationId);
         supplyEvent.setSyncTransactionDate(getDatetime("yyyy-MM-dd"));
         supplyEvent.setFullSync(true);
-        supplyEvent.setCountRecords(Integer.toString(json.size()));
+        supplyEvent.setCountRecords(Integer.toString(payload.size()));
         return supplyEvent;
     }
 
