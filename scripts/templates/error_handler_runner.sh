@@ -8,5 +8,9 @@ mvn -Pdataflow-runner compile exec:java \
       --subnetwork=https://www.googleapis.com/compute/v1/projects/network-b2b9/regions/us-east1/subnetworks/np-integration4 \
       --defaultBucket=gs://tst1-integration-3ca6-default-deadletter/ \
       --deadletterPubsubSubscription=projects/tst1-integration-3ca6/subscriptions/deadletter_subscription \
-      --patternToBucketMap=create_order_ecom|gs://tst1-integration-3ca6-create-order-ecom-errors/
+      --patternToBucketMap=create_order_ecom|gs://tst1-integration-3ca6-create-order-ecom-errors/  \
+      --autoscalingAlgorithm=THROUGHPUT_BASED \
+      --workerMachineType=n1-standard-2 \
+      --enableStreamingEngine=true \
+      --maxNumWorkers=5 \
       --runner=DataflowRunner"

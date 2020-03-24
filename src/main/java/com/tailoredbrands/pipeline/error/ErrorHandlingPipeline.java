@@ -25,7 +25,8 @@ import org.joda.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.vavr.API.List;
+import java.util.Arrays;
+
 import static io.vavr.API.Tuple;
 
 public class ErrorHandlingPipeline {
@@ -45,10 +46,14 @@ public class ErrorHandlingPipeline {
 
     Counter total = Metrics.counter("error_handler", "total_errors_processed");
 
-    Map<String, Tuple2<String, Integer>> tags = List(options.getPatternToBucketMap().split(",")).zipWithIndex().toMap(p2b2i -> {
-      val split = p2b2i._1.split("|");
-      return Tuple(split[0], Tuple(split[1], p2b2i._2));
-    });
+    Map<String, Tuple2<String, Integer>> tags =
+        List
+            .ofAll(Arrays.asList(options.getPatternToBucketMap().split(",")))
+            .zipWithIndex()
+            .toMap(p2b2i -> {
+              val split = p2b2i._1.split("|");
+              return Tuple(split[0], Tuple(split[1], p2b2i._2));
+            });
 
     Map<Integer, String> buckets = tags.values().toMap(Tuple2::swap);
 
@@ -76,12 +81,12 @@ public class ErrorHandlingPipeline {
             )
         );
 
-    for(int i = 0; i < tags.size() + 1; i++){
+    for (int i = 0; i < tags.size() + 1; i++) {
       list
           .get(i)
           .apply("Map to strings", MapElements.into(TypeDescriptor.of(String.class)).via(ErrorMessage::getRawMessage))
           .apply("Window", Window.into(FixedWindows.of(Duration.standardSeconds(5L))))
-          .apply("Write to GCS", TextIO.write().to(buckets.getOrElse(i, options.getDefaultBucket())).withWindowedWrites().withoutSharding());
+          .apply("Write to GCS", TextIO.write().to(buckets.getOrElse(i, options.getDefaultBucket())).withWindowedWrites().withNumShards(1));
     }
     return pipeline.run();
   }
