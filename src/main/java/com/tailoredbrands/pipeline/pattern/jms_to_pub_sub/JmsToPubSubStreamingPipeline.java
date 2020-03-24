@@ -159,7 +159,7 @@ public class JmsToPubSubStreamingPipeline {
                 errorMessage.setJobId(jobName);
                 errorMessage.setShortPatternId(businessInterface);
                 errorMessage.setStacktrace(List(err.getCause().getStackTrace()).take(10).map(StackTraceElement::toString).mkString("\n"));
-                return new PubsubMessage(JsonUtils.serializeToBytes(JsonUtils.serializeToBytes(errorMessage)), new HashMap<>());
+                return new PubsubMessage(JsonUtils.serializeToBytes(JsonUtils.serializeToBytes(JsonUtils.toJsonNode(errorMessage))), new HashMap<>());
                 }
             );
     }

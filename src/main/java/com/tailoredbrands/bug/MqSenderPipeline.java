@@ -19,8 +19,6 @@ import static com.tailoredbrands.util.Peek.increment;
 
 public class MqSenderPipeline {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MqSenderPipeline.class);
-
     public interface SendToTibcoOptions extends JmsToPubSubOptions {
         @Required
         @Default.String("gs://tst1-integration-3ca6/temp/Messages.txt")
@@ -46,7 +44,6 @@ public class MqSenderPipeline {
                 .apply(JmsIO.write()
                                 .withConnectionFactory(connectionFactory)
                                 .withQueue(options.getJmsQueue())
-                        //                .withQueue("POS.TEST.Q")
                 );
         pipeline.run();
     }
