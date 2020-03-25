@@ -6,7 +6,6 @@ public enum ErrorType {
     JMS_PAYLOAD_EXTRACTION_ERROR("jms_payload_extraction_error"),
 
     JSON_TO_PUBSUB_MESSAGE_CONVERSION_ERROR("json_to_pubsub_message_conversion_error"),
-    JSON_TO_BASE64_STRING_CONVERSION_ERROR("json_to_base64_string_conversion_error"),
 
     OBJECT_TO_JSON_CONVERSION_ERROR("object_to_json_conversion_error"),
     OBJECT_TO_OBJECT_CONVERSION_ERROR("object_to_object_conversion_error"),

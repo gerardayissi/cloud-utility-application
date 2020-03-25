@@ -38,7 +38,7 @@ import static com.tailoredbrands.util.predef.Resources.readAsString;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 
-public class GcsToPubSubBatchPipelineTest implements Serializable {
+public class GcsToPubSubStreamingPipelineTest implements Serializable {
     @Rule
     public transient TestPipeline pipeline = TestPipeline.create();
 
@@ -61,7 +61,7 @@ public class GcsToPubSubBatchPipelineTest implements Serializable {
                         JsonUtils.deserialize(readAsString("item_full_feed/item_full_feed_target.json")))))
                         .withCoder(Tuple2Coder.of(MapCoder.of(StringUtf8Coder.of(), StringUtf8Coder.of()),
                                 TryCoder.of(Coders.jsonNode()))))
-                .apply(GcsToPubSubBatchPipeline.toPubSubMessage());
+                .apply(GcsToPubSubStreamingPipeline.toPubSubMessage());
 
         PAssert.that(pCollection)
                 .satisfies(messages -> matchAll(messages,
@@ -83,7 +83,7 @@ public class GcsToPubSubBatchPipelineTest implements Serializable {
                                 )
                         ), Tuple2Coder.of(MapCoder.of(StringUtf8Coder.of(), StringUtf8Coder.of()),
                                 TryCoder.of(PubsubMessageWithAttributesCoder.of()))))
-                .apply(GcsToPubSubBatchPipeline.split(successTag, failureTag));
+                .apply(GcsToPubSubStreamingPipeline.split(successTag, failureTag));
         // success
         val successCollection = pCollectionTuple.get(successTag).setCoder(PubsubMessageWithAttributesCoder.of());
         PAssert.that(successCollection)
@@ -108,7 +108,7 @@ public class GcsToPubSubBatchPipelineTest implements Serializable {
                                 Tuple.of(getItemFullFeedRow(), Try.failure(new ProcessingException(OTHER)))
                         ), Tuple2Coder.of(MapCoder.of(StringUtf8Coder.of(), StringUtf8Coder.of()),
                                 TryCoder.of(PubsubMessageWithAttributesCoder.of()))))
-                .apply(GcsToPubSubBatchPipeline.split(successTag, failureTag));
+                .apply(GcsToPubSubStreamingPipeline.split(successTag, failureTag));
         // success
         val successCollection = pCollectionTuple.get(successTag).setCoder(PubsubMessageWithAttributesCoder.of());
         PAssert.that(successCollection).empty();

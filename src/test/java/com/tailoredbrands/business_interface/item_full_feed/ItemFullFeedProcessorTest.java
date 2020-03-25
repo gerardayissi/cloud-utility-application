@@ -128,23 +128,23 @@ public class ItemFullFeedProcessorTest implements Serializable {
         itemFullFeed.setDepartmentName("DRESS SHIRTS");
         itemFullFeed.setDepartmentNumber("50");
         itemFullFeed.setDescription("CALVIN KLEIN BIG & TALL SPREAD SOLID SLIM FIT DRESS SHIRT");
-        itemFullFeed.setIsGiftCard("false");
-        itemFullFeed.setIsScanOnly("true");
-        itemFullFeed.setIsGiftwithPurchase("false");
+        itemFullFeed.setIsGiftCard(false);
+        itemFullFeed.setIsScanOnly(true);
+        itemFullFeed.setIsGiftwithPurchase(false);
         itemFullFeed.setItemId("TMW5K4960702");
         itemFullFeed.setProductClass("5K49");
         itemFullFeed.setSeason("S16");
-        itemFullFeed.setSeasonYear("2019");
+        itemFullFeed.setSeasonYear(2019);
         itemFullFeed.setShortDescription("CK BTSOLSPRD");
         itemFullFeed.setSize("16 36/37");
-        itemFullFeed.setStyle("TMW");
-        itemFullFeed.setWeight("1");
+        itemFullFeed.setStyle("FLT");
+        itemFullFeed.setWeight(1d);
         itemFullFeed.setWeightUOM("LB");
 
         val handlingAttributes = new HandlingAttributes();
-        handlingAttributes.setIsHazmat("false");
-        handlingAttributes.setIsParcelShippingAllowed("true");
-        handlingAttributes.setIsAirShippingAllowed("true");
+        handlingAttributes.setIsHazmat(false);
+        handlingAttributes.setIsParcelShippingAllowed(true);
+        handlingAttributes.setIsAirShippingAllowed(true);
         handlingAttributes.setDescription("CK BTSOLSPRD");
         itemFullFeed.setHandlingAttributes(handlingAttributes);
 
@@ -162,20 +162,20 @@ public class ItemFullFeedProcessorTest implements Serializable {
         itemFullFeed.setManufacturingAttribute(manufacturingAttribute);
 
         val sellingAttributes = new SellingAttributes();
-        sellingAttributes.setActivationRequired("false");
-        sellingAttributes.setDigitalGoods("false");
-        sellingAttributes.setIsDiscountable("false");
-        sellingAttributes.setIsExchangeable("false");
-        sellingAttributes.setIsPriceOverrideable("true");
-        sellingAttributes.setIsReturnableAtDC("true");
-        sellingAttributes.setShipToAddress("true");
-        sellingAttributes.setPickUpInStore("true");
+        sellingAttributes.setActivationRequired(false);
+        sellingAttributes.setDigitalGoods(false);
+        sellingAttributes.setIsDiscountable(false);
+        sellingAttributes.setIsExchangeable(false);
+        sellingAttributes.setIsPriceOverrideable(true);
+        sellingAttributes.setIsReturnableAtDC(true);
+        sellingAttributes.setShipToAddress(true);
+        sellingAttributes.setPickUpInStore(true);
+        sellingAttributes.setSoldOnline(true);
         sellingAttributes.setPriceStatusId("true");
-        sellingAttributes.setSoldOnline("true");
         itemFullFeed.setSellingAttributes(sellingAttributes);
 
         val extended = new Extended();
-        extended.setFlatOrGOH("FLAT");
+        extended.setFlatOrGOH("FLT");
         extended.setGroup("51BSOLSPRDSLIM");
         extended.setDivision("50");
         extended.setSizeDescriptionMedium("16 36/37");

@@ -12,7 +12,7 @@ import org.apache.beam.sdk.values.PCollection;
 
 import java.util.Map;
 
-import static com.tailoredbrands.business_interface.BusinessInterface.*;
+import static com.tailoredbrands.business_interface.BusinessInterface.ITEM_FULL_FEED;
 import static io.vavr.API.Match;
 
 public class GcsToPubSubProcessorFactory {

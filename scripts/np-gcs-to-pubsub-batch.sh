@@ -5,7 +5,7 @@ export PIPELINE_NAME=gcs-to-pub-sub
 export BUSINESS_INTERFACE=item_full_feed
 
 mvn compile exec:java \
--Dexec.mainClass=GcsToPubSubBatchPipeline \
+-Dexec.mainClass=GcsToPubSubStreamingPipeline \
       -Dexec.args="--project=${PROJECT_ID} \
       --serviceAccount=compute@np-integration-8656.iam.gserviceaccount.com \
       --stagingLocation=gs://tb-np-dataflow-pipelines/${PIPELINE_NAME}/staging \

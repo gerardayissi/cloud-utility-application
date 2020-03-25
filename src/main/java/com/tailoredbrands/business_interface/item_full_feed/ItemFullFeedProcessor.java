@@ -1,9 +1,6 @@
 package com.tailoredbrands.business_interface.item_full_feed;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.tailoredbrands.pipeline.error.ProcessingException;
-import com.tailoredbrands.pipeline.options.GcsToPubSubOptions;
-import com.tailoredbrands.util.json.JsonUtils;
 import com.tailoredbrands.generated.json.item_full_feed.CodeTypeId;
 import com.tailoredbrands.generated.json.item_full_feed.Extended;
 import com.tailoredbrands.generated.json.item_full_feed.HandlingAttributes;
@@ -11,6 +8,9 @@ import com.tailoredbrands.generated.json.item_full_feed.ItemCode;
 import com.tailoredbrands.generated.json.item_full_feed.ItemFullFeed;
 import com.tailoredbrands.generated.json.item_full_feed.ManufacturingAttribute;
 import com.tailoredbrands.generated.json.item_full_feed.SellingAttributes;
+import com.tailoredbrands.pipeline.error.ProcessingException;
+import com.tailoredbrands.pipeline.options.GcsToPubSubOptions;
+import com.tailoredbrands.util.json.JsonUtils;
 import io.vavr.Tuple2;
 import io.vavr.control.Try;
 import lombok.val;
@@ -30,8 +30,9 @@ import static com.tailoredbrands.pipeline.error.ErrorType.CSV_ROW_TO_OBJECT_CONV
 import static com.tailoredbrands.pipeline.error.ErrorType.OBJECT_TO_JSON_CONVERSION_ERROR;
 import static io.vavr.API.$;
 import static io.vavr.API.Case;
-import static java.lang.Math.min;
 import static java.util.Collections.singletonList;
+import static org.apache.commons.lang3.StringUtils.truncate;
+import static org.apache.commons.lang3.math.NumberUtils.toDouble;
 
 public class ItemFullFeedProcessor extends PTransform<PCollection<Map<String, String>>,
         PCollection<Tuple2<Map<String, String>, Try<JsonNode>>>> {
@@ -72,32 +73,29 @@ public class ItemFullFeedProcessor extends PTransform<PCollection<Map<String, St
     private ItemFullFeed toItemFullFeed(Map<String, String> csvRow) {
         val itemFullFeed = new ItemFullFeed();
         itemFullFeed.setBaseUOM("U");
-        itemFullFeed.setBrand(csvRow.get("COMPANY"));
+        val company = csvRow.get("COMPANY");
+        itemFullFeed.setBrand(!company.isEmpty() ? company : truncate(csvRow.get("ITEMCODES.ID"), 3));
         itemFullFeed.setColor(csvRow.get("COLOR.DESC"));
         itemFullFeed.setDepartmentName(csvRow.get("DIVISION.DESCRIPTION"));
         itemFullFeed.setDepartmentNumber(csvRow.get("DIVISION"));
         itemFullFeed.setDescription(csvRow.get("LONG.DESC"));
-        itemFullFeed.setIsGiftCard("false");
-        itemFullFeed.setIsScanOnly("true");
-        itemFullFeed.setIsGiftwithPurchase("false");
+        itemFullFeed.setIsGiftCard(false);
+        itemFullFeed.setIsScanOnly(true);
+        itemFullFeed.setIsGiftwithPurchase(false);
         itemFullFeed.setItemId(csvRow.get("COMPANY") + csvRow.get("ITEMCODES.ID"));
-        val id = csvRow.getOrDefault("ITEMCODES.ID", "").trim();
-        val idTruncateAt = min(id.length(), 4);
-        itemFullFeed.setProductClass(id.substring(0, idTruncateAt));
+        itemFullFeed.setProductClass(getProductClass(csvRow));
         itemFullFeed.setSeason(csvRow.get("SEASON.CODE"));
-        itemFullFeed.setSeasonYear("2019"); //todo: verify with stakeholders
-        val shortDesc = csvRow.getOrDefault("CLASS.DESC", "").trim();
-        val shortDescTruncateAt = min(shortDesc.length(), 50);
-        itemFullFeed.setShortDescription(shortDesc.substring(0, shortDescTruncateAt));
+        itemFullFeed.setSeasonYear(2019); //todo: verify with stakeholders
+        itemFullFeed.setShortDescription(truncate(csvRow.get("CLASS.DESC"), 50));
         itemFullFeed.setSize(csvRow.get("SIZE.DESC.MEDIUM"));
-        itemFullFeed.setStyle(csvRow.get("COMPANY"));
-        itemFullFeed.setWeight(csvRow.get("WEIGHT.IN.LBS"));
+        itemFullFeed.setStyle("FLAT".equalsIgnoreCase(csvRow.get("FLAT.OR.GOH")) ? "FLT" : "GOH");
+        itemFullFeed.setWeight(toDouble(csvRow.get("WEIGHT.IN.LBS")));
         itemFullFeed.setWeightUOM("LB");
 
         val handlingAttributes = new HandlingAttributes();
-        handlingAttributes.setIsHazmat("1".equals(csvRow.get("HAZARDOUS.FLAG")) ? "true" : "false");
-        handlingAttributes.setIsParcelShippingAllowed("true");
-        handlingAttributes.setIsAirShippingAllowed("true".equalsIgnoreCase(csvRow.get("HAZARDOUS.FLAG")) ? "false" : "true");
+        handlingAttributes.setIsAirShippingAllowed(!"true".equalsIgnoreCase(csvRow.get("HAZARDOUS.FLAG")));
+        handlingAttributes.setIsHazmat("1".equals(csvRow.get("HAZARDOUS.FLAG")));
+        handlingAttributes.setIsParcelShippingAllowed(true);
         handlingAttributes.setDescription(csvRow.get("CLASS.DESC"));
         itemFullFeed.setHandlingAttributes(handlingAttributes);
 
@@ -115,20 +113,20 @@ public class ItemFullFeedProcessor extends PTransform<PCollection<Map<String, St
         itemFullFeed.setManufacturingAttribute(manufacturingAttribute);
 
         val sellingAttributes = new SellingAttributes();
-        sellingAttributes.setActivationRequired("false");
-        sellingAttributes.setDigitalGoods("false");
-        sellingAttributes.setIsDiscountable("false");
-        sellingAttributes.setIsExchangeable("false");
-        sellingAttributes.setIsPriceOverrideable("true");
-        sellingAttributes.setIsReturnableAtDC("true");
-        sellingAttributes.setShipToAddress("true");
-        sellingAttributes.setPickUpInStore("true");
+        sellingAttributes.setActivationRequired(false);
+        sellingAttributes.setDigitalGoods(false);
+        sellingAttributes.setIsDiscountable(false);
+        sellingAttributes.setIsExchangeable(false);
+        sellingAttributes.setIsPriceOverrideable(true);
+        sellingAttributes.setIsReturnableAtDC(true);
+        sellingAttributes.setShipToAddress(true);
+        sellingAttributes.setPickUpInStore(true);
         sellingAttributes.setPriceStatusId("true");
-        sellingAttributes.setSoldOnline("true");
+        sellingAttributes.setSoldOnline(true);
         itemFullFeed.setSellingAttributes(sellingAttributes);
 
         val extended = new Extended();
-        extended.setFlatOrGOH(csvRow.get("FLAT.OR.GOH"));
+        extended.setFlatOrGOH("FLAT".equalsIgnoreCase(csvRow.get("FLAT.OR.GOH")) ? "FLT" : "GOH");
         extended.setGroup(csvRow.get("GROUP"));
         extended.setDivision(csvRow.get("PSEUDIV"));
         extended.setSizeDescriptionMedium(csvRow.get("SIZE.DESC.MEDIUM"));
@@ -148,6 +146,14 @@ public class ItemFullFeedProcessor extends PTransform<PCollection<Map<String, St
         itemFullFeed.setExtended(extended);
 
         return itemFullFeed;
+    }
+
+    private String getProductClass(Map<String, String> csvRow) {
+        if ("1".equals(csvRow.get("NO.WAREHOUSE.STOCK"))) return "DROPSHIP";
+        if ("838CEDARSHOETRE".equalsIgnoreCase(csvRow.get("GROUP"))) return "SHOETREE";
+        if ("853UMBRELLAS".equalsIgnoreCase(csvRow.get("GROUP"))) return "UMBRELLA";
+        if ("40".equalsIgnoreCase(csvRow.get("PSEUDIV"))) return "SHOE";
+        return truncate(csvRow.get("ITEMCODES.ID"), 4);
     }
 
     @SuppressWarnings("unchecked")
