@@ -201,7 +201,7 @@ public class ItemFullFeedProcessorTest implements Serializable {
         return new GcsToPubSubOptions() {
             @Override
             public String getUser() {
-                return user;
+                return null;
             }
 
             @Override
@@ -211,11 +211,41 @@ public class ItemFullFeedProcessorTest implements Serializable {
 
             @Override
             public String getOrganization() {
-                return organization;
+                return null;
             }
 
             @Override
             public void setOrganization(String value) {
+
+            }
+
+            @Override
+            public Long getDurationSeconds() {
+                return null;
+            }
+
+            @Override
+            public void setDurationSeconds(Long value) {
+
+            }
+
+            @Override
+            public Integer getErrorThreshold() {
+                return null;
+            }
+
+            @Override
+            public void setErrorThreshold(Integer value) {
+
+            }
+
+            @Override
+            public String getProcessedBucket() {
+                return null;
+            }
+
+            @Override
+            public void setProcessedBucket(String value) {
 
             }
 
@@ -246,6 +276,26 @@ public class ItemFullFeedProcessorTest implements Serializable {
 
             @Override
             public void setInputFilePattern(String value) {
+
+            }
+
+            @Override
+            public String getErrorGCSFilePath() {
+                return null;
+            }
+
+            @Override
+            public void setErrorGCSFilePath(String value) {
+
+            }
+
+            @Override
+            public String getProcessedGCSFilePath() {
+                return null;
+            }
+
+            @Override
+            public void setProcessedGCSFilePath(String value) {
 
             }
 

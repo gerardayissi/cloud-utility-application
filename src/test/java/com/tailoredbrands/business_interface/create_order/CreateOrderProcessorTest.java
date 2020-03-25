@@ -85,7 +85,7 @@ public class CreateOrderProcessorTest implements Serializable {
         .apply(Create.of(
             new Tuple2<>(jmsRecord(Resources.readAsString("create_order/CreateOrderInput.json")), Try.success(inputJson))
         ).withCoder(Tuple2Coder.of(SerializableCoder.of(JmsRecord.class), TryCoder.of(SerializableCoder.of(CreateOrderInput.class)))))
-        .apply(CreateOrderProcessor.transform());
+        .apply(CreateOrderProcessor.transform("testUser"));
     PAssert.that(pc).satisfies(it -> hasItems(it,
         map(t -> t._2.get().getMessages().get(0).getAttributes().getOrganization(), containsString(inputJson.getOrgId())
         )
@@ -100,7 +100,7 @@ public class CreateOrderProcessorTest implements Serializable {
             new Tuple2<>(jmsRecord(Resources.readAsString("create_order/CreateOrderInput.json")), Try.success(Resources.readAsString("create_order/CreateOrderInput.json")))
         ).withCoder(Tuple2Coder.of(SerializableCoder.of(JmsRecord.class), TryCoder.of(StringUtf8Coder.of()))))
         .apply("JSON to object", CreateOrderProcessor.convertJSONtoObject())
-        .apply("Transform", CreateOrderProcessor.transform())
+        .apply("Transform", CreateOrderProcessor.transform("testUser"))
         .apply("Object to JSON", CreateOrderProcessor.convertObjectToJson());
     PAssert.that(pc).satisfies(it -> hasItems(it,
         map(t -> t._2.get().get("messages").get(0).get("attributes").get("Organization").asText(), containsString("TMW"))
