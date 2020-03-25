@@ -1,7 +1,9 @@
 package com.tailoredbrands.pipeline.error;
 
 
-public class ErrorMessage {
+import java.io.Serializable;
+
+public class ErrorMessage implements Serializable {
   private String rawMessage;
 
   private String errorCode;
