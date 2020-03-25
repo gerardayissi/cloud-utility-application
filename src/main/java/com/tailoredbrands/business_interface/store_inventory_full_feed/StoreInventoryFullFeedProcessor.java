@@ -5,29 +5,22 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.tailoredbrands.generated.json.store_inventory_full_feed.*;
 import com.tailoredbrands.pipeline.error.ProcessingException;
 import com.tailoredbrands.pipeline.options.GcsToPubSubOptions;
-import com.tailoredbrands.util.FileRowMetadata;
+import com.tailoredbrands.util.FileWithMeta;
 import com.tailoredbrands.util.json.JsonUtils;
 import io.vavr.Tuple2;
 import io.vavr.control.Try;
 import lombok.val;
 import org.apache.beam.sdk.options.PipelineOptions;
-import org.apache.beam.sdk.transforms.Combine;
 import org.apache.beam.sdk.transforms.MapElements;
 import org.apache.beam.sdk.transforms.PTransform;
-import org.apache.beam.sdk.transforms.windowing.FixedWindows;
-import org.apache.beam.sdk.transforms.windowing.Window;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.PCollectionList;
 import org.apache.beam.sdk.values.TypeDescriptor;
-import org.joda.time.Duration;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.tailoredbrands.pipeline.error.ErrorType.CSV_ROW_TO_OBJECT_CONVERSION_ERROR;
 import static com.tailoredbrands.pipeline.error.ErrorType.OBJECT_TO_JSON_CONVERSION_ERROR;
@@ -35,8 +28,8 @@ import static io.vavr.API.$;
 import static io.vavr.API.Case;
 import static java.util.Collections.singletonList;
 
-public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<FileRowMetadata>,
-    PCollectionList<Tuple2<List<FileRowMetadata>, Try<JsonNode>>>> {
+public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<FileWithMeta>,
+    PCollectionList<Tuple2<FileWithMeta, Try<JsonNode>>>> {
 
     private String user;
     private String organization;
@@ -54,15 +47,15 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
     }
 
     @Override
-    public PCollectionList<Tuple2<List<FileRowMetadata>, Try<JsonNode>>> expand(PCollection<FileRowMetadata> rows) {
+    public PCollectionList<Tuple2<FileWithMeta, Try<JsonNode>>> expand(PCollection<FileWithMeta> rows) {
 
-        Duration windowDuration = Duration.standardSeconds(3);
-        Window<Tuple2<FileRowMetadata, Try<SupplyDetail>>> window = Window.into(FixedWindows.of(windowDuration));
+//        Duration windowDuration = Duration.standardSeconds(3);
+//        Window<Tuple2<FileRowMetadata, Try<SupplyDetail>>> window = Window.into(FixedWindows.of(windowDuration));
 
         val mainPC = rows
-            .apply("CSV row to DTO", csvRowToSupplyDetailsDto())
-            .apply("Declare window", window)
-            .apply("Combine DTOs into list", Combine.globally(new CombineRowsFn()).withoutDefaults());
+            .apply("CSV row to DTO", csvRowToSupplyDetailsDto());
+//            .apply("Declare window", window)
+//            .apply("Combine DTOs into list", Combine.globally(new CombineRowsFn()).withoutDefaults());
 
         val startSyncPC = mainPC
             .apply("Transform Sync Start DTO to JSON", dtoToJson("StartSync")).setName("StartSync");
@@ -78,9 +71,9 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
         return pc;
     }
 
-    MapElements<FileRowMetadata, Tuple2<FileRowMetadata, Try<SupplyDetail>>> csvRowToSupplyDetailsDto() {
+    MapElements<FileWithMeta, Tuple2<FileWithMeta, Try<List<SupplyDetail>>>> csvRowToSupplyDetailsDto() {
         return MapElements
-            .into(new TypeDescriptor<Tuple2<FileRowMetadata, Try<SupplyDetail>>>() {
+            .into(new TypeDescriptor<Tuple2<FileWithMeta, Try<List<SupplyDetail>>>>() {
             })
             .via(csvRow -> new Tuple2<>(csvRow, Try.of(() -> toSupplyDetailDto(csvRow))
                 .mapFailure(Case($(e -> !(e instanceof ProcessingException)),
@@ -88,15 +81,15 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
             );
     }
 
-    MapElements<Tuple2<List<FileRowMetadata>, Try<List<SupplyDetail>>>, Tuple2<List<FileRowMetadata>, Try<JsonNode>>> dtoToJson(String syncType) {
+    MapElements<Tuple2<FileWithMeta, Try<List<SupplyDetail>>>, Tuple2<FileWithMeta, Try<JsonNode>>> dtoToJson(String syncType) {
         return MapElements
-            .into(new TypeDescriptor<Tuple2<List<FileRowMetadata>, Try<JsonNode>>>() {
+            .into(new TypeDescriptor<Tuple2<FileWithMeta, Try<JsonNode>>>() {
             })
-            .via(tuple -> tuple
+            .via(file -> file
                 .map2(maybeDto -> maybeDto
                     .map(JsonUtils::serializeObject)
                     .map(JsonUtils::deserialize)
-                    .map(jsonNode -> toJsonWithAttributes(jsonNode, syncType, tuple._1))
+                    .map(jsonNode -> toJsonWithAttributes(jsonNode, syncType, file._1.getSourceName()))
                     .mapFailure(
                         Case($(e -> !(e instanceof ProcessingException)),
                             exc -> new ProcessingException(OBJECT_TO_JSON_CONVERSION_ERROR, exc))
@@ -105,27 +98,31 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
             );
     }
 
-    private SupplyDetail toSupplyDetailDto(FileRowMetadata data) {
-        val csvRow = data.getRecord();
+    private List<SupplyDetail> toSupplyDetailDto(FileWithMeta data) {
+        val res = new ArrayList<SupplyDetail>();
+        val csvRows = data.getRecords();
         val supplyDetails = new SupplyDetail();
         val supplyDefinition = new SupplyDefinition();
-        supplyDefinition.setItemId(csvRow.get("Itemcode"));
+        for (Map<String, String> row : csvRows) {
+            supplyDefinition.setItemId(row.get("Itemcode"));
 
-        val supplyType = new SupplyType();
-        supplyType.setSupplyTypeId("On Hand Available");
+            val supplyType = new SupplyType();
+            supplyType.setSupplyTypeId("On Hand Available");
 
-        val supplyData = new SupplyData();
-        supplyData.setQuantity(csvRow.get("Quantity"));
-        supplyData.setUom("U");
+            val supplyData = new SupplyData();
+            supplyData.setQuantity(row.get("Quantity"));
+            supplyData.setUom("U");
 
-        supplyDefinition.setSupplyType(supplyType);
-        supplyDefinition.setSupplyData(supplyData);
+            supplyDefinition.setSupplyType(supplyType);
+            supplyDefinition.setSupplyData(supplyData);
 
-        supplyDetails.setSupplyDefinition(supplyDefinition);
-        return supplyDetails;
+            supplyDetails.setSupplyDefinition(supplyDefinition);
+            res.add(supplyDetails);
+        }
+        return res;
     }
 
-    private JsonNode toJsonWithAttributes(JsonNode payload, String type, List<FileRowMetadata> fileMeta) {
+    private JsonNode toJsonWithAttributes(JsonNode payload, String type, String filename) {
         val attributes = new LinkedHashMap<String, String>(2);
         attributes.put("User", user);
         attributes.put("Organization", organization);
@@ -133,7 +130,6 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
         val message = new LinkedHashMap<String, Object>(2);
         message.put("attributes", attributes);
 
-        val filename = fileMeta.get(0).getSourceName();
         val fileWithoutExt = filename.split("\\.(?=[^\\.]+$)")[0];
         val splittedFile = fileWithoutExt.split("_");
         val locationId = splittedFile[splittedFile.length - 1];

@@ -21,9 +21,16 @@ public interface GcsToPubSubOptions extends BusinessInterfaceOptions, CsvOptions
 
     void setDurationSeconds(Long value);
 
-    @Validation.Required
     @Description("The error threshold in percentage ex: 10")
     Integer getErrorThreshold();
 
     void setErrorThreshold(Integer value);
+
+    @Validation.Required
+    @Description("The bucket where we need to move processed files")
+    String getProcessedBucket();
+
+    void setProcessedBucket(String value);
+
+
 }
