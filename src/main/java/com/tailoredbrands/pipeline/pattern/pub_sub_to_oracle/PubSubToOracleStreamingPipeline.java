@@ -4,11 +4,14 @@ import com.tailoredbrands.pipeline.options.PubSubToOracleOptions;
 import lombok.val;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.PipelineResult;
+import org.apache.beam.sdk.extensions.gcp.options.GcpOptions;
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO;
 import org.apache.beam.sdk.io.jdbc.JdbcIO;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.tailoredbrands.util.SecretUtils.resolveSecret;
 
 /**
  * This pipeline ingests incoming data from a Cloud Pub/Sub topic and
@@ -23,8 +26,14 @@ public class PubSubToOracleStreamingPipeline {
                 .fromArgs(args)
                 .withValidation()
                 .as(PubSubToOracleOptions.class);
-
+        resolveSecrets(options);
         run(options);
+    }
+
+    private static void resolveSecrets(PubSubToOracleOptions options) {
+        val project = options.as(GcpOptions.class).getProject();
+        options.setUser(resolveSecret(project, options.getUser()));
+        options.setPassword(resolveSecret(project, options.getPassword()));
     }
 
     public static PipelineResult run(PubSubToOracleOptions options) {

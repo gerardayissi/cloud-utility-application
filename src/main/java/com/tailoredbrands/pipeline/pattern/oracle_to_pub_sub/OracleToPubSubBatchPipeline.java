@@ -6,6 +6,7 @@ import lombok.val;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.PipelineResult;
 import org.apache.beam.sdk.coders.StringUtf8Coder;
+import org.apache.beam.sdk.extensions.gcp.options.GcpOptions;
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO;
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessage;
 import org.apache.beam.sdk.io.jdbc.JdbcIO;
@@ -16,6 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+
+import static com.tailoredbrands.util.SecretUtils.resolveSecret;
 
 /**
  * The {@code OracleToPubSubBatchPipeline} takes incoming data from
@@ -34,8 +37,15 @@ public class OracleToPubSubBatchPipeline {
         run(options);
     }
 
+    private static void resolveSecrets(OracleToPubSubOptions options) {
+        val project = options.as(GcpOptions.class).getProject();
+        options.setUser(resolveSecret(project, options.getUser()));
+        options.setPassword(resolveSecret(project, options.getPassword()));
+    }
+
     public static PipelineResult run(OracleToPubSubOptions options) {
         val pipeline = Pipeline.create(options);
+        resolveSecrets(options);
         pipeline
                 .apply("Read from Oracle", readFromOracle(options))
                 .apply("Convert to PubSub Message", toPubSubMessage())
