@@ -20,4 +20,4 @@ jmsPassword=${JMS_PASSWORD}--\
 jmsQueue=${JMS_QUEUE}--\
 jmsServerUrl=${JMS_SERVER}--\
 input=${TEMP_DIR}/Messages.txt--\
-jmsToPubsubPipelineType=${PROVIDER}
+jmsProvider=${PROVIDER}

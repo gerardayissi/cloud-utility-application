@@ -1,0 +1,82 @@
+{
+  "CapturedDate": "2019-06-06T15:15:00.000",
+  "CurrencyCode": "USD",
+  "CustomerEmail": "jsmith@gmail.com",
+  "CustomerFirstName": "Jack",
+  "CustomerId": "JS",
+  "CustomerLastName": "Smith",
+  "CustomerPhone": "4042207211",
+  "DocType": {
+    "DocTypeId": "CustomerOrder"
+  },
+  "DoNotReleaseBefore": "2019-06-06T15:15:00.000",
+  "ParentReservationRequestId": null,
+  "OrgId": "TMW",
+  "IsCancelled": false,
+  "IsConfirmed": true,
+  "IsOnHold": false,
+  "IsPostVoided": false,
+  "IsTaxExempt": false,
+  "OrderId": "akm020725",
+  "OrderActions": {
+    "IsAlreadyPriced": true,
+    "IsAlreadyCharged": true,
+    "IsAlreadyTaxed": true
+  },
+  "OrderSubtotal": 21.2,
+  "OrderTotal": 21.2,
+  "OrderType": {
+    "OrderTypeId": "MWD"
+  },
+  "Sellingchannel": {
+    "SellingChannelId": "Web"
+  },
+  "OrderTaxDetail": null,
+  "OrderLine": [
+    {
+      "OrderLineId": "1",
+      "DeliveryMethod": {
+        "DeliveryMethodId": "ShipToStore"
+      },
+      "ShipToLocationId": "1101",
+      "IsGiftCard": false,
+      "GiftCardValue": null,
+      "ItemId": "TMW205D60F21",
+      "RequestedDeliveryDate": "2023-10-14T15:15:00.000",
+      "Quantity": 1,
+      "UOM": "U",
+      "UnitPrice": 20,
+      "ShippingMethodId": "UGRD",
+      "OrderLineVASInstructions": [
+        {
+          "VasInstructions": "CS 1.25 inches",
+          "VasOptionId": "CS",
+          "VasTypeId": "CS"
+        }
+      ]
+    }
+  ],
+  "Payment": [
+    {
+      "PaymentMethod": [
+        {
+          "BillingAddress": {
+            "Address": {
+              "FirstName": "Jack",
+              "LastName": "Smith",
+              "Address1": "2300 Windy Ridge Pkwy SE",
+              "Address2": null,
+              "Address3": null,
+              "City": "Atlanta",
+              "State": "GA",
+              "PostalCode": "30339",
+              "Country": "US",
+              "Phone": "4042207211",
+              "Email": "jsmith@gmail.com"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

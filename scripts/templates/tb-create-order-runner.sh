@@ -1,0 +1,23 @@
+mvn -Pdataflow-runner compile exec:java \
+      -Dexec.mainClass=com.tailoredbrands.pipeline.pattern.jms_to_pub_sub.JmsToPubSubStreamingPipeline \
+      -Dexec.args="--project=tst1-integration-3ca6 \
+      --region=us-east1 \
+      --gcpTempLocation=gs://tst1-integration-3ca6-jms-pubsub-df-temp/temp/ \
+      --stagingLocation=gs://tst1-integration-3ca6-jms-pubsub-df-staging/staging/ \
+      --serviceAccount=project-service-account@tst1-integration-3ca6.iam.gserviceaccount.com \
+      --subnetwork=https://www.googleapis.com/compute/v1/projects/network-b2b9/regions/us-east1/subnetworks/np-integration4 \
+      --jmsProvider=websphere \
+      --jmsServerUrl=mqhatstsubcorp.tmw.com \
+      --jmsQueue=GOOGLE.CLOUD.PUBLISHER \
+      --channel=ESBCRS.LB.SVRCONN \
+      --port=2024 \
+      --outputPubsubTopic=projects/tst1-integration-3ca6/topics/create_order_ecom \
+      --deadletterPubsubTopic=projects/tst1-integration-3ca6/topics/deadletter \
+      --businessInterface=create_order \
+      --patternFullName=create_order_ecom \
+      --tbUser=admin@tbi.com \
+      --autoscalingAlgorithm=THROUGHPUT_BASED \
+      --workerMachineType=n1-standard-2 \
+      --enableStreamingEngine=true \
+      --maxNumWorkers=10 \
+      --runner=DataflowRunner"

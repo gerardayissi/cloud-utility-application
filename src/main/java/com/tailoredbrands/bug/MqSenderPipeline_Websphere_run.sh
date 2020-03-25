@@ -26,7 +26,7 @@ mvn -Pdataflow-runner compile exec:java \
 --workerMachineType=n1-standard-1 \
 --autoscalingAlgorithm=THROUGHPUT_BASED \
 --subnetwork=https://www.googleapis.com/compute/v1/projects/network-b2b9/regions/us-east1/subnetworks/np-integration4 \
---jmsToPubsubPipelineType=${PROVIDER} \
+--jmsProvider=${PROVIDER} \
 --jmsUser=${JMS_USER}\
 --jmsPassword=${JMS_PASSWORD}\
 --jmsQueue=${JMS_QUEUE}\

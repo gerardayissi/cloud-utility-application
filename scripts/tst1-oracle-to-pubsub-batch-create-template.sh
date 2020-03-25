@@ -7,8 +7,8 @@ export BUSINESS_INTERFACE=poc
 
 mvn clean package
 
-java -cp target/dev-1.0-SNAPSHOT-shaded.jar \
-OracleToPubSubBatchPipeline \
+java -cp target/cloud-integrations-0.1-SNAPSHOT-shaded.jar \
+com.tailoredbrands.pipeline.pattern.oracle_to_pub_sub.OracleToPubSubBatchPipeline \
       --project=${PROJECT_ID} \
       --region=${REGION} \
       --serviceAccount=project-service-account@tst1-integration-3ca6.iam.gserviceaccount.com \

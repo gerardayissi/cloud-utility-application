@@ -59,7 +59,7 @@ public class JmsToPubSubMultiTopicsPipeline {
     public static PipelineResult run(JmsToPubSubOptions options) throws JMSException {
         Pipeline pipeline = Pipeline.create(options);
 
-        JmsToPubSubCounter counter = new JmsToPubSubCounter(options.getJmsToPubsubPipelineType());
+        JmsToPubSubCounter counter = new JmsToPubSubCounter(options.getBusinessInterface());
 
         TupleTag<PubsubMessage> successTag = new TupleTag<PubsubMessage>() {};
 
@@ -69,11 +69,11 @@ public class JmsToPubSubMultiTopicsPipeline {
                 .apply("Read Messages from JMS",
                         JmsIO.read()
                                 .withConnectionFactory(
-                                        JmsConnectionFactoryBuilder.build(options, options.getJmsToPubsubPipelineType())
+                                        JmsConnectionFactoryBuilder.build(options, options.getBusinessInterface())
                                 ).withQueue(options.getJmsQueue()))
                 .apply("JMS records counter", increment(counter.jmsRecordsRead))
                 .apply("Extract JMS message payload", extractJmsPayload())
-                .apply("Process Message", JmsToPubSubMultiTopicsProcessorFactory.forType(options.getJmsToPubsubPipelineType()));
+                .apply("Process Message", JmsToPubSubMultiTopicsProcessorFactory.forType(options.getBusinessInterface()));
 
         // TODO refactored later and needed proper testing
         List<PCollection> pCollections = List.ofAll(pcl.getAll());

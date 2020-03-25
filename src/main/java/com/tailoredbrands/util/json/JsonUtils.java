@@ -93,6 +93,10 @@ public class JsonUtils {
         return mapper().convertValue(value, JsonNode.class);
     }
 
+    public static <T> T fromJsonNode(JsonNode node, Class<T> clazz) {
+        return mapper().convertValue(node, clazz);
+    }
+
     public static byte[] serializeToBytes(Object value) {
         try {
             return mapper().writeValueAsBytes(value);

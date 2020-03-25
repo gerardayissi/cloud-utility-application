@@ -23,6 +23,11 @@ public interface JmsOptions extends PipelineOptions {
     void setJmsPassword(String value);
 
     @Validation.Required
+    @Default.String("tibco")
+    String getJmsProvider();
+    void setJmsProvider(String value);
+
+    @Validation.Required
     @Default.String("POS.TEST.Q")
     String getJmsQueue();
 
