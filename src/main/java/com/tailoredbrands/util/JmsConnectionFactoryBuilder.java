@@ -38,7 +38,7 @@ public class JmsConnectionFactoryBuilder {
             //            case WEBSPHERE:
             //                return buildWebsphereJmsConnectionFactory(options, appName);
             default:
-                throw new IllegalStateException("Unexpected JSM queue type: " + options.getJmsToPubsubPipelineType());
+                throw new IllegalStateException("Unexpected JSM queue type: " + options.getBusinessInterface());
         }
     }
 
