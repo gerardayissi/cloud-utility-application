@@ -33,14 +33,12 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
 
     private String user;
     private String organization;
-//    private Integer THRESHOLD;
 
     public StoreInventoryFullFeedProcessor(PipelineOptions options) {
         if (options instanceof GcsToPubSubOptions) {
             val gcsToPubSubOptions = (GcsToPubSubOptions) options;
             user = gcsToPubSubOptions.getUser();
             organization = gcsToPubSubOptions.getOrganization();
-//            THRESHOLD = gcsToPubSubOptions.getErrorThreshold();
         } else {
             throw new IllegalArgumentException("Invalid Store Inventory Full Feed options: " + options.getClass().getSimpleName());
         }
@@ -58,13 +56,13 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
 //            .apply("Combine DTOs into list", Combine.globally(new CombineRowsFn()).withoutDefaults());
 
         val startSyncPC = mainPC
-            .apply("Transform Sync Start DTO to JSON", dtoToJson("StartSync")).setName("StartSync");
+            .apply("Transform StartSync DTO to JSON", dtoToJson("StartSync")).setName("StartSync");
 
         val syncDetail = mainPC
-            .apply("Transform Sync Detail DTO to JSON", dtoToJson("SyncDetail")).setName("syncDetail");
+            .apply("Transform SyncDetail DTO to JSON", dtoToJson("SyncDetail")).setName("SyncDetail");
 
         val endSync = mainPC
-            .apply("Transform Sync End DTO to JSON", dtoToJson("EndSync")).setName("endSync");
+            .apply("Transform EndSync DTO to JSON", dtoToJson("EndSync")).setName("EndSync");
 
         val pc = PCollectionList.of(startSyncPC).and(syncDetail).and(endSync);
 
@@ -85,11 +83,11 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
         return MapElements
             .into(new TypeDescriptor<Tuple2<FileWithMeta, Try<JsonNode>>>() {
             })
-            .via(file -> file
+            .via(tuple2 -> tuple2
                 .map2(maybeDto -> maybeDto
                     .map(JsonUtils::serializeObject)
                     .map(JsonUtils::deserialize)
-                    .map(jsonNode -> toJsonWithAttributes(jsonNode, syncType, file._1.getSourceName()))
+                    .map(jsonNode -> toJsonWithAttributes(jsonNode, syncType, tuple2._1.getSourceName()))
                     .mapFailure(
                         Case($(e -> !(e instanceof ProcessingException)),
                             exc -> new ProcessingException(OBJECT_TO_JSON_CONVERSION_ERROR, exc))
@@ -103,7 +101,7 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
         val csvRows = data.getRecords();
         val supplyDetails = new SupplyDetail();
         val supplyDefinition = new SupplyDefinition();
-        for (Map<String, String> row : csvRows) {
+        csvRows.forEach(row -> {
             supplyDefinition.setItemId(row.get("Itemcode"));
 
             val supplyType = new SupplyType();
@@ -118,7 +116,7 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
 
             supplyDetails.setSupplyDefinition(supplyDefinition);
             res.add(supplyDetails);
-        }
+            });
         return res;
     }
 
@@ -131,9 +129,8 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
         message.put("attributes", attributes);
 
         val fileWithoutExt = filename.split("\\.(?=[^\\.]+$)")[0];
-        val splittedFile = fileWithoutExt.split("_");
-        val locationId = splittedFile[splittedFile.length - 1];
-
+        val fileSplitted = fileWithoutExt.split("_");
+        val locationId = fileSplitted[fileSplitted.length - 1];
         val transactionNumber = locationId + getDatetime("yyyymmddhhmss");
 
         val syncDTO = toSupplyEventDto(type, payload, transactionNumber, locationId);
@@ -151,8 +148,8 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
     }
 
     private JsonNode getSyncSupplyEventJson(String type, SyncSupplyEvent dto, JsonNode payload) {
-        val jsonMain = JsonUtils.toJsonNode(dto);
-        ObjectNode objectNode = (ObjectNode) jsonMain;
+        val json = JsonUtils.toJsonNode(dto);
+        ObjectNode objectNode = (ObjectNode) json;
         if (type.equals("SyncDetail")) {
             objectNode.set("SupplyDetails", payload);
         } else {

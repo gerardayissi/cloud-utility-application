@@ -1,7 +1,8 @@
 package com.tailoredbrands.util;
 
+import io.vavr.collection.List;
+
 import java.io.Serializable;
-import java.util.List;
 import java.util.Map;
 
 public class FileWithMeta implements Serializable {

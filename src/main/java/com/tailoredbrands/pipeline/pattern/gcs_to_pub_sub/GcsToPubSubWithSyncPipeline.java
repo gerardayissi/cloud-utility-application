@@ -85,13 +85,12 @@ public class GcsToPubSubWithSyncPipeline {
 
                     processed
                         .get(processedTag)
-                        .apply("Map to bucket and raw message",
+                        .apply("Map to processed file",
                             MapElements
                                 .into(new TypeDescriptor<KV<String, String>>() {
                                 })
                                 .via(tuple2 -> KV.of(tuple2._1.getSourceName(), tuple2._1.getFileContent())))
                         .apply("Window", Window.into(FixedWindows.of(Duration.standardSeconds(5L))))
-
                         .apply("Write File to processed bucket",
                             FileIO.<String, KV<String, String>>writeDynamic()
                                 .by(KV::getKey)
