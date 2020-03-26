@@ -21,6 +21,7 @@ import org.apache.beam.sdk.values.TypeDescriptor;
 import org.apache.commons.csv.CSVRecord;
 import org.joda.time.Duration;
 
+import java.lang.reflect.Array;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -33,7 +34,7 @@ import static io.vavr.API.Case;
 import static java.util.Collections.singletonList;
 
 public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<FileWithMeta>,
-    PCollectionList<Tuple2<FileWithMeta, Try<JsonNode>>>> {
+    PCollection<Tuple2<FileWithMeta, List<Try<JsonNode>>>>> {
 
     private String user;
     private String organization;
@@ -49,7 +50,7 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
     }
 
     @Override
-    public PCollectionList<Tuple2<FileWithMeta, Try<JsonNode>>> expand(PCollection<FileWithMeta> rows) {
+    public PCollection<Tuple2<FileWithMeta, List<Try<JsonNode>>>> expand(PCollection<FileWithMeta> rows) {
 
         Duration windowDuration = Duration.standardSeconds(3);
         Window<Tuple2<FileWithMeta, Try<SupplyDetail>>> window = Window.into(FixedWindows.of(windowDuration));
@@ -71,53 +72,20 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
             .apply("Declare window", window)
             .apply("Combine DTOs", Combine.globally(new CombineRowsFn()).withoutDefaults());
 
-        val mainPC = rows
-            .apply(ParDo.of(
-                new DoFn<FileWithMeta, Tuple2<FileWithMeta, KV<Integer, CSVRecord>>>() {
-                    @ProcessElement
-                    public void processElement(@Element FileWithMeta fileWithMeta, DoFn.OutputReceiver<Tuple2<FileWithMeta, KV<Integer, CSVRecord>>> receiver) {
-                        val csvRows = fileWithMeta.getRecords();
-                        for (KV<Integer, CSVRecord> row : csvRows) {
-                            receiver.output(new Tuple2<>(fileWithMeta, row));
-                        }
-                    }
-                }
-                )
-            )
-            .apply(csvRowToSupplyDetailsDto2())
-            .apply(ParDo.of(
-                new DoFn<Tuple2<FileWithMeta, Try<SupplyDetail>>, Void>() {
-                    @ProcessElement
-                    public void processElement(@Element Tuple2<FileWithMeta, Try<SupplyDetail>> data) {
-                        System.out.println(data);
-                    }
-                }
-            ));
-
-
-        val startSyncPC = mainPC2
-            .apply("Transform StartSync DTO to JSON", dtoToJson("StartSync")).setName("StartSync");
+//        val startSyncPC = mainPC2
+//            .apply("Transform StartSync DTO to JSON", dtoToJson("StartSync")).setName("StartSync");
 
         val syncDetail = mainPC2
-            .apply("Transform SyncDetail DTO to JSON", dtoToJson("SyncDetail")).setName("SyncDetail");
+            .apply("Transform SyncDetail DTO to JSON", dtoToJson2("SyncDetail")).setName("SyncDetail")
+            .apply(finalJson("SyncDetail"));
 
-        val endSync = mainPC2
-            .apply("Transform EndSync DTO to JSON", dtoToJson("EndSync")).setName("EndSync");
+//        val endSync = mainPC2
+//            .apply("Transform EndSync DTO to JSON", dtoToJson("EndSync")).setName("EndSync");
 
-        val pc = PCollectionList.of(startSyncPC).and(syncDetail).and(endSync);
+//        val pc = PCollectionList.of(startSyncPC).and(syncDetail).and(endSync);
 
-        return pc;
+        return syncDetail;
     }
-
-//    MapElements<FileWithMeta, Tuple2<FileWithMeta, Try<List<SupplyDetail>>>> csvRowToSupplyDetailsDto() {
-//        return MapElements
-//            .into(new TypeDescriptor<Tuple2<FileWithMeta, Try<List<SupplyDetail>>>>() {
-//            })
-//            .via(csvRow -> new Tuple2<>(csvRow, Try.of(() -> toSupplyDetailDtoOLD(csvRow))
-//                .mapFailure(Case($(e -> !(e instanceof ProcessingException)),
-//                    exc -> new ProcessingException(CSV_ROW_TO_OBJECT_CONVERSION_ERROR, exc))))
-//            );
-//    }
 
     MapElements<Tuple2<FileWithMeta, KV<Integer, CSVRecord>>, Tuple2<FileWithMeta, Try<SupplyDetail>>> csvRowToSupplyDetailsDto2() {
         return MapElements
@@ -130,21 +98,50 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
             );
     }
 
-    MapElements<Tuple2<FileWithMeta, Try<List<SupplyDetail>>>, Tuple2<FileWithMeta, Try<JsonNode>>> dtoToJson(String syncType) {
+    MapElements<Tuple2<FileWithMeta, List<Try<SupplyDetail>>>, Tuple2<FileWithMeta, List<Try<JsonNode>>>> dtoToJson2(String syncType) {
         return MapElements
-            .into(new TypeDescriptor<Tuple2<FileWithMeta, Try<JsonNode>>>() {
+            .into(new TypeDescriptor<Tuple2<FileWithMeta, List<Try<JsonNode>>>>() {
             })
             .via(tuple2 -> tuple2
-                .map2(maybeDto -> maybeDto
-                    .map(JsonUtils::serializeObject)
-                    .map(JsonUtils::deserialize)
-                    .map(jsonNode -> toJsonWithAttributes(jsonNode, syncType, tuple2._1.getSourceName()))
-                    .mapFailure(
-                        Case($(e -> !(e instanceof ProcessingException)),
-                            exc -> new ProcessingException(OBJECT_TO_JSON_CONVERSION_ERROR, exc))
-                    )
-                )
-            );
+                    .map2(maybeDto -> {
+                        val res = new ArrayList<Try<JsonNode>>();
+                        maybeDto.forEach(dto -> {
+                            val item = dto.map(JsonUtils::toJsonNode)
+                                .mapFailure(
+                                    Case($(e -> !(e instanceof ProcessingException)),
+                                        exc -> new ProcessingException(OBJECT_TO_JSON_CONVERSION_ERROR, exc))
+                                );
+                            res.add(item);
+                        });
+                        return res;
+                    }));
+    }
+
+    MapElements<Tuple2<FileWithMeta, List<Try<JsonNode>>>, Tuple2<FileWithMeta, List<Try<JsonNode>>>> finalJson(String syncType) {
+        return MapElements
+            .into(new TypeDescriptor<Tuple2<FileWithMeta, List<Try<JsonNode>>>>() {
+            })
+            .via(tuple2 -> tuple2
+                .map2(jsonNodes -> {
+                    val res = new ArrayList<Try<JsonNode>>();
+                    val supplyDetails = new ArrayList<JsonNode>();
+                    jsonNodes.forEach(jsonNodeTry -> {
+                        if (jsonNodeTry.isFailure()) {
+                            res.add(jsonNodeTry);
+                        }
+
+                        jsonNodeTry.map(jsonNode -> supplyDetails.add(jsonNode))
+                            .mapFailure(
+                                Case($(e -> !(e instanceof ProcessingException)),
+                                    exc -> new ProcessingException(OBJECT_TO_JSON_CONVERSION_ERROR, exc))
+                            );
+                    });
+                    val payload = JsonUtils.serializeObject(supplyDetails);
+                    val supplyDetailsPayload = JsonUtils.deserialize(payload);
+                    val finalJson = Try.of(() -> toJsonWithAttributes(supplyDetailsPayload, syncType, tuple2._1.getSourceName()));
+                    res.add(finalJson);
+                    return res;
+                }));
     }
 
     private SupplyDetail toSupplyDetailDto(Map<String, String> csvRow) {
@@ -164,15 +161,6 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
 
         supplyDetails.setSupplyDefinition(supplyDefinition);
         return supplyDetails;
-    }
-
-    private List<SupplyDetail> toSupplyDetailDtoOLD(FileWithMeta data) {
-        val res = new ArrayList<SupplyDetail>();
-        val csvRows = data.getRecords();
-        val supplyDetails = new SupplyDetail();
-        val supplyDefinition = new SupplyDefinition();
-        res.add(supplyDetails);
-        return res;
     }
 
     private JsonNode toJsonWithAttributes(JsonNode payload, String type, String filename) {

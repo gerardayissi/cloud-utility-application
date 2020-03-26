@@ -23,7 +23,7 @@ public class StoreInventoryFullFeedAccum implements Serializable {
     private final List<String> fileContent = new ArrayList<>();
     private final List<KV<Integer, CSVRecord>> records = new ArrayList<>();
 
-    private final List<SupplyDetail> supplyDetails = new ArrayList<>();
+    private final List<Try<SupplyDetail>> supplyDetails = new ArrayList<>();
 
     public void add(Tuple2<FileWithMeta, Try<SupplyDetail>> data) {
         val fileWithMeta = data._1;
@@ -31,13 +31,13 @@ public class StoreInventoryFullFeedAccum implements Serializable {
         fileContent.add(fileWithMeta.getFileContent());
         records.addAll(fileWithMeta.getRecords());
 
-        data.map1(row -> row)
+        val itemOrFailure = data
             .map2(maybeDto -> maybeDto
-                .map(supplyDetail -> supplyDetails.add(supplyDetail))
                 .mapFailure(
                     Case($(e -> !(e instanceof ProcessingException)),
                         exc -> new ProcessingException(COMBINE_OBJECTS_TO_LIST_CONVERSION_ERROR, exc)))
-            );
+            )._2;
+        supplyDetails.add(itemOrFailure);
     }
 
     public void extend(StoreInventoryFullFeedAccum obj) {
@@ -47,9 +47,8 @@ public class StoreInventoryFullFeedAccum implements Serializable {
         supplyDetails.addAll(obj.supplyDetails);
     }
 
-    public Tuple2<FileWithMeta, Try<List<SupplyDetail>>> get() {
+    public Tuple2<FileWithMeta, List<Try<SupplyDetail>>> get() {
         return new Tuple2(
-            FileWithMeta.of(filename.get(0), fileContent.get(0), records),
-            Try.of(() -> supplyDetails));
+            FileWithMeta.of(filename.get(0), fileContent.get(0), records), supplyDetails);
     }
 }

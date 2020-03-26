@@ -6,12 +6,15 @@ import com.tailoredbrands.pipeline.function.CsvFileWithMetaFn;
 import com.tailoredbrands.pipeline.options.GcsToPubSubOptions;
 import com.tailoredbrands.util.FileWithMeta;
 import com.tailoredbrands.util.Peek;
+import com.tailoredbrands.util.coder.Tuple2Coder;
 import com.tailoredbrands.util.json.JsonUtils;
 import io.vavr.Tuple2;
 import io.vavr.control.Try;
 import lombok.val;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.PipelineResult;
+import org.apache.beam.sdk.coders.ListCoder;
+import org.apache.beam.sdk.coders.SerializableCoder;
 import org.apache.beam.sdk.coders.StringUtf8Coder;
 import org.apache.beam.sdk.io.FileIO;
 import org.apache.beam.sdk.io.TextIO;
@@ -28,7 +31,9 @@ import org.joda.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import static com.tailoredbrands.pipeline.error.ErrorType.*;
 import static com.tailoredbrands.util.Peek.increment;
@@ -53,10 +58,10 @@ public class GcsToPubSubWithSyncPipeline {
         val counter = new GcsToPubSubCounter(options.getBusinessInterface());
         val processedTag = new TupleTag<Tuple2<FileWithMeta, Try<PubsubMessage>>>() {
         };
-        val failureTag = new TupleTag<Tuple2<FileWithMeta, Try<PubsubMessage>>>() {
+        val failureTag = new TupleTag<Tuple2<FileWithMeta, List<Try<PubsubMessage>>>>() {
         };
 
-        PCollectionList<Tuple2<FileWithMeta, Try<JsonNode>>> pcl = pipeline
+        PCollection<Tuple2<FileWithMeta, List<Try<JsonNode>>>> pc = pipeline
 
             .apply("Match Files on GCS", FileIO.match()
                 .filepattern(options.getInputFilePattern())
@@ -67,83 +72,93 @@ public class GcsToPubSubWithSyncPipeline {
             .apply("Count Rows", increment(counter.csvRowsRead))
             .apply("Process Business Interface", GCsToPubSubWithSyncProcessorFactory.from(options));
 
-        io.vavr.collection.List.ofAll(pcl.getAll())
-            .forEach(pc -> {
-                    val processed = pc
-                        .apply("Convert Json To PubSubMessage", toPubSubMessage())
-                        .apply("Success | Failure", split(processedTag, failureTag));
+        val processed = pc
+            .apply("Convert Json To PubSubMessage", toPubSubMessage())
+            .apply("Success | Failure", split(processedTag, failureTag));
 
-                    processed
-                        .get(processedTag)
-                        .apply("Map to PubSubMessage",
-                            MapElements
-                                .into(new TypeDescriptor<PubsubMessage>() {
-                                })
-                                .via(tuple2 -> tuple2._2.get()))
-                        .setCoder(PubsubMessageWithAttributesCoder.of())
-                        .apply("Count and log messages to PubSub", countAndLogOutbound(counter.pubsubMessagesWritten))
-                        .apply("Write Messages to Pubsub", PubsubIO.writeMessages().to(options.getOutputPubsubTopic()));
+        processed
+            .get(processedTag)
+            .apply("Map to PubSubMessage",
+                MapElements
+                    .into(new TypeDescriptor<PubsubMessage>() {
+                    })
+                    .via(tuple2 -> tuple2._2.get()))
+            .setCoder(PubsubMessageWithAttributesCoder.of())
+            .apply("Count and log messages to PubSub", countAndLogOutbound(counter.pubsubMessagesWritten))
+            .apply("Write Messages to Pubsub", PubsubIO.writeMessages().to(options.getOutputPubsubTopic()));
 
-                    processed
-                        .get(processedTag)
-                        .apply("Map to processed file",
-                            MapElements
-                                .into(new TypeDescriptor<KV<String, String>>() {
-                                })
-                                .via(tuple2 -> KV.of(tuple2._1.getSourceName(), tuple2._1.getFileContent())))
-                        .apply("Window", Window.into(FixedWindows.of(Duration.standardSeconds(5L))))
-                        .apply("Write File to processed bucket",
-                            FileIO.<String, KV<String, String>>writeDynamic()
-                                .by(KV::getKey)
-                                .withDestinationCoder(StringUtf8Coder.of())
-                                .via(Contextful.fn(KV::getValue), TextIO.sink())
-                                .to(options.getProcessedBucket())
-                                .withNaming(key -> FileIO.Write.defaultNaming(key.replaceAll(".csv", ""), ".csv"))
-                                .withNumShards(1)
-                        );
-
-                    processed
-                        .get(failureTag)
-                        .apply("Log & Count Failures", logFailures(counter))
-                        .apply(processFailure());
-                }
+        processed
+            .get(processedTag)
+            .apply("Map to processed file",
+                MapElements
+                    .into(new TypeDescriptor<KV<String, String>>() {
+                    })
+                    .via(tuple2 -> KV.of(tuple2._1.getSourceName(), tuple2._1.getFileContent())))
+            .apply("Window", Window.into(FixedWindows.of(Duration.standardSeconds(5L))))
+            .apply("Write File to processed bucket",
+                FileIO.<String, KV<String, String>>writeDynamic()
+                    .by(KV::getKey)
+                    .withDestinationCoder(StringUtf8Coder.of())
+                    .via(Contextful.fn(KV::getValue), TextIO.sink())
+                    .to(options.getProcessedBucket())
+                    .withNaming(key -> FileIO.Write.defaultNaming(key.replaceAll(".csv", ""), ".csv"))
+                    .withNumShards(1)
             );
+
+        processed
+            .get(failureTag)
+            .apply("Log & Count Failures", logFailures(counter));
+//            .apply(processFailure());
 
         return pipeline.run();
     }
 
     @SuppressWarnings("unchecked")
-    static MapElements<Tuple2<FileWithMeta, Try<JsonNode>>, Tuple2<FileWithMeta, Try<PubsubMessage>>> toPubSubMessage() {
+    static MapElements<Tuple2<FileWithMeta, List<Try<JsonNode>>>, Tuple2<FileWithMeta, List<Try<PubsubMessage>>>> toPubSubMessage() {
         return MapElements
-            .into(new TypeDescriptor<Tuple2<FileWithMeta, Try<PubsubMessage>>>() {
+            .into(new TypeDescriptor<Tuple2<FileWithMeta, List<Try<PubsubMessage>>>>() {
             })
-            .via(tuple -> tuple.map2(
-                maybeJson -> maybeJson.map(jsonNode -> new PubsubMessage(JsonUtils.serializeToBytes(jsonNode), new HashMap<>()))
-                    .mapFailure(Case($(e -> !(e instanceof ProcessingException)),
-                        exc -> new ProcessingException(JSON_TO_PUBSUB_MESSAGE_CONVERSION_ERROR, exc))))
-            );
+            .via(tuple -> tuple
+                .map2(list -> {
+                        val res = new ArrayList<Try<PubsubMessage>>();
+                        list.forEach(jsonNodeTry -> {
+                            val pubSubOrElse = jsonNodeTry.map(jsonNode -> new PubsubMessage(JsonUtils.serializeToBytes(jsonNode), new HashMap<>()))
+                                .mapFailure(Case($(e -> !(e instanceof ProcessingException)),
+                                    exc -> new ProcessingException(JSON_TO_PUBSUB_MESSAGE_CONVERSION_ERROR, exc)));
+                            res.add(pubSubOrElse);
+                        });
+                        return res;
+                    }
+                ));
     }
 
-    static ParDo.MultiOutput<Tuple2<FileWithMeta, Try<PubsubMessage>>, Tuple2<FileWithMeta, Try<PubsubMessage>>> split(
+    static ParDo.MultiOutput<Tuple2<FileWithMeta, List<Try<PubsubMessage>>>, Tuple2<FileWithMeta, Try<PubsubMessage>>> split(
         TupleTag<Tuple2<FileWithMeta, Try<PubsubMessage>>> success,
-        TupleTag<Tuple2<FileWithMeta, Try<PubsubMessage>>> failure) {
+        TupleTag<Tuple2<FileWithMeta, List<Try<PubsubMessage>>>> failure) {
 
-        return ParDo.of(new DoFn<Tuple2<FileWithMeta, Try<PubsubMessage>>, Tuple2<FileWithMeta, Try<PubsubMessage>>>() {
+        return ParDo.of(new DoFn<Tuple2<FileWithMeta, List<Try<PubsubMessage>>>, Tuple2<FileWithMeta, Try<PubsubMessage>>>() {
             @ProcessElement
             public void processElement(ProcessContext context) {
                 val element = context.element();
-                if (element._2.isSuccess()) {
-                    context.output(new Tuple2(element._1, element._2));
-                } else {
-                    context.output(failure, element);
-                }
+                element.map2(list -> {
+                    val res = new ArrayList<>();
+                    list.forEach(pubsubMessages -> {
+                        if (pubsubMessages.isSuccess()) {
+                            context.output(new Tuple2(element._1, Try(() -> pubsubMessages)));
+                        }
+                        else {
+                            context.output(failure, element);
+                        }
+                    });
+                    return null;
+                });
             }
         }).withOutputTags(success, TupleTagList.of(failure));
     }
 
-    private static Peek<Tuple2<FileWithMeta, Try<PubsubMessage>>> logFailures(GcsToPubSubCounter counter) {
+    private static Peek<Tuple2<FileWithMeta, List<Try<PubsubMessage>>>> logFailures(GcsToPubSubCounter counter) {
         return Peek.each(failure -> {
-            ProcessingException err = (ProcessingException) failure._2.failed().get();
+            ProcessingException err = (ProcessingException) failure._2.get(0).failed().get();
             val detailedCounter = Match(err.getType()).of(
                 Case($(CSV_ROW_TO_OBJECT_CONVERSION_ERROR), counter.csvRowToObjectErrors),
                 Case($(OBJECT_TO_JSON_CONVERSION_ERROR), counter.objectToJsonErrors),
@@ -156,16 +171,16 @@ public class GcsToPubSubWithSyncPipeline {
         });
     }
 
-    static MapElements<Tuple2<FileWithMeta, Try<PubsubMessage>>, Tuple2<FileWithMeta, Try<PubsubMessage>>> processFailure() {
-        return MapElements
-            .into(new TypeDescriptor<Tuple2<FileWithMeta, Try<PubsubMessage>>>() {
-            })
-            .via(tuple -> tuple.map2(
-                maybeJson -> maybeJson.map(jsonNode -> new PubsubMessage(JsonUtils.serializeToBytes(jsonNode), new HashMap<>()))
-                    .mapFailure(Case($(e -> !(e instanceof ProcessingException)),
-                        exc -> new ProcessingException(JSON_TO_PUBSUB_MESSAGE_CONVERSION_ERROR, exc))))
-            );
-    }
+//    static MapElements<Tuple2<FileWithMeta, Try<PubsubMessage>>, Tuple2<FileWithMeta, Try<PubsubMessage>>> processFailure() {
+//        return MapElements
+//            .into(new TypeDescriptor<Tuple2<FileWithMeta, Try<PubsubMessage>>>() {
+//            })
+//            .via(tuple -> tuple.map2(
+//                maybeJson -> maybeJson.map(jsonNode -> new PubsubMessage(JsonUtils.serializeToBytes(jsonNode), new HashMap<>()))
+//                    .mapFailure(Case($(e -> !(e instanceof ProcessingException)),
+//                        exc -> new ProcessingException(JSON_TO_PUBSUB_MESSAGE_CONVERSION_ERROR, exc))))
+//            );
+//    }
 
     private static Peek<PubsubMessage> countAndLogOutbound(Counter counter) {
         return Peek.each(pubsubMessage -> {
