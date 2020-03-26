@@ -6,6 +6,7 @@ import lombok.val;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.PipelineResult;
 import org.apache.beam.sdk.coders.StringUtf8Coder;
+import org.apache.beam.sdk.extensions.gcp.options.GcpOptions;
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO;
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessage;
 import org.apache.beam.sdk.io.jdbc.JdbcIO;
@@ -16,6 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+
+import static com.tailoredbrands.util.SecretUtils.resolveSecret;
 
 /**
  * The {@code OracleToPubSubBatchPipeline} takes incoming data from
@@ -45,11 +48,12 @@ public class OracleToPubSubBatchPipeline {
     }
 
     private static JdbcIO.Read<String> readFromOracle(OracleToPubSubOptions options) {
+        val project = options.as(GcpOptions.class).getProject();
         return JdbcIO.<String>read()
                 .withDataSourceConfiguration(JdbcIO.DataSourceConfiguration.create(
                         options.getDriver(), options.getUrl())
-                        .withUsername(options.getUser())
-                        .withPassword(options.getPassword()))
+                        .withUsername(resolveSecret(project, options.getUser()))
+                        .withPassword(resolveSecret(project, options.getPassword())))
                 .withQuery("select username as schema_name\n" +
                         "from sys.all_users\n" +
                         "order by username")

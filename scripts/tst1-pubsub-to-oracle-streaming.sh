@@ -17,6 +17,6 @@ mvn compile exec:java \
       --inputPubsubSubscription=projects/${PROJECT_ID}/subscriptions/${BUSINESS_INTERFACE}-test-view \
       --driver=oracle.jdbc.OracleDriver \
       --url=jdbc:oracle:thin:@//dom12tstdb01.tmw.com:2494/domtest \
-      --user=esbuser \
-      --password=load4esb \
+      --user=secret_oracle_user \
+      --password=secret_oracle_password \
       --runner=DataflowRunner"
