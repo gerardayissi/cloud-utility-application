@@ -10,11 +10,14 @@ import com.tailoredbrands.pipeline.options.JmsToPubSubOptions;
 import com.tailoredbrands.util.json.JsonUtils;
 import io.vavr.Tuple2;
 import io.vavr.control.Try;
+import lombok.val;
 import org.apache.beam.sdk.io.jms.JmsRecord;
 import org.apache.beam.sdk.transforms.MapElements;
 import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.TypeDescriptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Base64;
 
@@ -22,6 +25,8 @@ import static com.tailoredbrands.pipeline.error.ErrorType.*;
 import static io.vavr.API.*;
 
 public class CreateOrderProcessor extends PTransform<PCollection<Tuple2<JmsRecord, Try<String>>>, PCollection<Tuple2<JmsRecord, Try<JsonNode>>>> {
+
+  private static final Logger LOG = LoggerFactory.getLogger(CreateOrderProcessor.class);
 
   @Override
   public PCollection<Tuple2<JmsRecord, Try<JsonNode>>> expand(PCollection<Tuple2<JmsRecord, Try<String>>> input) {
@@ -51,13 +56,15 @@ public class CreateOrderProcessor extends PTransform<PCollection<Tuple2<JmsRecor
         .via(tuple -> tuple.map2(
             input ->
                 input.map(inp -> {
-                  Message message = new Message(
+                  val message = new Message(
                       new Attributes(
                           tbUser,
                           inp.getOrgId()
                       ),
-                      Base64.getEncoder().encodeToString(JsonUtils.serializeToBytes(inp))
+                      new String(JsonUtils.serializeToBytes(inp))
                   );
+                  LOG.info(new String(JsonUtils.serializeToBytes(message)));
+                  message.setData(Base64.getEncoder().encodeToString(JsonUtils.serializeToBytes(inp)));
                   return new CreateOrderOutput(List(message).asJava());
                 })
                     .mapFailure(
