@@ -4,11 +4,14 @@ import com.tailoredbrands.pipeline.options.PubSubToOracleOptions;
 import lombok.val;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.PipelineResult;
+import org.apache.beam.sdk.extensions.gcp.options.GcpOptions;
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO;
 import org.apache.beam.sdk.io.jdbc.JdbcIO;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.tailoredbrands.util.SecretUtils.resolveSecret;
 
 /**
  * This pipeline ingests incoming data from a Cloud Pub/Sub topic and
@@ -23,7 +26,6 @@ public class PubSubToOracleStreamingPipeline {
                 .fromArgs(args)
                 .withValidation()
                 .as(PubSubToOracleOptions.class);
-
         run(options);
     }
 
@@ -37,11 +39,12 @@ public class PubSubToOracleStreamingPipeline {
     }
 
     private static JdbcIO.Write<String> writeToOracle(PubSubToOracleOptions options) {
+        val project = options.as(GcpOptions.class).getProject();
         return JdbcIO.<String>write()
                 .withDataSourceConfiguration(JdbcIO.DataSourceConfiguration.create(
                         options.getDriver(), options.getUrl())
-                        .withUsername(options.getUser())
-                        .withPassword(options.getPassword()))
+                        .withUsername(resolveSecret(project, options.getUser()))
+                        .withPassword(resolveSecret(project, options.getPassword())))
                 .withStatement("upsert into test_schema.test_table values(?)")
                 .withPreparedStatementSetter((JdbcIO.PreparedStatementSetter<String>)
                         (event, query) -> query.setString(1, event));
