@@ -1,16 +1,18 @@
 package com.tailoredbrands.util;
 
-import io.vavr.collection.List;
+
+import org.apache.beam.sdk.values.KV;
+import org.apache.commons.csv.CSVRecord;
 
 import java.io.Serializable;
-import java.util.Map;
+import java.util.List;
 
 public class FileWithMeta implements Serializable {
     private final String sourceName;
-    private final List<Map<String, String>> records;
+    private final List<KV<Integer, CSVRecord>> records;
     private final String content;
 
-    FileWithMeta(String sourceName, String content, List<Map<String, String>> records) {
+    FileWithMeta(String sourceName, String content, List<KV<Integer, CSVRecord>> records) {
         this.sourceName = sourceName;
         this.content = content;
         this.records = records;
@@ -20,7 +22,7 @@ public class FileWithMeta implements Serializable {
         return sourceName;
     }
 
-    public List<Map<String, String>> getRecords() {
+    public List<KV<Integer, CSVRecord>> getRecords() {
         return records;
     }
 
@@ -33,7 +35,7 @@ public class FileWithMeta implements Serializable {
         return "<" + sourceName + ":" + records + ">";
     }
 
-    public static FileWithMeta of(String filename, String content, List<Map<String, String>> records) {
+    public static FileWithMeta of(String filename, String content, List<KV<Integer, CSVRecord>> records) {
         return new FileWithMeta(filename, content, records);
     }
 }

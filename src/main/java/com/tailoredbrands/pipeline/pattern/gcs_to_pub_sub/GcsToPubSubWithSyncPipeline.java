@@ -18,6 +18,7 @@ import org.apache.beam.sdk.io.TextIO;
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO;
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessage;
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessageWithAttributesCoder;
+import org.apache.beam.sdk.metrics.Counter;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.transforms.*;
 import org.apache.beam.sdk.transforms.windowing.FixedWindows;
@@ -80,7 +81,7 @@ public class GcsToPubSubWithSyncPipeline {
                                 })
                                 .via(tuple2 -> tuple2._2.get()))
                         .setCoder(PubsubMessageWithAttributesCoder.of())
-                        .apply("Count Messages to PubSub", increment(counter.pubsubMessagesWritten))
+                        .apply("Count and log messages to PubSub", countAndLogOutbound(counter.pubsubMessagesWritten))
                         .apply("Write Messages to Pubsub", PubsubIO.writeMessages().to(options.getOutputPubsubTopic()));
 
                     processed
@@ -103,7 +104,8 @@ public class GcsToPubSubWithSyncPipeline {
 
                     processed
                         .get(failureTag)
-                        .apply("Log & Count Failures", logAndCountFailures(counter));
+                        .apply("Log & Count Failures", logFailures(counter))
+                        .apply(processFailure());
                 }
             );
 
@@ -139,7 +141,7 @@ public class GcsToPubSubWithSyncPipeline {
         }).withOutputTags(success, TupleTagList.of(failure));
     }
 
-    private static Peek<Tuple2<FileWithMeta, Try<PubsubMessage>>> logAndCountFailures(GcsToPubSubCounter counter) {
+    private static Peek<Tuple2<FileWithMeta, Try<PubsubMessage>>> logFailures(GcsToPubSubCounter counter) {
         return Peek.each(failure -> {
             ProcessingException err = (ProcessingException) failure._2.failed().get();
             val detailedCounter = Match(err.getType()).of(
@@ -151,6 +153,24 @@ public class GcsToPubSubWithSyncPipeline {
             detailedCounter.inc();
             counter.totalErrors.inc();
             LOG.error(format("Failed to process Row: %s", failure._1), err);
+        });
+    }
+
+    static MapElements<Tuple2<FileWithMeta, Try<PubsubMessage>>, Tuple2<FileWithMeta, Try<PubsubMessage>>> processFailure() {
+        return MapElements
+            .into(new TypeDescriptor<Tuple2<FileWithMeta, Try<PubsubMessage>>>() {
+            })
+            .via(tuple -> tuple.map2(
+                maybeJson -> maybeJson.map(jsonNode -> new PubsubMessage(JsonUtils.serializeToBytes(jsonNode), new HashMap<>()))
+                    .mapFailure(Case($(e -> !(e instanceof ProcessingException)),
+                        exc -> new ProcessingException(JSON_TO_PUBSUB_MESSAGE_CONVERSION_ERROR, exc))))
+            );
+    }
+
+    private static Peek<PubsubMessage> countAndLogOutbound(Counter counter) {
+        return Peek.each(pubsubMessage -> {
+            counter.inc();
+            LOG.info(new String(pubsubMessage.getPayload()));
         });
     }
 }

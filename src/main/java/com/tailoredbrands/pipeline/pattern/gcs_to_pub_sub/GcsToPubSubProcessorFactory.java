@@ -2,7 +2,6 @@ package com.tailoredbrands.pipeline.pattern.gcs_to_pub_sub;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.tailoredbrands.business_interface.item_full_feed.ItemFullFeedProcessor;
-import com.tailoredbrands.business_interface.store_inventory_full_feed.StoreInventoryFullFeedProcessor;
 import com.tailoredbrands.pipeline.options.BusinessInterfaceOptions;
 import io.vavr.API;
 import io.vavr.Tuple2;
@@ -13,7 +12,7 @@ import org.apache.beam.sdk.values.PCollection;
 
 import java.util.Map;
 
-import static com.tailoredbrands.business_interface.BusinessInterface.*;
+import static com.tailoredbrands.business_interface.BusinessInterface.ITEM_FULL_FEED;
 import static io.vavr.API.Match;
 
 public class GcsToPubSubProcessorFactory {

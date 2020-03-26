@@ -12,7 +12,7 @@ import org.apache.beam.sdk.transforms.Combine;
 
 import java.util.List;
 
-public class CombineRowsFn extends Combine.CombineFn<Tuple2<FileWithMeta, Try<SupplyDetail>>, StoreInventoryFullFeedAccum, Tuple2<List<FileWithMeta>, Try<List<SupplyDetail>>>> {
+public class CombineRowsFn extends Combine.CombineFn<Tuple2<FileWithMeta, Try<SupplyDetail>>, StoreInventoryFullFeedAccum, Tuple2<FileWithMeta, Try<List<SupplyDetail>>>> {
 
     @Override
     public StoreInventoryFullFeedAccum createAccumulator() {
@@ -35,13 +35,13 @@ public class CombineRowsFn extends Combine.CombineFn<Tuple2<FileWithMeta, Try<Su
     }
 
     @Override
-    public Tuple2<List<FileWithMeta>, Try<List<SupplyDetail>>> extractOutput(StoreInventoryFullFeedAccum accumulator) {
+    public Tuple2<FileWithMeta, Try<List<SupplyDetail>>> extractOutput(StoreInventoryFullFeedAccum accumulator) {
         return accumulator.get();
     }
 
     @Override
-    public Tuple2Coder<List<FileWithMeta>, Try<List<SupplyDetail>>> getDefaultOutputCoder(CoderRegistry registry, Coder<Tuple2<FileWithMeta, Try<SupplyDetail>>> inputCoder) {
-        return Tuple2Coder.of(ListCoder.of(SerializableCoder.of(FileWithMeta.class)),
+    public Tuple2Coder<FileWithMeta, Try<List<SupplyDetail>>> getDefaultOutputCoder(CoderRegistry registry, Coder<Tuple2<FileWithMeta, Try<SupplyDetail>>> inputCoder) {
+        return Tuple2Coder.of(SerializableCoder.of(FileWithMeta.class),
             TryCoder.of(ListCoder.of(SerializableCoder.of(SupplyDetail.class))));
     }
 }

@@ -3,6 +3,7 @@ package com.tailoredbrands.pipeline.error;
 public class ProcessingException extends RuntimeException {
 
     private final ErrorType type;
+    public Integer rowIdx;
 
     public ProcessingException(ErrorType type) {
         super();
@@ -22,6 +23,12 @@ public class ProcessingException extends RuntimeException {
     public ProcessingException(ErrorType type, Throwable cause) {
         super(cause);
         this.type = type;
+    }
+
+    public ProcessingException(ErrorType type, Throwable cause, Integer rowIdx) {
+        super(cause);
+        this.type = type;
+        this.rowIdx = rowIdx;
     }
 
     public ErrorType getType() {

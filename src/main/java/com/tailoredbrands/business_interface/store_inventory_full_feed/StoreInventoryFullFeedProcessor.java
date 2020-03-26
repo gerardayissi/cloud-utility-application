@@ -11,11 +11,15 @@ import io.vavr.Tuple2;
 import io.vavr.control.Try;
 import lombok.val;
 import org.apache.beam.sdk.options.PipelineOptions;
-import org.apache.beam.sdk.transforms.MapElements;
-import org.apache.beam.sdk.transforms.PTransform;
+import org.apache.beam.sdk.transforms.*;
+import org.apache.beam.sdk.transforms.windowing.FixedWindows;
+import org.apache.beam.sdk.transforms.windowing.Window;
+import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.PCollectionList;
 import org.apache.beam.sdk.values.TypeDescriptor;
+import org.apache.commons.csv.CSVRecord;
+import org.joda.time.Duration;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -47,21 +51,57 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
     @Override
     public PCollectionList<Tuple2<FileWithMeta, Try<JsonNode>>> expand(PCollection<FileWithMeta> rows) {
 
-//        Duration windowDuration = Duration.standardSeconds(3);
-//        Window<Tuple2<FileRowMetadata, Try<SupplyDetail>>> window = Window.into(FixedWindows.of(windowDuration));
+        Duration windowDuration = Duration.standardSeconds(3);
+        Window<Tuple2<FileWithMeta, Try<SupplyDetail>>> window = Window.into(FixedWindows.of(windowDuration));
+
+        val mainPC2 = rows
+            .apply(ParDo.of(
+                new DoFn<FileWithMeta, Tuple2<FileWithMeta, KV<Integer, CSVRecord>>>() {
+                    @ProcessElement
+                    public void processElement(@Element FileWithMeta fileWithMeta, DoFn.OutputReceiver<Tuple2<FileWithMeta, KV<Integer, CSVRecord>>> receiver) {
+                        val csvRows = fileWithMeta.getRecords();
+                        for (KV<Integer, CSVRecord> row : csvRows) {
+                            receiver.output(new Tuple2<>(fileWithMeta, row));
+                        }
+                    }
+                }
+                )
+            )
+            .apply("CSV row to DTO", csvRowToSupplyDetailsDto2())
+            .apply("Declare window", window)
+            .apply("Combine DTOs", Combine.globally(new CombineRowsFn()).withoutDefaults());
 
         val mainPC = rows
-            .apply("CSV row to DTO", csvRowToSupplyDetailsDto());
-//            .apply("Declare window", window)
-//            .apply("Combine DTOs into list", Combine.globally(new CombineRowsFn()).withoutDefaults());
+            .apply(ParDo.of(
+                new DoFn<FileWithMeta, Tuple2<FileWithMeta, KV<Integer, CSVRecord>>>() {
+                    @ProcessElement
+                    public void processElement(@Element FileWithMeta fileWithMeta, DoFn.OutputReceiver<Tuple2<FileWithMeta, KV<Integer, CSVRecord>>> receiver) {
+                        val csvRows = fileWithMeta.getRecords();
+                        for (KV<Integer, CSVRecord> row : csvRows) {
+                            receiver.output(new Tuple2<>(fileWithMeta, row));
+                        }
+                    }
+                }
+                )
+            )
+            .apply(csvRowToSupplyDetailsDto2())
+            .apply(ParDo.of(
+                new DoFn<Tuple2<FileWithMeta, Try<SupplyDetail>>, Void>() {
+                    @ProcessElement
+                    public void processElement(@Element Tuple2<FileWithMeta, Try<SupplyDetail>> data) {
+                        System.out.println(data);
+                    }
+                }
+            ));
 
-        val startSyncPC = mainPC
+
+        val startSyncPC = mainPC2
             .apply("Transform StartSync DTO to JSON", dtoToJson("StartSync")).setName("StartSync");
 
-        val syncDetail = mainPC
+        val syncDetail = mainPC2
             .apply("Transform SyncDetail DTO to JSON", dtoToJson("SyncDetail")).setName("SyncDetail");
 
-        val endSync = mainPC
+        val endSync = mainPC2
             .apply("Transform EndSync DTO to JSON", dtoToJson("EndSync")).setName("EndSync");
 
         val pc = PCollectionList.of(startSyncPC).and(syncDetail).and(endSync);
@@ -69,13 +109,24 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
         return pc;
     }
 
-    MapElements<FileWithMeta, Tuple2<FileWithMeta, Try<List<SupplyDetail>>>> csvRowToSupplyDetailsDto() {
+//    MapElements<FileWithMeta, Tuple2<FileWithMeta, Try<List<SupplyDetail>>>> csvRowToSupplyDetailsDto() {
+//        return MapElements
+//            .into(new TypeDescriptor<Tuple2<FileWithMeta, Try<List<SupplyDetail>>>>() {
+//            })
+//            .via(csvRow -> new Tuple2<>(csvRow, Try.of(() -> toSupplyDetailDtoOLD(csvRow))
+//                .mapFailure(Case($(e -> !(e instanceof ProcessingException)),
+//                    exc -> new ProcessingException(CSV_ROW_TO_OBJECT_CONVERSION_ERROR, exc))))
+//            );
+//    }
+
+    MapElements<Tuple2<FileWithMeta, KV<Integer, CSVRecord>>, Tuple2<FileWithMeta, Try<SupplyDetail>>> csvRowToSupplyDetailsDto2() {
         return MapElements
-            .into(new TypeDescriptor<Tuple2<FileWithMeta, Try<List<SupplyDetail>>>>() {
+            .into(new TypeDescriptor<Tuple2<FileWithMeta, Try<SupplyDetail>>>() {
             })
-            .via(csvRow -> new Tuple2<>(csvRow, Try.of(() -> toSupplyDetailDto(csvRow))
-                .mapFailure(Case($(e -> !(e instanceof ProcessingException)),
-                    exc -> new ProcessingException(CSV_ROW_TO_OBJECT_CONVERSION_ERROR, exc))))
+            .via(tuple2 -> tuple2
+                .map2(kv -> Try.of(() -> toSupplyDetailDto(kv.getValue().toMap()))
+                    .mapFailure(Case($(e -> !(e instanceof ProcessingException)),
+                        exc -> new ProcessingException(CSV_ROW_TO_OBJECT_CONVERSION_ERROR, exc, kv.getKey()))))
             );
     }
 
@@ -96,27 +147,31 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
             );
     }
 
-    private List<SupplyDetail> toSupplyDetailDto(FileWithMeta data) {
+    private SupplyDetail toSupplyDetailDto(Map<String, String> csvRow) {
+        val supplyDetails = new SupplyDetail();
+        val supplyDefinition = new SupplyDefinition();
+        supplyDefinition.setItemId(csvRow.get("Itemcode"));
+
+        val supplyType = new SupplyType();
+        supplyType.setSupplyTypeId("On Hand Available");
+
+        val supplyData = new SupplyData();
+        supplyData.setQuantity(Integer.parseInt(csvRow.get("Quantity")));
+        supplyData.setUom("U");
+
+        supplyDefinition.setSupplyType(supplyType);
+        supplyDefinition.setSupplyData(supplyData);
+
+        supplyDetails.setSupplyDefinition(supplyDefinition);
+        return supplyDetails;
+    }
+
+    private List<SupplyDetail> toSupplyDetailDtoOLD(FileWithMeta data) {
         val res = new ArrayList<SupplyDetail>();
         val csvRows = data.getRecords();
         val supplyDetails = new SupplyDetail();
         val supplyDefinition = new SupplyDefinition();
-        csvRows.forEach(row -> {
-            supplyDefinition.setItemId(row.get("Itemcode"));
-
-            val supplyType = new SupplyType();
-            supplyType.setSupplyTypeId("On Hand Available");
-
-            val supplyData = new SupplyData();
-            supplyData.setQuantity(row.get("Quantity"));
-            supplyData.setUom("U");
-
-            supplyDefinition.setSupplyType(supplyType);
-            supplyDefinition.setSupplyData(supplyData);
-
-            supplyDetails.setSupplyDefinition(supplyDefinition);
-            res.add(supplyDetails);
-            });
+        res.add(supplyDetails);
         return res;
     }
 
