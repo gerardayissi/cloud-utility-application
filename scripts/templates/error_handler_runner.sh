@@ -11,5 +11,7 @@ mvn -Pdataflow-runner compile exec:java \
       --autoscalingAlgorithm=THROUGHPUT_BASED \
       --workerMachineType=n1-standard-2 \
       --enableStreamingEngine=true \
+      --numWorkers=1 \
       --maxNumWorkers=5 \
+      --jobName=ErrorHandler \
       --runner=DataflowRunner"
