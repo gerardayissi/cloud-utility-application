@@ -22,4 +22,9 @@ public interface PubSubOptions extends PipelineOptions {
     ValueProvider<String> getOutputTopics();
 
     void setOutputTopics(ValueProvider<String> value);
+
+    @Description("Deadletter pubsub topic")
+    ValueProvider<String> getDeadletterPubsubTopic();
+
+    void setDeadletterPubsubTopic(ValueProvider<String> value);
 }

@@ -43,7 +43,8 @@
     <dependency>
       <groupId>org.apache.beam</groupId>
       <artifactId>beam-sdks-java-io-jms</artifactId>
-      <version>${beam.version}</version>
+      <!--            Temporary fix for JMS read bug-->
+      <version>2.20.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.beam</groupId>
@@ -242,7 +243,8 @@
             </goals>
             <configuration>
               <sources>
-                <source>target/generated-sources</source>
+                <source>target/generated-sources/json</source>
+                <source>target/generated-sources/xml</source>
               </sources>
             </configuration>
           </execution>
