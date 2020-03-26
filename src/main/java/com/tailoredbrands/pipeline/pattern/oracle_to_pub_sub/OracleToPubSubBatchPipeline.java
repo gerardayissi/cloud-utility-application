@@ -37,15 +37,8 @@ public class OracleToPubSubBatchPipeline {
         run(options);
     }
 
-    private static void resolveSecrets(OracleToPubSubOptions options) {
-        val project = options.as(GcpOptions.class).getProject();
-        options.setUser(resolveSecret(project, options.getUser()));
-        options.setPassword(resolveSecret(project, options.getPassword()));
-    }
-
     public static PipelineResult run(OracleToPubSubOptions options) {
         val pipeline = Pipeline.create(options);
-        resolveSecrets(options);
         pipeline
                 .apply("Read from Oracle", readFromOracle(options))
                 .apply("Convert to PubSub Message", toPubSubMessage())
@@ -55,11 +48,12 @@ public class OracleToPubSubBatchPipeline {
     }
 
     private static JdbcIO.Read<String> readFromOracle(OracleToPubSubOptions options) {
+        val project = options.as(GcpOptions.class).getProject();
         return JdbcIO.<String>read()
                 .withDataSourceConfiguration(JdbcIO.DataSourceConfiguration.create(
                         options.getDriver(), options.getUrl())
-                        .withUsername(options.getUser())
-                        .withPassword(options.getPassword()))
+                        .withUsername(resolveSecret(project, options.getUser()))
+                        .withPassword(resolveSecret(project, options.getPassword())))
                 .withQuery("select username as schema_name\n" +
                         "from sys.all_users\n" +
                         "order by username")

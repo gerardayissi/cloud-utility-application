@@ -26,14 +26,7 @@ public class PubSubToOracleStreamingPipeline {
                 .fromArgs(args)
                 .withValidation()
                 .as(PubSubToOracleOptions.class);
-        resolveSecrets(options);
         run(options);
-    }
-
-    private static void resolveSecrets(PubSubToOracleOptions options) {
-        val project = options.as(GcpOptions.class).getProject();
-        options.setUser(resolveSecret(project, options.getUser()));
-        options.setPassword(resolveSecret(project, options.getPassword()));
     }
 
     public static PipelineResult run(PubSubToOracleOptions options) {
@@ -46,11 +39,12 @@ public class PubSubToOracleStreamingPipeline {
     }
 
     private static JdbcIO.Write<String> writeToOracle(PubSubToOracleOptions options) {
+        val project = options.as(GcpOptions.class).getProject();
         return JdbcIO.<String>write()
                 .withDataSourceConfiguration(JdbcIO.DataSourceConfiguration.create(
                         options.getDriver(), options.getUrl())
-                        .withUsername(options.getUser())
-                        .withPassword(options.getPassword()))
+                        .withUsername(resolveSecret(project, options.getUser()))
+                        .withPassword(resolveSecret(project, options.getPassword())))
                 .withStatement("upsert into test_schema.test_table values(?)")
                 .withPreparedStatementSetter((JdbcIO.PreparedStatementSetter<String>)
                         (event, query) -> query.setString(1, event));
