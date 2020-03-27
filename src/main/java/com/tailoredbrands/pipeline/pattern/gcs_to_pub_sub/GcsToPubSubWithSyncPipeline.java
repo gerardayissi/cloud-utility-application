@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.tailoredbrands.pipeline.error.ErrorType.*;
 import static com.tailoredbrands.util.Peek.increment;
@@ -56,12 +57,12 @@ public class GcsToPubSubWithSyncPipeline {
 
         val pipeline = Pipeline.create(options);
         val counter = new GcsToPubSubCounter(options.getBusinessInterface());
-        val processedTag = new TupleTag<Tuple2<FileWithMeta, Try<PubsubMessage>>>() {
+        val processedTag = new TupleTag<Tuple2<FileWithMeta, List<Try<PubsubMessage>>>>() {
         };
         val failureTag = new TupleTag<Tuple2<FileWithMeta, List<Try<PubsubMessage>>>>() {
         };
 
-        PCollection<Tuple2<FileWithMeta, List<Try<JsonNode>>>> pc = pipeline
+        PCollectionList<Tuple2<FileWithMeta, List<Try<JsonNode>>>> pcs = pipeline
 
             .apply("Match Files on GCS", FileIO.match()
                 .filepattern(options.getInputFilePattern())
@@ -72,42 +73,69 @@ public class GcsToPubSubWithSyncPipeline {
             .apply("Count Rows", increment(counter.csvRowsRead))
             .apply("Process Business Interface", GCsToPubSubWithSyncProcessorFactory.from(options));
 
-        val processed = pc
-            .apply("Convert Json To PubSubMessage", toPubSubMessage())
-            .apply("Success | Failure", split(processedTag, failureTag));
+        io.vavr.collection.List.ofAll(pcs.getAll()).forEach(pc -> {
+//                if (pc.equals("StartSync")) {
+                    val processed = pc
+                        .apply("Convert Json To PubSubMessage", toPubSubMessage())
+                        .apply("Success | Failure", split(processedTag, failureTag));
 
-        processed
-            .get(processedTag)
-            .apply("Map to PubSubMessage",
-                MapElements
-                    .into(new TypeDescriptor<PubsubMessage>() {
-                    })
-                    .via(tuple2 -> tuple2._2.get()))
-            .setCoder(PubsubMessageWithAttributesCoder.of())
-            .apply("Count and log messages to PubSub", countAndLogOutbound(counter.pubsubMessagesWritten))
-            .apply("Write Messages to Pubsub", PubsubIO.writeMessages().to(options.getOutputPubsubTopic()));
+                    processed
+                        .get(processedTag)
+                        .apply("Map to PubSubMessage",
+                            MapElements
+                                .into(new TypeDescriptor<PubsubMessage>() {
+                                })
+                                .via(tuple2 -> tuple2._2.stream().map(pubsubMessages -> pubsubMessages.get()).findFirst().get())
+                        )
+                        .setCoder(PubsubMessageWithAttributesCoder.of())
+                        .apply("Count and log messages to PubSub", countAndLogOutbound(counter.pubsubMessagesWritten))
+                        .apply("Write Messages to Pubsub", PubsubIO.writeMessages().to(options.getOutputPubsubTopic()));
 
-        processed
-            .get(processedTag)
-            .apply("Map to processed file",
-                MapElements
-                    .into(new TypeDescriptor<KV<String, String>>() {
-                    })
-                    .via(tuple2 -> KV.of(tuple2._1.getSourceName(), tuple2._1.getFileContent())))
-            .apply("Window", Window.into(FixedWindows.of(Duration.standardSeconds(5L))))
-            .apply("Write File to processed bucket",
-                FileIO.<String, KV<String, String>>writeDynamic()
-                    .by(KV::getKey)
-                    .withDestinationCoder(StringUtf8Coder.of())
-                    .via(Contextful.fn(KV::getValue), TextIO.sink())
-                    .to(options.getProcessedBucket())
-                    .withNaming(key -> FileIO.Write.defaultNaming(key.replaceAll(".csv", ""), ".csv"))
-                    .withNumShards(1)
-            );
+                    processed
+                        .get(failureTag)
+                        .apply("Log & Count Failures", logFailures(counter));
+                }
+//            }
 
-        processed
-            .get(failureTag)
-            .apply("Log & Count Failures", logFailures(counter));
+        );
+
+//        val processed = pc.get(0).getName()
+//            .apply("Convert Json To PubSubMessage", toPubSubMessage())
+//            .apply("Success | Failure", split(processedTag, failureTag));
+//
+//        processed
+//            .get(processedTag)
+//            .apply("Map to PubSubMessage",
+//                MapElements
+//                    .into(new TypeDescriptor<PubsubMessage>() {
+//                    })
+//                    .via(tuple2 -> tuple2._2.stream().map(pubsubMessages -> pubsubMessages.get()).findFirst().get())
+//            )
+//            .setCoder(PubsubMessageWithAttributesCoder.of())
+//            .apply("Count and log messages to PubSub", countAndLogOutbound(counter.pubsubMessagesWritten))
+//            .apply("Write Messages to Pubsub", PubsubIO.writeMessages().to(options.getOutputPubsubTopic()));
+//
+//        processed
+//            .get(processedTag)
+//            .apply("Map to processed file",
+//                MapElements
+//                    .into(new TypeDescriptor<KV<String, String>>() {
+//                    })
+//                    .via(tuple2 -> KV.of(tuple2._1.getSourceName(), tuple2._1.getFileContent())))
+//            .apply("Window", Window.into(FixedWindows.of(Duration.standardSeconds(5L))))
+//            .apply("Write File to processed bucket",
+//                FileIO.<String, KV<String, String>>writeDynamic()
+//                    .by(KV::getKey)
+//                    .withDestinationCoder(StringUtf8Coder.of())
+//                    .via(Contextful.fn(KV::getValue), TextIO.sink())
+//                    .to(options.getProcessedBucket())
+//                    .withNaming(key -> FileIO.Write.defaultNaming(key.replaceAll(".csv", ""), ".csv"))
+//                    .withNumShards(1)
+//            );
+//
+//        processed
+//            .get(failureTag)
+//            .apply("Log & Count Failures", logFailures(counter));
 //            .apply(processFailure());
 
         return pipeline.run();
@@ -132,11 +160,11 @@ public class GcsToPubSubWithSyncPipeline {
                 ));
     }
 
-    static ParDo.MultiOutput<Tuple2<FileWithMeta, List<Try<PubsubMessage>>>, Tuple2<FileWithMeta, Try<PubsubMessage>>> split(
-        TupleTag<Tuple2<FileWithMeta, Try<PubsubMessage>>> success,
+    static ParDo.MultiOutput<Tuple2<FileWithMeta, List<Try<PubsubMessage>>>, Tuple2<FileWithMeta, List<Try<PubsubMessage>>>> split(
+        TupleTag<Tuple2<FileWithMeta, List<Try<PubsubMessage>>>> success,
         TupleTag<Tuple2<FileWithMeta, List<Try<PubsubMessage>>>> failure) {
 
-        return ParDo.of(new DoFn<Tuple2<FileWithMeta, List<Try<PubsubMessage>>>, Tuple2<FileWithMeta, Try<PubsubMessage>>>() {
+        return ParDo.of(new DoFn<Tuple2<FileWithMeta, List<Try<PubsubMessage>>>, Tuple2<FileWithMeta, List<Try<PubsubMessage>>>>() {
             @ProcessElement
             public void processElement(ProcessContext context) {
                 val element = context.element();
