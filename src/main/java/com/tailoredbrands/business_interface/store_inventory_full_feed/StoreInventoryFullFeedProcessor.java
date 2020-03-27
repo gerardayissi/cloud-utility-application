@@ -52,7 +52,7 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
     @Override
     public PCollectionList<Tuple2<FileWithMeta, List<Try<JsonNode>>>> expand(PCollection<FileWithMeta> rows) {
 
-        Duration windowDuration = Duration.standardSeconds(5L);
+        Duration windowDuration = Duration.standardSeconds(30L);
         Window<Tuple2<FileWithMeta, Try<SupplyDetail>>> window = Window.into(FixedWindows.of(windowDuration));
 
         val mainPC2 = rows
@@ -150,7 +150,7 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
                         res.add(finalJson);
 
                     } else {
-                        val batches = Lists.partition(supplyDetails, 5);
+                        val batches = Lists.partition(supplyDetails,10);
 
                         for (List<JsonNode> json : batches) {
                             val payload = JsonUtils.serializeObject(json);
