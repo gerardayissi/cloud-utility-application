@@ -11,11 +11,6 @@ public interface GcsOptions extends PipelineOptions {
 
     void setInputFilePattern(String value);
 
-//    @Description("The file to read records from (e.g. gs://bucket/file-location.csv)")
-//    String getGCSFilePath();
-//
-//    void setGCSFilePath(String value);
-
     @Description("The file to read records from (e.g. gs://bucket/file-location.csv)")
     String getErrorGCSFilePath();
 

@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import com.tailoredbrands.generated.json.store_inventory_full_feed.*;
 import com.tailoredbrands.pipeline.error.ProcessingException;
 import com.tailoredbrands.pipeline.options.GcsToPubSubOptions;
+import com.tailoredbrands.pipeline.pattern.gcs_to_pub_sub.GcsToPubSubCounter;
 import com.tailoredbrands.util.FileWithMeta;
 import com.tailoredbrands.util.json.JsonUtils;
 import io.vavr.Tuple2;
@@ -29,6 +30,7 @@ import java.util.*;
 
 import static com.tailoredbrands.pipeline.error.ErrorType.CSV_ROW_TO_OBJECT_CONVERSION_ERROR;
 import static com.tailoredbrands.pipeline.error.ErrorType.OBJECT_TO_JSON_CONVERSION_ERROR;
+import static com.tailoredbrands.util.Peek.increment;
 import static io.vavr.API.$;
 import static io.vavr.API.Case;
 import static java.util.Collections.singletonList;
@@ -38,10 +40,12 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
 
     private String user;
     private String organization;
+    private GcsToPubSubCounter counter;
 
     public StoreInventoryFullFeedProcessor(PipelineOptions options) {
         if (options instanceof GcsToPubSubOptions) {
             val gcsToPubSubOptions = (GcsToPubSubOptions) options;
+            counter = new GcsToPubSubCounter(gcsToPubSubOptions.getBusinessInterface());
             user = gcsToPubSubOptions.getUser();
             organization = gcsToPubSubOptions.getOrganization();
         } else {
@@ -56,7 +60,8 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
         Window<Tuple2<FileWithMeta, Try<SupplyDetail>>> window = Window.into(FixedWindows.of(windowDuration));
 
         val mainPC2 = rows
-            .apply(ParDo.of(
+            .apply("Read all file records",
+                ParDo.of(
                 new DoFn<FileWithMeta, Tuple2<FileWithMeta, KV<Integer, CSVRecord>>>() {
                     @ProcessElement
                     public void processElement(@Element FileWithMeta fileWithMeta, DoFn.OutputReceiver<Tuple2<FileWithMeta, KV<Integer, CSVRecord>>> receiver) {
@@ -68,24 +73,24 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
                 }
                 )
             )
+            .apply("Count rows in files", increment(counter.csvRowsRead))
             .apply("CSV row to DTO", csvRowToSupplyDetailsDto())
             .apply("Declare window", window)
             .apply("Combine DTOs", Combine.globally(new CombineRowsFn()).withoutDefaults());
 
         val startSyncPC = mainPC2
             .apply("Transform StartSync DTO to JSON", dtoToJson())
-            .apply("Getting StartSync Json to Push", toFinalJson("StartSync"))
+            .apply("StartSync Json to Push", toFinalJson("StartSync"))
             .setName("StartSync");
-        ;
 
         val syncDetail = mainPC2
             .apply("Transform SyncDetail DTO to JSON", dtoToJson())
-            .apply("Getting SyncDetail Json to Push", toFinalJson("SyncDetail"))
+            .apply("SyncDetail Json to Push", toFinalJson("SyncDetail"))
             .setName("SyncDetail");
 
         val endSync = mainPC2
             .apply("Transform EndSync DTO to JSON", dtoToJson())
-            .apply("Getting EndSync Json to Push", toFinalJson("EndSync"))
+            .apply("EndSync Json to Push", toFinalJson("EndSync"))
             .setName("EndSync");
 
         val pc = PCollectionList.of(startSyncPC).and(syncDetail).and(endSync);
@@ -172,7 +177,7 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
         supplyType.setSupplyTypeId("On Hand Available");
 
         val supplyData = new SupplyData();
-        supplyData.setQuantity(Integer.parseInt(csvRow.get("Quantity")));
+        supplyData.setQuantity(csvRow.get("Quantity"));
         supplyData.setUom("U");
 
         supplyDefinition.setSupplyType(supplyType);
