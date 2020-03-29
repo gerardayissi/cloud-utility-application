@@ -1,5 +1,6 @@
 package com.tailoredbrands.business_interface.item_full_feed;
 
+import com.google.auth.Credentials;
 import com.tailoredbrands.generated.json.item_full_feed.CodeTypeId;
 import com.tailoredbrands.generated.json.item_full_feed.Extended;
 import com.tailoredbrands.generated.json.item_full_feed.HandlingAttributes;
@@ -19,6 +20,9 @@ import org.apache.beam.sdk.PipelineRunner;
 import org.apache.beam.sdk.coders.MapCoder;
 import org.apache.beam.sdk.coders.SerializableCoder;
 import org.apache.beam.sdk.coders.StringUtf8Coder;
+import org.apache.beam.sdk.extensions.gcp.auth.CredentialFactory;
+import org.apache.beam.sdk.extensions.gcp.storage.PathValidator;
+import org.apache.beam.sdk.extensions.gcp.util.GcsUtil;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.options.ValueProvider;
 import org.apache.beam.sdk.testing.PAssert;
@@ -28,9 +32,11 @@ import org.apache.beam.sdk.transforms.display.DisplayData;
 import org.junit.Rule;
 import org.junit.Test;
 
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 import static com.tailoredbrands.testutil.Matchers.MapContainsAll.mapContainsAll;
 import static com.tailoredbrands.testutil.Matchers.map;
@@ -199,6 +205,189 @@ public class ItemFullFeedProcessorTest implements Serializable {
 
     private PipelineOptions getOptions() {
         return new GcsToPubSubOptions() {
+            @Override
+            public String getAppName() {
+                return null;
+            }
+
+            @Override
+            public void setAppName(String value) {
+
+            }
+
+            @Override
+            public GoogleApiTracer getGoogleApiTrace() {
+                return null;
+            }
+
+            @Override
+            public void setGoogleApiTrace(GoogleApiTracer commands) {
+
+            }
+
+            @Override
+            public String getProject() {
+                return null;
+            }
+
+            @Override
+            public void setProject(String value) {
+
+            }
+
+            @Override
+            public String getZone() {
+                return null;
+            }
+
+            @Override
+            public void setZone(String value) {
+
+            }
+
+            @Override
+            public String getWorkerRegion() {
+                return null;
+            }
+
+            @Override
+            public void setWorkerRegion(String workerRegion) {
+
+            }
+
+            @Override
+            public String getWorkerZone() {
+                return null;
+            }
+
+            @Override
+            public void setWorkerZone(String workerZone) {
+
+            }
+
+            @Override
+            public Class<? extends CredentialFactory> getCredentialFactoryClass() {
+                return null;
+            }
+
+            @Override
+            public void setCredentialFactoryClass(Class<? extends CredentialFactory> credentialFactoryClass) {
+
+            }
+
+            @Override
+            public Credentials getGcpCredential() {
+                return null;
+            }
+
+            @Override
+            public void setGcpCredential(Credentials value) {
+
+            }
+
+            @Override
+            public boolean isEnableStreamingEngine() {
+                return false;
+            }
+
+            @Override
+            public void setEnableStreamingEngine(boolean value) {
+
+            }
+
+            @Nullable
+            @Override
+            public String getGcpTempLocation() {
+                return null;
+            }
+
+            @Override
+            public void setGcpTempLocation(String value) {
+
+            }
+
+            @Nullable
+            @Override
+            public String getDataflowKmsKey() {
+                return null;
+            }
+
+            @Override
+            public void setDataflowKmsKey(String dataflowKmsKey) {
+
+            }
+
+            @Override
+            public GcsUtil getGcsUtil() {
+                return null;
+            }
+
+            @Override
+            public void setGcsUtil(GcsUtil value) {
+
+            }
+
+            @Override
+            public ExecutorService getExecutorService() {
+                return null;
+            }
+
+            @Override
+            public void setExecutorService(ExecutorService value) {
+
+            }
+
+            @Override
+            public String getGcsEndpoint() {
+                return null;
+            }
+
+            @Override
+            public void setGcsEndpoint(String value) {
+
+            }
+
+            @Nullable
+            @Override
+            public Integer getGcsUploadBufferSizeBytes() {
+                return null;
+            }
+
+            @Override
+            public void setGcsUploadBufferSizeBytes(@Nullable Integer bytes) {
+
+            }
+
+            @Override
+            public Class<? extends PathValidator> getPathValidatorClass() {
+                return null;
+            }
+
+            @Override
+            public void setPathValidatorClass(Class<? extends PathValidator> validatorClass) {
+
+            }
+
+            @Override
+            public PathValidator getPathValidator() {
+                return null;
+            }
+
+            @Override
+            public void setPathValidator(PathValidator validator) {
+
+            }
+
+            @Override
+            public Boolean getGcsPerformanceMetrics() {
+                return null;
+            }
+
+            @Override
+            public void setGcsPerformanceMetrics(Boolean reportPerformanceMetrics) {
+
+            }
+
             @Override
             public String getUser() {
                 return user;

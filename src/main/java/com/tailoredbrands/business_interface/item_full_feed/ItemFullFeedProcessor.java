@@ -31,8 +31,8 @@ import static com.tailoredbrands.pipeline.error.ErrorType.OBJECT_TO_JSON_CONVERS
 import static io.vavr.API.$;
 import static io.vavr.API.Case;
 import static java.util.Collections.singletonList;
-import static org.apache.commons.lang3.StringUtils.truncate;
-import static org.apache.commons.lang3.math.NumberUtils.toDouble;
+import static org.apache.beam.repackaged.core.org.apache.commons.lang3.StringUtils.truncate;
+import static org.apache.beam.repackaged.core.org.apache.commons.lang3.math.NumberUtils.toDouble;
 
 public class ItemFullFeedProcessor extends PTransform<PCollection<Map<String, String>>,
         PCollection<Tuple2<Map<String, String>, Try<JsonNode>>>> {

@@ -17,10 +17,10 @@ import com.tailoredbrands.util.predef.Exceptions;
 import com.tailoredbrands.util.schema.BQDateTimeFormatValidator;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
+import org.apache.beam.repackaged.core.org.apache.commons.lang3.StringUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.lang3.StringUtils;
 import org.everit.json.schema.ArraySchema;
 import org.everit.json.schema.BooleanSchema;
 import org.everit.json.schema.CombinedSchema;
@@ -39,7 +39,7 @@ import static com.tailoredbrands.util.converter.Converters.lazy;
 import static com.tailoredbrands.util.converter.Converters.match;
 import static com.tailoredbrands.util.converter.Converters.when;
 import static com.tailoredbrands.util.matcher.Matchers.and;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.beam.repackaged.core.org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * Utility to denormalize (build json object) from single line (which contains raw values) of

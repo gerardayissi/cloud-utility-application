@@ -3,7 +3,7 @@ package com.tailoredbrands.pipeline.options;
 import org.apache.beam.sdk.options.Description;
 import org.apache.beam.sdk.options.Validation;
 
-public interface GcsToPubSubOptions extends BusinessInterfaceOptions, CsvOptions, GcsOptions, PubSubOptions {
+public interface GcsToPubSubOptions extends BusinessInterfaceOptions, CsvOptions, CustomGcsOptions, PubSubOptions {
     @Validation.Required
     @Description("The name of the User, ex: admin@tbi.com")
     String getUser();
