@@ -10,7 +10,6 @@ import io.vavr.control.Try;
 import lombok.val;
 import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.values.PCollection;
-import org.apache.beam.sdk.values.PCollectionList;
 
 import java.util.List;
 
@@ -19,7 +18,7 @@ import static io.vavr.API.Match;
 
 public class GCsToPubSubWithSyncProcessorFactory {
     public static PTransform<PCollection<FileWithMeta>,
-        PCollectionList<Tuple2<FileWithMeta, List<Try<JsonNode>>>>> from(BusinessInterfaceOptions options) {
+        PCollection<Tuple2<FileWithMeta, List<Try<JsonNode>>>>> from(BusinessInterfaceOptions options) {
 
         val businessInterface = options.getBusinessInterface();
 

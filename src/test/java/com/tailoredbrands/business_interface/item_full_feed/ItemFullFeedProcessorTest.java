@@ -240,12 +240,12 @@ public class ItemFullFeedProcessorTest implements Serializable {
             }
 
             @Override
-            public String getProcessedBucket() {
+            public Integer getBatchPayloadSize() {
                 return null;
             }
 
             @Override
-            public void setProcessedBucket(String value) {
+            public void setBatchPayloadSize(Integer value) {
 
             }
 
@@ -280,22 +280,12 @@ public class ItemFullFeedProcessorTest implements Serializable {
             }
 
             @Override
-            public String getErrorGCSFilePath() {
+            public String getProcessedBucket() {
                 return null;
             }
 
             @Override
-            public void setErrorGCSFilePath(String value) {
-
-            }
-
-            @Override
-            public String getProcessedGCSFilePath() {
-                return null;
-            }
-
-            @Override
-            public void setProcessedGCSFilePath(String value) {
+            public void setProcessedBucket(String value) {
 
             }
 

@@ -26,11 +26,10 @@ public interface GcsToPubSubOptions extends BusinessInterfaceOptions, CsvOptions
 
     void setErrorThreshold(Integer value);
 
-    @Validation.Required
-    @Description("The bucket where we need to move processed files")
-    String getProcessedBucket();
+    @Description("Batch payload of no more than this size records ex: 300")
+    Integer getBatchPayloadSize();
 
-    void setProcessedBucket(String value);
+    void setBatchPayloadSize(Integer value);
 
 
 }

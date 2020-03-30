@@ -36,25 +36,27 @@ import static io.vavr.API.Case;
 import static java.util.Collections.singletonList;
 
 public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<FileWithMeta>,
-    PCollectionList<Tuple2<FileWithMeta, List<Try<JsonNode>>>>> {
+    PCollection<Tuple2<FileWithMeta, List<Try<JsonNode>>>>> {
 
     private String user;
     private String organization;
     private GcsToPubSubCounter counter;
+    private Integer batchSize;
 
     public StoreInventoryFullFeedProcessor(PipelineOptions options) {
         if (options instanceof GcsToPubSubOptions) {
             val gcsToPubSubOptions = (GcsToPubSubOptions) options;
-            counter = new GcsToPubSubCounter(gcsToPubSubOptions.getBusinessInterface());
             user = gcsToPubSubOptions.getUser();
             organization = gcsToPubSubOptions.getOrganization();
+            batchSize = gcsToPubSubOptions.getBatchPayloadSize();
+            counter = new GcsToPubSubCounter(gcsToPubSubOptions.getBusinessInterface());
         } else {
             throw new IllegalArgumentException("Invalid Store Inventory Full Feed options: " + options.getClass().getSimpleName());
         }
     }
 
     @Override
-    public PCollectionList<Tuple2<FileWithMeta, List<Try<JsonNode>>>> expand(PCollection<FileWithMeta> rows) {
+    public PCollection<Tuple2<FileWithMeta, List<Try<JsonNode>>>> expand(PCollection<FileWithMeta> rows) {
 
         Duration windowDuration = Duration.standardSeconds(30L);
         Window<Tuple2<FileWithMeta, Try<SupplyDetail>>> window = Window.into(FixedWindows.of(windowDuration));
@@ -93,9 +95,10 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
             .apply("EndSync Json to Push", toFinalJson("EndSync"))
             .setName("EndSync");
 
-        val pc = PCollectionList.of(startSyncPC).and(syncDetail).and(endSync);
+        val pcs = PCollectionList.of(startSyncPC).and(syncDetail).and(endSync);
+        val finalPc = pcs.apply(Flatten.pCollections());
 
-        return pc;
+        return finalPc;
     }
 
     MapElements<Tuple2<FileWithMeta, KV<Integer, CSVRecord>>, Tuple2<FileWithMeta, Try<SupplyDetail>>> csvRowToSupplyDetailsDto() {
@@ -155,7 +158,7 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
                         res.add(finalJson);
 
                     } else {
-                        val batches = Lists.partition(supplyDetails,10);
+                        val batches = Lists.partition(supplyDetails, batchSize);
 
                         for (List<JsonNode> json : batches) {
                             val payload = JsonUtils.serializeObject(json);
@@ -177,7 +180,7 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
         supplyType.setSupplyTypeId("On Hand Available");
 
         val supplyData = new SupplyData();
-        supplyData.setQuantity(csvRow.get("Quantity"));
+        supplyData.setQuantity(Integer.parseInt(csvRow.get("Quantity")));
         supplyData.setUom("U");
 
         supplyDefinition.setSupplyType(supplyType);
