@@ -41,10 +41,10 @@ public class MqListenerPipeline {
                 .withValidation()
                 .as(JmsToPubSubOptions.class);
 
-        final JmsToPubSubCounter counter = new JmsToPubSubCounter("SendTo" + options.getJmsToPubsubPipelineType());
+        final JmsToPubSubCounter counter = new JmsToPubSubCounter("SendTo" + options.getBusinessInterface());
 
         final ConnectionFactory connectionFactory = JmsConnectionFactoryBuilder.build(
-                options, options.getJmsToPubsubPipelineType());
+                options, options.getBusinessInterface());
 
         final TupleTag<String> successTag = new TupleTag<String>() {};
         final TupleTag<Tuple2<JmsRecord, Try<String>>> failureTag = new TupleTag<Tuple2<JmsRecord, Try<String>>>() {};

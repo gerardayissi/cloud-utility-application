@@ -41,7 +41,7 @@ public class JmsToPubSubStreamingPipelineTest implements Serializable {
     public void extractJMSPayload() {
         PCollection<Tuple2<JmsRecord, Try<String>>> pc = pipeline
                 .apply(Create.of(jmsRecord(Resources.readAsString("item_delta_feed/10_Universe_Item_xml.xml"))))
-                .apply(JmsToPubSubStreamingPipeline.extractJmsPayload());
+                .apply(JmsToPubSubStreamingPipeline.extractAndLogJmsPayload());
         PAssert.that(pc).satisfies(it -> hasItems(it,
                 map(t -> t._2.get(), containsString(Resources.readAsString("item_delta_feed/10_Universe_Item_xml.xml")))
                 )

@@ -53,7 +53,8 @@
         <dependency>
             <groupId>org.apache.beam</groupId>
             <artifactId>beam-sdks-java-io-jms</artifactId>
-            <version>${beam.version}</version>
+            <!--            Temporary fix for JMS read bug-->
+            <version>2.20.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.apache.beam</groupId>
@@ -119,6 +120,11 @@
             <groupId>com.google.auto.service</groupId>
             <artifactId>auto-service</artifactId>
             <version>1.0-rc6</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-secretmanager</artifactId>
+            <version>0.3.0</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -265,7 +271,8 @@
                         </goals>
                         <configuration>
                             <sources>
-                                <source>target/generated-sources</source>
+                                <source>target/generated-sources/json</source>
+                                <source>target/generated-sources/xml</source>
                             </sources>
                         </configuration>
                     </execution>

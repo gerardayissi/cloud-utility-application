@@ -11,6 +11,7 @@ public enum ErrorType {
     OBJECT_TO_OBJECT_CONVERSION_ERROR("object_to_object_conversion_error"),
 
     XML_TO_OBJECT_CONVERSION_ERROR("xml_to_object_conversion_error"),
+    JSON_TO_OBJECT_CONVERSION_ERROR("json_to_object_conversion_error"),
 
     OTHER(null);
 
