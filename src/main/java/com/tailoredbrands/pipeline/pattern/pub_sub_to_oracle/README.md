@@ -1,4 +1,4 @@
-## 1.1.1 Availability Sync - Network
+## 1.1.1 Availability Sync Network
 
 ### Pattern: PubSub to Oracle (IN_PUBSUB_ORACLE)
 ### Pipeline: [AvailabilitySyncNetworkPipeline](./AvailabilitySyncNetworkPipeline.java)
@@ -31,12 +31,12 @@ Manhattan will start publishing data to PubSub Topic which will be consumed by t
     - If the check fails, then write records to text error
 8. Log output data before writing them to the target. 
 
-### Messages: 
+### Source Messages
 - [Start](../../../../../../resources/json/availability_sync_network/AvailabilitySyncStart.json)
 - [Detail](../../../../../../resources/json/availability_sync_network/AvailabilitySyncDetail.json)
 - [End](../../../../../../resources/json/availability_sync_network/AvailabilitySyncEnd.json)
 
-### Build Template:
+### Build Template
 TODO
 
 ### Run Template
