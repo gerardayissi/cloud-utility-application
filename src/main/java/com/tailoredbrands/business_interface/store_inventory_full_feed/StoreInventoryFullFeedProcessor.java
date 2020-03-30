@@ -8,10 +8,12 @@ import com.tailoredbrands.pipeline.error.ProcessingException;
 import com.tailoredbrands.pipeline.options.GcsToPubSubOptions;
 import com.tailoredbrands.pipeline.pattern.gcs_to_pub_sub.GcsToPubSubCounter;
 import com.tailoredbrands.util.FileWithMeta;
+import com.tailoredbrands.util.Peek;
 import com.tailoredbrands.util.json.JsonUtils;
 import io.vavr.Tuple2;
 import io.vavr.control.Try;
 import lombok.val;
+import org.apache.beam.sdk.metrics.Counter;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.transforms.*;
 import org.apache.beam.sdk.transforms.windowing.FixedWindows;
@@ -22,6 +24,8 @@ import org.apache.beam.sdk.values.PCollectionList;
 import org.apache.beam.sdk.values.TypeDescriptor;
 import org.apache.commons.csv.CSVRecord;
 import org.joda.time.Duration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -30,13 +34,14 @@ import java.util.*;
 
 import static com.tailoredbrands.pipeline.error.ErrorType.CSV_ROW_TO_OBJECT_CONVERSION_ERROR;
 import static com.tailoredbrands.pipeline.error.ErrorType.OBJECT_TO_JSON_CONVERSION_ERROR;
-import static com.tailoredbrands.util.Peek.increment;
 import static io.vavr.API.$;
 import static io.vavr.API.Case;
 import static java.util.Collections.singletonList;
 
 public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<FileWithMeta>,
     PCollection<Tuple2<FileWithMeta, List<Try<JsonNode>>>>> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(StoreInventoryFullFeedProcessor.class);
 
     private String user;
     private String organization;
@@ -64,21 +69,21 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
         val mainPC2 = rows
             .apply("Read all file records",
                 ParDo.of(
-                new DoFn<FileWithMeta, Tuple2<FileWithMeta, KV<Integer, CSVRecord>>>() {
-                    @ProcessElement
-                    public void processElement(@Element FileWithMeta fileWithMeta, DoFn.OutputReceiver<Tuple2<FileWithMeta, KV<Integer, CSVRecord>>> receiver) {
-                        val csvRows = fileWithMeta.getRecords();
-                        for (KV<Integer, CSVRecord> row : csvRows) {
-                            receiver.output(new Tuple2<>(fileWithMeta, row));
+                    new DoFn<FileWithMeta, Tuple2<FileWithMeta, KV<Integer, CSVRecord>>>() {
+                        @ProcessElement
+                        public void processElement(@Element FileWithMeta fileWithMeta, DoFn.OutputReceiver<Tuple2<FileWithMeta, KV<Integer, CSVRecord>>> receiver) {
+                            val csvRows = fileWithMeta.getRecords();
+                            for (KV<Integer, CSVRecord> row : csvRows) {
+                                receiver.output(new Tuple2<>(fileWithMeta, row));
+                            }
                         }
                     }
-                }
                 )
             )
-            .apply("Count rows in files", increment(counter.csvRowsRead))
+            .apply("Log and count original CSV records", countAndLogOutbound(counter.csvRowsRead))
             .apply("CSV row to DTO", csvRowToSupplyDetailsDto())
             .apply("Declare window", window)
-            .apply("Combine DTOs", Combine.globally(new CombineRowsFn()).withoutDefaults());
+            .apply("Combine payload", Combine.globally(new CombineRowsFn()).withoutDefaults());
 
         val startSyncPC = mainPC2
             .apply("Transform StartSync DTO to JSON", dtoToJson())
@@ -180,7 +185,7 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
         supplyType.setSupplyTypeId("On Hand Available");
 
         val supplyData = new SupplyData();
-        supplyData.setQuantity(Integer.parseInt(csvRow.get("Quantity")));
+        supplyData.setQuantity(csvRow.get("Quantity"));
         supplyData.setUom("U");
 
         supplyDefinition.setSupplyType(supplyType);
@@ -243,5 +248,12 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
         val localDateTime = LocalDateTime.now(ZoneOffset.UTC);
         val formatter = DateTimeFormatter.ofPattern(format);
         return localDateTime.format(formatter);
+    }
+
+    private static Peek<Tuple2<FileWithMeta, KV<Integer, CSVRecord>>> countAndLogOutbound(Counter counter) {
+        return Peek.each(tuple2 -> {
+            counter.inc();
+            LOG.info(String.valueOf(new Tuple2(tuple2._1.getSourceName(), tuple2._2.getValue().toMap())));
+        });
     }
 }
