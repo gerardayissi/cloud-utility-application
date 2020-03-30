@@ -1,5 +1,6 @@
 package com.tailoredbrands.pipeline.pattern.gcs_to_pub_sub;
 
+import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.tailoredbrands.business_interface.item_full_feed.ItemFullFeedProcessFileFn;
 import com.tailoredbrands.pipeline.options.GcsToPubSubOptions;
 import lombok.val;
@@ -24,7 +25,7 @@ public class GcsToPubSubStreamingPipeline {
 
     private static final Logger LOG = LoggerFactory.getLogger(GcsToPubSubStreamingPipeline.class);
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         GcsToPubSubOptions options = PipelineOptionsFactory
                 .fromArgs(args)
                 .withValidation()
@@ -32,10 +33,11 @@ public class GcsToPubSubStreamingPipeline {
         run(options);
     }
 
-    public static PipelineResult run(GcsToPubSubOptions options) {
+    public static PipelineResult run(GcsToPubSubOptions options) throws Exception {
         val pipeline = Pipeline.create(options);
         val counter = new GcsToPubSubCounter(options.getBusinessInterface());
-
+        val MAOCredentials = ServiceAccountCredentials.fromStream(
+                ClassLoader.getSystemClassLoader().getResourceAsStream("keys/tssls4-pubsubrw.json"));
         pipeline
                 .apply("Match Files on GCS", FileIO.match()
                         .filepattern(options.getInputFilePattern())
@@ -44,7 +46,7 @@ public class GcsToPubSubStreamingPipeline {
                 .apply("Read Files from GCS", FileIO.readMatches())
                 .apply("Count Files", increment(counter.gcsFilesRead))
 
-                .apply("Process File", ParDo.of(new ItemFullFeedProcessFileFn(options, counter)));
+                .apply("Process File", ParDo.of(new ItemFullFeedProcessFileFn(options, counter, MAOCredentials)));
 
         return pipeline.run();
     }

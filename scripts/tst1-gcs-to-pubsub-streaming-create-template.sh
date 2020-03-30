@@ -15,12 +15,11 @@ com.tailoredbrands.pipeline.pattern.gcs_to_pub_sub.GcsToPubSubStreamingPipeline 
       --subnetwork=https://www.googleapis.com/compute/v1/projects/network-b2b9/regions/us-east1/subnetworks/np-integration4 \
       --stagingLocation=gs://${PROJECT_ID}/dataflow/pipeline/${PIPELINE_NAME}/staging \
       --tempLocation=gs://${PROJECT_ID}/dataflow/pipeline/${PIPELINE_NAME}/temp \
-      --templateLocation=gs://${PROJECT_ID}/dataflow/pipeline/${PIPELINE_NAME}/template \
       --inputFilePattern=gs://${PROJECT_ID}/dataflow/pipeline/${PIPELINE_NAME}/test/item-full-feed-source*.csv \
       --delimiter='|' \
-      --user=admin@tmw.com \
+      --user=admin@tbi.com \
       --organization=TMW \
       --businessInterface=${BUSINESS_INTERFACE} \
-      --outputPubsubTopic=projects/${PROJECT_ID}/topics/${BUSINESS_INTERFACE} \
+      --outputPubsubTopic=projects/tasl-omni-stg-04-ops/topics/INB_XINT_ItemQueueMSGType_GCPQ \
       --numWorkers=1 \
       --runner=DataflowRunner

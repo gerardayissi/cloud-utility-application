@@ -4,6 +4,8 @@ import com.google.api.core.ApiFuture;
 import com.google.api.core.ApiFutures;
 import com.google.api.gax.batching.BatchingSettings;
 import com.google.api.gax.batching.FlowControlSettings;
+import com.google.api.gax.core.FixedCredentialsProvider;
+import com.google.auth.Credentials;
 import com.google.cloud.pubsub.v1.Publisher;
 import com.google.protobuf.ByteString;
 import com.google.pubsub.v1.PubsubMessage;
@@ -35,12 +37,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.channels.Channels;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Map;
 
 import static com.google.api.gax.batching.FlowController.LimitExceededBehavior;
 import static com.tailoredbrands.pipeline.error.ErrorType.CSV_ROW_TO_OBJECT_CONVERSION_ERROR;
-import static com.tailoredbrands.pipeline.error.ErrorType.JSON_TO_PUBSUB_MESSAGE_CONVERSION_ERROR;
 import static com.tailoredbrands.pipeline.error.ErrorType.OBJECT_TO_JSON_CONVERSION_ERROR;
 import static com.tailoredbrands.util.FileUtils.getProcessedFilePath;
 import static io.vavr.API.$;
@@ -49,24 +49,25 @@ import static io.vavr.API.Match;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static org.apache.beam.repackaged.core.org.apache.commons.lang3.StringUtils.truncate;
-import static org.apache.beam.repackaged.core.org.apache.commons.lang3.math.NumberUtils.toDouble;
 
 public class ItemFullFeedProcessFileFn extends DoFn<FileIO.ReadableFile, Void> {
 
     private static final Logger LOG = LoggerFactory.getLogger(ItemFullFeedProcessFileFn.class);
 
-    private static final Base64.Encoder Base64Encoder = Base64.getEncoder();
-
     private final GcsToPubSubCounter counter;
+    private final Credentials MAOCredentials;
     private final String user;
     private final String organization;
     private final String outputPubsubTopic;
     private final char delimiter;
 
+
+
     private Publisher publisher;
 
-    public ItemFullFeedProcessFileFn(GcsToPubSubOptions options, GcsToPubSubCounter counter) {
+    public ItemFullFeedProcessFileFn(GcsToPubSubOptions options, GcsToPubSubCounter counter, Credentials MAOCredentials) {
         this.counter = counter;
+        this.MAOCredentials = MAOCredentials;
         user = options.getUser();
         organization = options.getOrganization();
         outputPubsubTopic = options.getOutputPubsubTopic().get();
@@ -81,6 +82,7 @@ public class ItemFullFeedProcessFileFn extends DoFn<FileIO.ReadableFile, Void> {
     public void setup() {
         try {
             publisher = Publisher.newBuilder(outputPubsubTopic)
+                    .setCredentialsProvider(FixedCredentialsProvider.create(MAOCredentials))
                     .setBatchingSettings(
                             BatchingSettings.newBuilder()
                                     .setElementCountThreshold(1000L)
@@ -128,7 +130,7 @@ public class ItemFullFeedProcessFileFn extends DoFn<FileIO.ReadableFile, Void> {
             }
         }
         publisher.publishAllOutstanding();
-        ApiFutures.allAsList(pubSubFutures).get();
+        LOG.info("Message Ids: {}", ApiFutures.allAsList(pubSubFutures).get());
         reader.close();
         is.close();
         LOG.info("File: {}, {} messages published", filePath, pubSubFutures.size());
@@ -149,9 +151,7 @@ public class ItemFullFeedProcessFileFn extends DoFn<FileIO.ReadableFile, Void> {
                 .mapFailure(Case($(e -> !(e instanceof ProcessingException)),
                         exc -> new ProcessingException(CSV_ROW_TO_OBJECT_CONVERSION_ERROR, exc)));
         return maybeItem
-                .map(JsonUtils::toJsonNode)
-                .map(JsonUtils::serializeToBytes)
-                .map(Base64Encoder::encodeToString)
+                .map(JsonUtils::serializeObject)
                 .mapFailure(Case($(e -> !(e instanceof ProcessingException)),
                         exc -> new ProcessingException(OBJECT_TO_JSON_CONVERSION_ERROR, exc)));
     }
@@ -165,9 +165,9 @@ public class ItemFullFeedProcessFileFn extends DoFn<FileIO.ReadableFile, Void> {
         itemFullFeed.setDepartmentName(csvRow.get("DIVISION.DESCRIPTION"));
         itemFullFeed.setDepartmentNumber(csvRow.get("DIVISION"));
         itemFullFeed.setDescription(csvRow.get("LONG.DESC"));
-        itemFullFeed.setIsGiftCard(false);
-        itemFullFeed.setIsScanOnly(true);
-        itemFullFeed.setIsGiftwithPurchase(false);
+        itemFullFeed.setIsGiftCard("false");
+        itemFullFeed.setIsScanOnly("true");
+        itemFullFeed.setIsGiftwithPurchase("false");
         itemFullFeed.setItemId(csvRow.get("COMPANY") + csvRow.get("ITEMCODES.ID"));
         itemFullFeed.setProductClass(getProductClass(csvRow));
         itemFullFeed.setSeason(csvRow.get("SEASON.CODE"));
@@ -175,13 +175,13 @@ public class ItemFullFeedProcessFileFn extends DoFn<FileIO.ReadableFile, Void> {
         itemFullFeed.setShortDescription(truncate(csvRow.get("CLASS.DESC"), 50));
         itemFullFeed.setSize(csvRow.get("SIZE.DESC.MEDIUM"));
         itemFullFeed.setStyle("FLAT".equalsIgnoreCase(csvRow.get("FLAT.OR.GOH")) ? "FLT" : "GOH");
-        itemFullFeed.setWeight(toDouble(csvRow.get("WEIGHT.IN.LBS")));
+        itemFullFeed.setWeight(csvRow.get("WEIGHT.IN.LBS"));
         itemFullFeed.setWeightUOM("LB");
 
         val handlingAttributes = new HandlingAttributes();
-        handlingAttributes.setIsAirShippingAllowed(!"true".equalsIgnoreCase(csvRow.get("HAZARDOUS.FLAG")));
-        handlingAttributes.setIsHazmat("1".equals(csvRow.get("HAZARDOUS.FLAG")));
-        handlingAttributes.setIsParcelShippingAllowed(true);
+        handlingAttributes.setIsAirShippingAllowed("true".equalsIgnoreCase(csvRow.get("HAZARDOUS.FLAG")) ? "false" : "true");
+        handlingAttributes.setIsHazmat("1".equals(csvRow.get("HAZARDOUS.FLAG")) ? "true" : "false");
+        handlingAttributes.setIsParcelShippingAllowed("true");
         handlingAttributes.setDescription(csvRow.get("CLASS.DESC"));
         itemFullFeed.setHandlingAttributes(handlingAttributes);
 
@@ -199,16 +199,16 @@ public class ItemFullFeedProcessFileFn extends DoFn<FileIO.ReadableFile, Void> {
         itemFullFeed.setManufacturingAttribute(manufacturingAttribute);
 
         val sellingAttributes = new SellingAttributes();
-        sellingAttributes.setActivationRequired(false);
-        sellingAttributes.setDigitalGoods(false);
-        sellingAttributes.setIsDiscountable(false);
-        sellingAttributes.setIsExchangeable(false);
-        sellingAttributes.setIsPriceOverrideable(true);
-        sellingAttributes.setIsReturnableAtDC(true);
-        sellingAttributes.setShipToAddress(true);
-        sellingAttributes.setPickUpInStore(true);
+        sellingAttributes.setActivationRequired("false");
+        sellingAttributes.setDigitalGoods("false");
+        sellingAttributes.setIsDiscountable("false");
+        sellingAttributes.setIsExchangeable("false");
+        sellingAttributes.setIsPriceOverrideable("true");
+        sellingAttributes.setIsReturnableAtDC("true");
+        sellingAttributes.setShipToAddress("true");
+        sellingAttributes.setPickUpInStore("true");
         sellingAttributes.setPriceStatusId("true");
-        sellingAttributes.setSoldOnline(true);
+        sellingAttributes.setSoldOnline("true");
         itemFullFeed.setSellingAttributes(sellingAttributes);
 
         val extended = new Extended();
@@ -243,11 +243,13 @@ public class ItemFullFeedProcessFileFn extends DoFn<FileIO.ReadableFile, Void> {
     }
 
     private PubsubMessage toPubSubMessage(Try<String> maybeData) {
-        return PubsubMessage.newBuilder()
+        val message = PubsubMessage.newBuilder()
                 .setData(ByteString.copyFromUtf8(maybeData.get()))
-                .putAttributes("User", user)
-                .putAttributes("Organization", organization)
+                .putAttributes("User", "admin@tbi.com")
+                .putAttributes("Organization", "TMW")
                 .build();
+        LOG.info(message.toString());
+        return message;
     }
 
     private void processError(CSVRecord record, Try<String> maybeData) {
@@ -255,7 +257,6 @@ public class ItemFullFeedProcessFileFn extends DoFn<FileIO.ReadableFile, Void> {
         val detailedCounter = Match(err.getType()).of(
                 Case($(CSV_ROW_TO_OBJECT_CONVERSION_ERROR), counter.csvRowToObjectErrors),
                 Case($(OBJECT_TO_JSON_CONVERSION_ERROR), counter.objectToJsonErrors),
-                Case($(JSON_TO_PUBSUB_MESSAGE_CONVERSION_ERROR), counter.jsonToPubSubErrors),
                 Case($(), counter.untypedErrors)
         );
         detailedCounter.inc();

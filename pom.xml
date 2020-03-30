@@ -35,6 +35,10 @@
             <version>${beam.version}</version>
             <exclusions>
                 <exclusion>
+                    <groupId>com.google.api</groupId>
+                    <artifactId>gax-grpc</artifactId>
+                </exclusion>
+                <exclusion>
                     <groupId>io.grpc</groupId>
                     <artifactId>*</artifactId>
                 </exclusion>
@@ -154,12 +158,12 @@
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-pubsub</artifactId>
-            <version>1.81.0</version>
+            <version>1.103.1</version>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-protobuf</artifactId>
-            <version>1.21.0</version>
+            <version>1.27.2</version>
         </dependency>
 
         <dependency>
