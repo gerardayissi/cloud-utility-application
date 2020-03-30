@@ -7,7 +7,10 @@ import com.tailoredbrands.util.coder.TryCoder;
 import com.tailoredbrands.util.coder.Tuple2Coder;
 import io.vavr.Tuple2;
 import io.vavr.control.Try;
-import org.apache.beam.sdk.coders.*;
+import org.apache.beam.sdk.coders.Coder;
+import org.apache.beam.sdk.coders.CoderRegistry;
+import org.apache.beam.sdk.coders.ListCoder;
+import org.apache.beam.sdk.coders.SerializableCoder;
 import org.apache.beam.sdk.transforms.Combine;
 
 import java.util.List;

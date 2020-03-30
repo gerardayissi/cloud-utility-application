@@ -41,6 +41,7 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
     private String user;
     private GcsToPubSubCounter counter;
     private Integer batchSize;
+    private Long windowDuration;
 
     public StoreInventoryFullFeedProcessor(PipelineOptions options) {
         if (options instanceof GcsToPubSubOptions) {
@@ -48,6 +49,7 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
             user = gcsToPubSubOptions.getUser();
             batchSize = gcsToPubSubOptions.getBatchPayloadSize();
             counter = new GcsToPubSubCounter(gcsToPubSubOptions.getBusinessInterface());
+            windowDuration = gcsToPubSubOptions.getDurationSeconds();
         } else {
             throw new IllegalArgumentException("Invalid Store Inventory Full Feed options: " + options.getClass().getSimpleName());
         }
@@ -56,27 +58,17 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
     @Override
     public PCollection<Tuple2<FileWithMeta, List<Try<JsonNode>>>> expand(PCollection<FileWithMeta> rows) {
 
-        Duration windowDuration = Duration.standardSeconds(30L);
+        Duration windowDuration = Duration.standardSeconds(10L);
         Window<Tuple2<FileWithMeta, Try<SupplyDetail>>> window = Window.into(FixedWindows.of(windowDuration));
 
         val mainPC2 = rows
-            .apply("Read all file records",
-                ParDo.of(
-                    new DoFn<FileWithMeta, Tuple2<FileWithMeta, KV<Integer, CSVRecord>>>() {
-                        @ProcessElement
-                        public void processElement(@Element FileWithMeta fileWithMeta, DoFn.OutputReceiver<Tuple2<FileWithMeta, KV<Integer, CSVRecord>>> receiver) {
-                            val csvRows = fileWithMeta.getRecords();
-                            for (KV<Integer, CSVRecord> row : csvRows) {
-                                receiver.output(new Tuple2<>(fileWithMeta, row));
-                            }
-                        }
-                    }
-                )
-            )
+            .apply("Read all file records", readFileRecords())
             .apply("Count original CSV records", increment(counter.csvRowsRead))
             .apply("CSV row to DTO", csvRowToSupplyDetailsDto())
             .apply("Declare window", window)
-            .apply("Combine payload", Combine.globally(new CombineRowsFn()).withoutDefaults());
+            .apply("Transform to KV", toKV())
+            .apply(GroupByKey.create())
+            .apply("Combine payload per file", ParDo.of(new CombineRowsPerKey()));
 
         val startSyncPC = mainPC2
             .apply("Transform StartSync DTO to JSON", dtoToJson())
@@ -167,6 +159,32 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
                     }
                     return res;
                 }));
+    }
+
+    static ParDo.SingleOutput<FileWithMeta, Tuple2<FileWithMeta, KV<Integer, CSVRecord>>> readFileRecords() {
+        return ParDo.of(
+            new DoFn<FileWithMeta, Tuple2<FileWithMeta, KV<Integer, CSVRecord>>>() {
+                @ProcessElement
+                public void processElement(@Element FileWithMeta fileWithMeta, DoFn.OutputReceiver<Tuple2<FileWithMeta, KV<Integer, CSVRecord>>> receiver) {
+                    val csvRows = fileWithMeta.getRecords();
+                    for (KV<Integer, CSVRecord> row : csvRows) {
+                        receiver.output(new Tuple2<>(fileWithMeta, row));
+                    }
+                }
+            }
+        );
+    }
+
+    static ParDo.SingleOutput<Tuple2<FileWithMeta, Try<SupplyDetail>>, KV<String, Tuple2<FileWithMeta, Try<SupplyDetail>>>> toKV() {
+        return ParDo.of(
+            new DoFn<Tuple2<FileWithMeta, Try<SupplyDetail>>, KV<String, Tuple2<FileWithMeta, Try<SupplyDetail>>>>() {
+                @ProcessElement
+                public void processElement(ProcessContext c) {
+                    val input = c.element();
+                    c.output(KV.of(input._1.getSourceName(), new Tuple2<>(input._1, input._2)));
+                }
+            }
+        );
     }
 
     private SupplyDetail toSupplyDetailDto(Map<String, String> csvRow) {

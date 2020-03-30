@@ -11,7 +11,6 @@ export TEMPLATE=${JOB_NAME}
 
 # all params
 export USER=admin@tbi.com
-export ORG=TMW
 export DURATION=30
 export ERROR_THRESHOLD=10
 export BATCH_PAYLOAD=300
@@ -37,7 +36,6 @@ mvn compile exec:java \
 --templateLocation=${TEMPLATE_DIR}/${TEMPLATE} \
 --businessInterface=${BUSINESS_INTERFACE} \
 --user=${USER} \
---organization=${ORG} \
 --errorThreshold=${ERROR_THRESHOLD} \
 --batchPayloadSize=${BATCH_PAYLOAD} \
 --processedBucket=${PROCESSED_BUCKET} \
