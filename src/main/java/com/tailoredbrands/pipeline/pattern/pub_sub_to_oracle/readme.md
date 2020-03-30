@@ -35,3 +35,12 @@ Manhattan will start publishing data to PubSub Topic which will be consumed by t
 - [Start](../../../../../../resources/json/availability_sync_network/AvailabilitySyncStart.json)
 - [Detail](../../../../../../resources/json/availability_sync_network/AvailabilitySyncDetail.json)
 - [End](../../../../../../resources/json/availability_sync_network/AvailabilitySyncEnd.json)
+
+### Build template:
+TODO
+
+### Run Template
+TODO
+
+### Run Locally
+TODO
