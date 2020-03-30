@@ -3,6 +3,7 @@
 ### Pattern: PubSub to Oracle (IN_PUBSUB_ORACLE)
 ### Pipeline: [AvailabilitySyncNetworkPipeline](./AvailabilitySyncNetworkPipeline.java)
 ### Mapping: [DetailedMapping](https://wiki.tailoredbrands.com/display/JBOM/Detailed+Mapping#DetailedMapping-1.1.1AvailabilitySync-Network)
+### Jira: [CIS-33](https://jira.tailoredbrands.com/browse/CIS-33)
 ### Description:
 1. UC4 Scheduler will start a time based trigger to check if data from Store Inventory Full Feed and DC Inventory Full Feed 
 have been processed on the Manhattan side using API calls to check the status. Once status returns successful, 
@@ -30,18 +31,7 @@ Manhattan will start publishing data to PubSub Topic which will be consumed by t
     - If the check fails, then write records to text error
 8. Log output data before writing them to the target. 
 
-### Q&A:
-
-Q: What format of messages will Manhattan publishing?
-Mapping mentions about three type of msg: 
-- Availability Start Sync.json
-- Availability Sync Detail.json
-- Availability End Sync.json
-
-But not clear why Start/End messages are needed because this pipeline will use a Window and group messages by NetworkAvailabilityResponse.ViewId
-
-Or will Manhattan publishing just items of "NetworkAvailabilityResponse" section from the "*Detail.json" msg?
-
-Q: Could you please provide target destination details? It is Oracle tables and fields to insert data.
-
-
+### Messages: 
+- [Start](../../../../../../resources/json/availability_sync_network/AvailabilitySyncStart.json)
+- [Detail](../../../../../../resources/json/availability_sync_network/AvailabilitySyncDetail.json)
+- [End](../../../../../../resources/json/availability_sync_network/AvailabilitySyncEnd.json)

@@ -54,6 +54,7 @@ public class AvailabilitySyncNetworkPipeline {
             .apply("Extract by viewId", extractView())
             .apply("Accumulating", accumulating())
             .apply("Output record counter", increment(counter.recordsWrite))
+            .apply("Write to log", writeToLog())
             .apply("Persist", writeToOracle(options))
         ;
 
@@ -63,13 +64,29 @@ public class AvailabilitySyncNetworkPipeline {
     private static Window<KV<String, PubsubMessage>> accumulating() {
         return Window.<KV<String, PubsubMessage>>
             into(Sessions.withGapDuration(Duration.standardSeconds(60L)))
+            // how long late date will be accepted and also how long the state of old window will be kept alive.
             .withAllowedLateness(Duration.ZERO)
+            // Sets a non-default trigger for this Window PTransform.
+            // Elements that are assigned to a specific window will be output when the trigger fires.
             .triggering(Repeatedly
-                .forever(AfterWatermark
+                // A Trigger that fires according to its subtrigger forever.
+                .forever(
+                    // AfterWatermark triggers fire based on progress of the system watermark.
+                    AfterWatermark
+                    // Creates a trigger that fires when the watermark passes the end of the window.
                     .pastEndOfWindow()
-                    .withEarlyFirings(AfterProcessingTime
+                    // Creates a new Trigger like the this, except that it fires repeatedly whenever the given Trigger
+                    // fires before the watermark has passed the end of the window.
+                    .withEarlyFirings(
+                        // A Trigger trigger that fires at a specified point in processing time, relative to when input first arrives.
+                        AfterProcessingTime
+                        // Creates a trigger that fires when the current processing time passes the processing
+                        // time at which this trigger saw the first element in a pane.
                         .pastFirstElementInPane()
+                        // Adds some delay to the original target time.
                         .plusDelayOf(Duration.standardSeconds(10L)))))
+            // Returns a new Window PTransform that uses the registered WindowFn and Triggering behavior,
+            // and that accumulates elements in a pane after they are triggered
             .accumulatingFiredPanes();
     }
 
@@ -86,16 +103,29 @@ public class AvailabilitySyncNetworkPipeline {
     private static MapElements<Tuple2<String, Try<PubsubMessage>>, KV<String, PubsubMessage>> extractView() {
         return MapElements
             .into(new TypeDescriptor<KV<String, PubsubMessage>>() {})
-            .via(t2 -> KV.of(t2._2.get().getAttribute("ViewId"), t2._2.get()));
+            .via(t2 -> {
+                final KV<String, PubsubMessage> kv = KV.of(t2._2.get().getAttribute("ViewId"), t2._2.get());
+                LOG.info("extractView: KV=[{}]", kv);
+                return kv;
+            });
     }
 
     private final static String INSERT_STATEMENT = "INSERT INTO table VALUES ()";
 
+    private static MapElements<KV<String, PubsubMessage>, KV<String, PubsubMessage>> writeToLog() {
+        return MapElements
+            .into(new TypeDescriptor<KV<String, PubsubMessage>>() {})
+            .via(in -> {
+                LOG.info("before write KV=[{}]", in);
+                return in;
+            });
+    }
+
     private static JdbcIO.Write<KV<String, PubsubMessage>> writeToOracle(PubSubToOracleOptions options) {
         return JdbcIO.<KV<String, PubsubMessage>>write()
-            .withDataSourceConfiguration(JdbcIO.DataSourceConfiguration.create(
-                options.getDriver(),
-                options.getUrl())
+            .withDataSourceConfiguration(JdbcIO
+                .DataSourceConfiguration
+                .create(options.getDriver(), options.getUrl())
                 .withUsername(options.getUser())
                 .withPassword(options.getPassword()))
             .withStatement(INSERT_STATEMENT)
