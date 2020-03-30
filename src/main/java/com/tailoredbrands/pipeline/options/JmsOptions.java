@@ -10,17 +10,9 @@ public interface JmsOptions extends PipelineOptions {
 
     void setJmsServerUrl(String value);
 
-    @Validation.Required
-    @Default.String("")
-    String getJmsUser();
+    String getJmsCredentialsSecret();
 
-    void setJmsUser(String value);
-
-    @Validation.Required
-    @Default.String("")
-    String getJmsPassword();
-
-    void setJmsPassword(String value);
+    void setJmsCredentialsSecret(String value);
 
     @Validation.Required
     @Default.String("tibco")
