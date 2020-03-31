@@ -77,6 +77,8 @@ public class GcsToPubSubWithSyncPipeline {
             .apply("Convert Json To PubSubMessage", toPubSubMessage())
             .apply("Checks errors", split(options.getErrorThreshold(), successTag, failureTag));
 
+        // process success flow
+        // splitting to pubsub and bucket
         PCollectionTuple pctSuccess = pc
             .get(successTag)
             .setCoder(Tuple2Coder.of(SerializableCoder.of(FileWithMeta.class), PubsubMessageWithAttributesCoder.of()))
@@ -88,6 +90,7 @@ public class GcsToPubSubWithSyncPipeline {
             .apply("Log and count messages to PubSub", countAndLogOutbound(counter.pubSubMessagesWritten))
             .apply("Write Messages to PubSub", PubsubIO.writeMessages().to(options.getOutputPubsubTopic()));
 
+        // write endSync msg
         pctSuccess
             .get(toBucketThenPubSubTag)
             .setCoder(Tuple2Coder.of(SerializableCoder.of(FileWithMeta.class), PubsubMessageWithAttributesCoder.of()))
@@ -101,6 +104,7 @@ public class GcsToPubSubWithSyncPipeline {
             .apply("Log and count End Sync message to PubSub", countAndLogOutbound(counter.pubSubEndSyncMessagesWritten))
             .apply("Write Messages to PubSub", PubsubIO.writeMessages().to(options.getOutputPubsubTopic()));
 
+        // move processed file after end sync
         pctSuccess
             .get(toBucketThenPubSubTag)
             .apply("Map to processed file",
@@ -260,33 +264,4 @@ public class GcsToPubSubWithSyncPipeline {
             LOG.info(new String(pubsubMessage.getPayload()));
         });
     }
-
-//    private static void runStartSync(PCollectionList<Tuple2<FileWithMeta, List<Try<JsonNode>>>> pcs,
-//                                     GcsToPubSubOptions options,
-//                                     GcsToPubSubCounter counter,
-//                                     TupleTag<Tuple2<FileWithMeta, PubsubMessage>> successTag,
-//                                     TupleTag<Tuple2<FileWithMeta, List<Try<PubsubMessage>>>> failureTag) {
-//
-//        val startSync = pcs.get(0)
-//            .apply("Convert Json To PubSubMessage", toPubSubMessage())
-//            .apply("Success | Failure", split(successTag, failureTag));
-//
-//        startSync
-//            .get(successTag)
-//            .setCoder(Tuple2Coder.of(SerializableCoder.of(FileWithMeta.class), PubsubMessageWithAttributesCoder.of()))
-//            .apply("Map to PubSubMessage",
-//                MapElements
-//                    .into(new TypeDescriptor<PubsubMessage>() {
-//                    })
-//                    .via(tuple2 -> tuple2._2)
-//            )
-//            .setCoder(PubsubMessageWithAttributesCoder.of())
-//            .apply("Count and log messages to PubSub", countAndLogOutbound(counter.pubsubMessagesWritten))
-//            .apply("Write Messages to Pubsub", PubsubIO.writeMessages().to(options.getOutputPubsubTopic()));
-//
-//        startSync
-//            .get(failureTag)
-//            .apply("Log & Count Failures", logFailures(counter));
-//    }
-
 }

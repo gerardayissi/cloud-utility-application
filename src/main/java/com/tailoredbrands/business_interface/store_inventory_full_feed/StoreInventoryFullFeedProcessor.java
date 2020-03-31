@@ -41,7 +41,7 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
     private String user;
     private GcsToPubSubCounter counter;
     private Integer batchSize;
-    private Long windowDuration;
+    private Long windowDurationSec;
 
     public StoreInventoryFullFeedProcessor(PipelineOptions options) {
         if (options instanceof GcsToPubSubOptions) {
@@ -49,7 +49,7 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
             user = gcsToPubSubOptions.getUser();
             batchSize = gcsToPubSubOptions.getBatchPayloadSize();
             counter = new GcsToPubSubCounter(gcsToPubSubOptions.getBusinessInterface());
-            windowDuration = gcsToPubSubOptions.getDurationSeconds();
+            windowDurationSec = gcsToPubSubOptions.getDurationSeconds();
         } else {
             throw new IllegalArgumentException("Invalid Store Inventory Full Feed options: " + options.getClass().getSimpleName());
         }
@@ -58,7 +58,7 @@ public class StoreInventoryFullFeedProcessor extends PTransform<PCollection<File
     @Override
     public PCollection<Tuple2<FileWithMeta, List<Try<JsonNode>>>> expand(PCollection<FileWithMeta> rows) {
 
-        Duration windowDuration = Duration.standardSeconds(10L);
+        Duration windowDuration = Duration.standardSeconds(windowDurationSec);
         Window<Tuple2<FileWithMeta, Try<SupplyDetail>>> window = Window.into(FixedWindows.of(windowDuration));
 
         val mainPC2 = rows
