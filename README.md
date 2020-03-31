@@ -55,12 +55,12 @@ CI/CD process integration [here](https://github.com/MensWearhouse/cloud-integrat
 ### Pipelines implementation
 
 - [0.4.1 Store Inventory Full Feed]()
-- [2.1.1 Create/Save Order (Ecom)]()
-- [2.1.2 Create/Save Order (Pre Sale)]()
-- [2.1.3 Create/Save Order (Custom Express)]() 
+- [2.1.1 Create/Save Order (Ecom)](src/main/java/com/tailoredbrands/pipeline/pattern/jms_to_pub_sub/README.md)
+- [2.1.2 Create/Save Order (Pre Sale)](src/main/java/com/tailoredbrands/pipeline/pattern/jms_to_pub_sub/README.md)
+- [2.1.3 Create/Save Order (Custom Express)](src/main/java/com/tailoredbrands/pipeline/pattern/jms_to_pub_sub/README.md) 
 - [0.1.1 Item Full Feed](src/main/java/com/tailoredbrands/pipeline/pattern/gcs_to_pub_sub/README.md#0.1.1 Item Full Feed)
 - [0.2.1, 0.2.2, 0.2.3 Facility (aka. Location, Inventory Location, Location Attributes)]()
-- [0.1.2 Item Delta Feed]()
+- [0.1.2 Item Delta Feed](src/main/java/com/tailoredbrands/pipeline/pattern/jms_to_pub_sub/README.md)
 - [1.1.1 Availability Sync - Network](src/main/java/com/tailoredbrands/pipeline/pattern/pub_sub_to_oracle/README.md#1.1.1 Availability Sync Network)
 
 
