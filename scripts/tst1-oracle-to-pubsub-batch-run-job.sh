@@ -5,7 +5,7 @@ export PROJECT_ID=tst1-integration-3ca6
 export PIPELINE_NAME=oracle-to-pub-sub
 export BUSINESS_INTERFACE=poc
 
-gcloud dataflow jobs run test-shaded-pipeline \
+gcloud dataflow jobs run oracle-to-pub-sub-secret-manager-test \
     --project=tst1-integration-3ca6 \
     --region=us-east1 \
     --service-account-email=project-service-account@tst1-integration-3ca6.iam.gserviceaccount.com \

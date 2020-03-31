@@ -7,7 +7,7 @@ export BUSINESS_INTERFACE=poc
 
 mvn clean package
 
-java -cp target/cloud-integrations-0.1-SNAPSHOT-shaded.jar \
+java -cp target/cloud-integrations-0.8-shaded.jar \
 com.tailoredbrands.pipeline.pattern.oracle_to_pub_sub.OracleToPubSubBatchPipeline \
       --project=${PROJECT_ID} \
       --region=${REGION} \
@@ -19,7 +19,7 @@ com.tailoredbrands.pipeline.pattern.oracle_to_pub_sub.OracleToPubSubBatchPipelin
       --businessInterface=${BUSINESS_INTERFACE} \
       --driver=oracle.jdbc.OracleDriver \
       --url=jdbc:oracle:thin:@//dom12tstdb01.tmw.com:2494/domtest \
-      --user=esbuser \
-      --password=load4esb \
+      --user=secret_oracle_user \
+      --password=secret_oracle_password \
       --outputPubsubTopic=projects/${PROJECT_ID}/topics/${BUSINESS_INTERFACE} \
       --runner=DataflowRunner
