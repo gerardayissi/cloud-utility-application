@@ -19,8 +19,9 @@ import com.tailoredbrands.generated.json.item_full_feed.SellingAttributes;
 import com.tailoredbrands.pipeline.error.ProcessingException;
 import com.tailoredbrands.pipeline.options.GcsToPubSubOptions;
 import com.tailoredbrands.pipeline.pattern.gcs_to_pub_sub.GcsToPubSubCounter;
-import com.tailoredbrands.util.json.JsonUtils;
 import io.vavr.control.Try;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.val;
 import org.apache.beam.sdk.extensions.gcp.options.GcsOptions;
 import org.apache.beam.sdk.extensions.gcp.util.GcsUtil;
@@ -43,6 +44,7 @@ import static com.google.api.gax.batching.FlowController.LimitExceededBehavior;
 import static com.tailoredbrands.pipeline.error.ErrorType.CSV_ROW_TO_OBJECT_CONVERSION_ERROR;
 import static com.tailoredbrands.pipeline.error.ErrorType.OBJECT_TO_JSON_CONVERSION_ERROR;
 import static com.tailoredbrands.util.FileUtils.getProcessedFilePath;
+import static com.tailoredbrands.util.json.JsonUtils.serializeObject;
 import static io.vavr.API.$;
 import static io.vavr.API.Case;
 import static io.vavr.API.Match;
@@ -57,7 +59,6 @@ public class ItemFullFeedProcessFileFn extends DoFn<FileIO.ReadableFile, Void> {
     private final GcsToPubSubCounter counter;
     private final Credentials MAOCredentials;
     private final String user;
-    private final String organization;
     private final String outputPubsubTopic;
     private final char delimiter;
 
@@ -69,7 +70,6 @@ public class ItemFullFeedProcessFileFn extends DoFn<FileIO.ReadableFile, Void> {
         this.counter = counter;
         this.MAOCredentials = MAOCredentials;
         user = options.getUser();
-        organization = options.getOrganization();
         outputPubsubTopic = options.getOutputPubsubTopic().get();
         val delimiterStr = options.getDelimiter();
         if (delimiterStr.length() > 1) {
@@ -146,12 +146,12 @@ public class ItemFullFeedProcessFileFn extends DoFn<FileIO.ReadableFile, Void> {
     }
 
     @SuppressWarnings("unchecked")
-    private Try<String> processRecord(CSVRecord record) {
+    private Try<ItemFullFeedWithOrg> processRecord(CSVRecord record) {
         val maybeItem = Try.of(() -> toItemFullFeed(record.toMap()))
                 .mapFailure(Case($(e -> !(e instanceof ProcessingException)),
                         exc -> new ProcessingException(CSV_ROW_TO_OBJECT_CONVERSION_ERROR, exc)));
         return maybeItem
-                .map(JsonUtils::serializeObject)
+                .map(item -> new ItemFullFeedWithOrg(serializeObject(item), item.getBrand()))
                 .mapFailure(Case($(e -> !(e instanceof ProcessingException)),
                         exc -> new ProcessingException(OBJECT_TO_JSON_CONVERSION_ERROR, exc)));
     }
@@ -242,17 +242,17 @@ public class ItemFullFeedProcessFileFn extends DoFn<FileIO.ReadableFile, Void> {
         return truncate(csvRow.get("ITEMCODES.ID"), 4);
     }
 
-    private PubsubMessage toPubSubMessage(Try<String> maybeData) {
+    private PubsubMessage toPubSubMessage(Try<ItemFullFeedWithOrg> maybeData) {
         val message = PubsubMessage.newBuilder()
-                .setData(ByteString.copyFromUtf8(maybeData.get()))
-                .putAttributes("User", "admin@tbi.com")
-                .putAttributes("Organization", "TMW")
+                .setData(ByteString.copyFromUtf8(maybeData.get().getItemFullFeed()))
+                .putAttributes("User", user)
+                .putAttributes("Organization", maybeData.get().getOrganization())
                 .build();
         LOG.info(message.toString());
         return message;
     }
 
-    private void processError(CSVRecord record, Try<String> maybeData) {
+    private void processError(CSVRecord record, Try<ItemFullFeedWithOrg> maybeData) {
         val err = (ProcessingException) maybeData.failed().get();
         val detailedCounter = Match(err.getType()).of(
                 Case($(CSV_ROW_TO_OBJECT_CONVERSION_ERROR), counter.csvRowToObjectErrors),
@@ -269,5 +269,12 @@ public class ItemFullFeedProcessFileFn extends DoFn<FileIO.ReadableFile, Void> {
         gcsUtil.copy(asList(filePath), asList(processedFiledPath));
         gcsUtil.remove(asList(filePath));
         LOG.info("File: {}, Moved to: {}", filePath, processedFiledPath);
+    }
+
+    @Data
+    @AllArgsConstructor
+    static final class ItemFullFeedWithOrg {
+        private String itemFullFeed;
+        private String organization;
     }
 }

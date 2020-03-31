@@ -7,12 +7,5 @@ public interface GcsToPubSubOptions extends BusinessInterfaceOptions, CsvOptions
     @Validation.Required
     @Description("The name of the User, ex: admin@tbi.com")
     String getUser();
-
     void setUser(String value);
-
-    @Validation.Required
-    @Description("The name of the Organization, ex: TMW")
-    String getOrganization();
-
-    void setOrganization(String value);
 }
