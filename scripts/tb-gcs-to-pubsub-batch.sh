@@ -5,7 +5,7 @@ export PIPELINE_NAME=gcs-to-pubsub
 export BUSINESS_INTERFACE=item_full_feed
 
 mvn compile exec:java \
--Dexec.mainClass=GcsToPubSubBatchPipeline \
+-Dexec.mainClass=GcsToPubSubStreamingPipeline \
       -Dexec.args="--project=${PROJECT_ID}} \
       --stagingLocation=gs://tb-dataflow-pipelines/${PIPELINE_NAME}staging \
       --tempLocation=gs://tb-dataflow-pipelines/${PIPELINE_NAME}/temp \

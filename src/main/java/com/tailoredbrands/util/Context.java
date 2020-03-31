@@ -1,7 +1,7 @@
 package com.tailoredbrands.util;
 
 import com.tailoredbrands.util.control.Try;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.beam.repackaged.core.org.apache.commons.lang3.StringUtils;
 import org.everit.json.schema.Schema;
 
 import java.util.List;

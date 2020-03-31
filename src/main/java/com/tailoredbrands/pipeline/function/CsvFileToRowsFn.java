@@ -29,6 +29,7 @@ public class CsvFileToRowsFn extends DoFn<FileIO.ReadableFile, Map<String, Strin
         Iterable<CSVRecord> records = CSVFormat.DEFAULT
                 .withFirstRecordAsHeader()
                 .withDelimiter(delimiter)
+                .withTrim(true)
                 .parse(reader);
         for (CSVRecord record : records) {
             receiver.output(record.toMap());

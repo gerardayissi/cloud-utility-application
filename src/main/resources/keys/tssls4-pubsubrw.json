@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "tasl-omni-stg-04-ops",
+  "private_key_id": "5f6696e4c4bd132eb8428292e20e197fabf6e97b",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC9URYe0IqDM1hr\n4II8JnatohDEgtoAQ3HBLdhKmUmaThwQEcTI6Z7YTgoBMdP6wAJqqtRDp1h8stmJ\nCxyAWl4u4kEKSGju/cmTmyy/p/0MPvCvLJ/WcDHSj/Zw3Ob+OyEQKt4mMcskTqXb\nBQ8CakwPiex0QqyETYrtP5MZ7+4vegEe5NayHupyxPqFJR3rPy5J9/gWq+GqxmBK\nBk0POMydJNDmjUofAGepNHZM1FaJA3rOfvDBJkuuRSYuv4rAAzVsI3zaTzZsfynu\nalB6ssMU809I1a6gtySyD0naXmWvxre7eStA7H2xDSIbtqTK8UI8WpGzD9HePVNa\nmm9VBQj5AgMBAAECggEAFfMNqeEzHALTGr/PDbcGbbtzbvs+WAc5zERa1kxXM6Yg\nfA75VjN67JiAsbKDoagLJ6+aeGURvfR1Av34Lhv8HTqzgIQUcXgYe84DFk39aWLv\nQBogBopfxmpVT/DWsc1seA3GT56Yj0M0mNQJcVXeb3NF6FVWH+lHJRpovVo7bwLG\nn74Bi3mxxnfjOSBFZpazEXWMSZHG4m+/1onHRz2AY9nqzomahKzFAHUdOgVVXdOl\noFTBRIyyWIcJ+SLvChXArxfYMQF6xm2j/o11eHcGriE7XVirGXl9r5WEmo1q9+xw\nZXR9LRvdcMfirep9c3tW/hG2y3hhynFtzP5/Cj408QKBgQDu+MBDanZvWiRRkcof\nlwBp7g/UzSSRzaFpinjV4w0MUieLLnA49z6Zx4G8vTqL30yZXgg/vewSHdxw0q6h\n8jI18n7Iy7ukKwxE/ZUTTWo4CsfnXUx/h1mU5Nd/WKrmrzRJq4lglz3IaYZgXh8A\nN0/i2oT9MtTbMft3eM/BZqjjkQKBgQDKzouGz31Y7ozItE1aDN3V9AYZGZvZMx/k\neT486CWdaznTzCM/XLOrP2Tu/9iLs3AnzwxAs1AG17D4566kd/6ZQI+MVemJwpYt\nEDfU97shk32ELRTXRxCYwb5MNTIWMHrnDTuL7RW/WBD6J7bwMZy7gpvtD51yiW4G\nPBVHjCZK6QKBgQCCvJgCyeXNeZVRAt9/dM8HJPSISUrucX8TDGybJ0JmMTPtExTW\nNX2MB/fUV/oFt75iUW1V4gOazbdiCgD8HFKX7Pirxbn8UIi/3bOHAd1Ql6VR0Fsf\nkd7SdHfo9YtZ9RQ4EZ5wt41XbVPUuOlg5uHPjBkhpIOK/8dBT1jpx84x4QKBgAvp\n+lRfGBQDX43i2bBylQ2emkUbNgaadEMtxDQ7xwnqZKlGksOEJKHoxXss2IHMdsg/\n545delQMk77rjVzoF7LVEhnCakfHgJ8BFuaR7xJX4cXECDdlW1o993nunhSjoHS2\nWEsuEFr/R3AKqTqPD5AMajCQ/ETgQfBn0zAy0YURAoGACAFTg0FVhomgpvkGlYDY\n8NZJyngtEx/4QmmLQKg5MSe/zx3FPJoupoMN7nvENHHDQ5mUeNTst6FEw7xwIRZJ\nz8RZUKbARegSLzkFHVxC6GXmhouKPZKWkP0RwGsF3i3KMcbYSx/SfxKRUNQr9sqL\nA6MyLYSvnN+lLAN+go2NYAg=\n-----END PRIVATE KEY-----\n",
+  "client_email": "tsslosf41o-pubsubrw@tasl-omni-stg-04-ops.iam.gserviceaccount.com",
+  "client_id": "105414713290900167025",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/tsslosf41o-pubsubrw%40tasl-omni-stg-04-ops.iam.gserviceaccount.com"
+}

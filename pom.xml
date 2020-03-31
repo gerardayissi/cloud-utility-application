@@ -2,10 +2,12 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
          xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.tailoredbrands</groupId>
     <artifactId>cloud-integrations</artifactId>
     <version>0.8</version>
+
     <properties>
         <vavr.version>0.10.2</vavr.version>
         <websphere.version>9.1.4.0</websphere.version>
@@ -20,6 +22,7 @@
         <jackson.version>2.10.2</jackson.version>
         <maven.compiler.source>1.8</maven.compiler.source>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.beam</groupId>
@@ -123,11 +126,6 @@
             <version>1.0-rc6</version>
         </dependency>
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>28.2-jre</version>
-        </dependency>
-        <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-secretmanager</artifactId>
             <version>0.3.0</version>
@@ -153,15 +151,26 @@
             <version>${websphere.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.jvnet.jaxb2_commons</groupId>
+            <artifactId>jaxb2-basics-runtime</artifactId>
+            <version>1.11.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-pubsub</artifactId>
+            <version>1.103.1</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-protobuf</artifactId>
+            <version>1.27.2</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest</artifactId>
             <version>2.2</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jvnet.jaxb2_commons</groupId>
-            <artifactId>jaxb2-basics-runtime</artifactId>
-            <version>1.11.1</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -170,6 +179,7 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
     <repositories>
         <repository>
             <releases>
@@ -183,6 +193,7 @@
             <url>http://35.221.54.31:8081/repository/df-pipe/</url>
         </repository>
     </repositories>
+
     <build>
         <plugins>
             <plugin>
