@@ -17,6 +17,7 @@ public class GcsToPubSubCounter implements Serializable {
     public final Counter pubSubMessagesWritten;
     public final Counter pubSubEndSyncMessagesWritten;
     public final Counter processedFilesCreated;
+    public final Counter filesWithFailuresCreated;
     public final Counter untypedErrors;
     public final Counter totalErrors;
 
@@ -31,6 +32,7 @@ public class GcsToPubSubCounter implements Serializable {
         pubSubMessagesWritten = Metrics.counter(namespace, "pubsub-messages-written");
         pubSubEndSyncMessagesWritten = Metrics.counter(namespace, "pubsub-end-sync-messages-written");
         processedFilesCreated = Metrics.counter(namespace, "files-created-after-processing");
+        filesWithFailuresCreated = Metrics.counter(namespace, "files-created-with-failures");
         untypedErrors = Metrics.counter(namespace, "untyped-errors");
         totalErrors = Metrics.counter(namespace, "total-errors");
     }

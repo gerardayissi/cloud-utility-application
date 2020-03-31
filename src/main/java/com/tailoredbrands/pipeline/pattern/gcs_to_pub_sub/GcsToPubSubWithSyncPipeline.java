@@ -77,7 +77,6 @@ public class GcsToPubSubWithSyncPipeline {
             .apply("Convert Json To PubSubMessage", toPubSubMessage())
             .apply("Checks errors", split(options.getErrorThreshold(), successTag, failureTag));
 
-
         PCollectionTuple pctSuccess = pc
             .get(successTag)
             .setCoder(Tuple2Coder.of(SerializableCoder.of(FileWithMeta.class), PubsubMessageWithAttributesCoder.of()))
@@ -121,12 +120,27 @@ public class GcsToPubSubWithSyncPipeline {
                     .withNumShards(1)
             );
 
-        // StartSync
-//        runStartSync(pcs, options, counter, successTag, failureTag);
-//         process SyncDetail
-//        runSyncDetail(pcs, options, counter, successTag, failureTag);
-//        // End Sync
-//        runEndSync(pcs, options, counter, successTag, failureTag);
+        // failure flow
+        pc
+            .get(failureTag)
+            .apply("Map failure rows", mapFailure())
+            .apply("Log and count errors", logFailures(counter))
+            .apply("Map to file with failures",
+                MapElements
+                    .into(new TypeDescriptor<KV<String, String>>() {
+                    })
+                    .via(tuple2 -> KV.of(tuple2._1.getSourceName(), tuple2._1().getFileContent())))
+            .apply("Window", Window.into(FixedWindows.of(Duration.standardSeconds(5L))))
+            .apply("Count files to be creating", increment(counter.filesWithFailuresCreated))
+            .apply("Write file with failures into the bucket",
+                FileIO.<String, KV<String, String>>writeDynamic()
+                    .by(KV::getKey)
+                    .withDestinationCoder(StringUtf8Coder.of())
+                    .via(Contextful.fn(KV::getValue), TextIO.sink())
+                    .to(options.getFailureBucket())
+                    .withNaming(key -> FileIO.Write.defaultNaming("Error_" + key.replaceAll(".csv", ""), ".csv"))
+                    .withNumShards(1)
+            );
 
         return pipeline.run();
     }
@@ -161,10 +175,8 @@ public class GcsToPubSubWithSyncPipeline {
                 val element = context.element();
                 val errorsCnt = element._2().stream().filter(failure -> failure.isFailure()).count();
                 if (errorsCnt > 0) {
-                    val threshold = element._1.getRecords().size() * thresholdPercentage / 100;
-                    if (errorsCnt < threshold) {
-                        // process valid records and move errors into file
-                    } else {
+                    val errorsPercent = errorsCnt * 100 / element._1.getRecords().size();
+                    if (errorsPercent > thresholdPercentage) {
                         // move all file into error file
                         context.output(failure, element);
                     }
@@ -200,31 +212,47 @@ public class GcsToPubSubWithSyncPipeline {
         }).withOutputTags(toBucket, TupleTagList.of(toPubSub));
     }
 
-    private static Peek<Tuple2<FileWithMeta, List<Try<PubsubMessage>>>> logFailures(GcsToPubSubCounter counter) {
-        return Peek.each(failure -> {
-            ProcessingException err = (ProcessingException) failure._2.get(0).failed().get();
-            val detailedCounter = Match(err.getType()).of(
-                Case($(CSV_ROW_TO_OBJECT_CONVERSION_ERROR), counter.csvRowToObjectErrors),
-                Case($(OBJECT_TO_JSON_CONVERSION_ERROR), counter.objectToJsonErrors),
-                Case($(JSON_TO_PUBSUB_MESSAGE_CONVERSION_ERROR), counter.jsonToPubSubErrors),
-                Case($(), counter.untypedErrors)
-            );
-            detailedCounter.inc();
-            counter.totalErrors.inc();
-            LOG.error(format("Failed to process Row: %s", failure._1), err);
+    static ParDo.SingleOutput<Tuple2<FileWithMeta, List<Try<PubsubMessage>>>, Tuple2<FileWithMeta, List<Try<PubsubMessage>>>> mapFailure() {
+        return ParDo.of(new DoFn<Tuple2<FileWithMeta, List<Try<PubsubMessage>>>, Tuple2<FileWithMeta, List<Try<PubsubMessage>>>>() {
+            @ProcessElement
+            public void processElement(ProcessContext context) {
+                val element = context.element();
+                val messages = element._2;
+                messages
+                    .stream()
+                    .filter(row -> row.isSuccess())
+                    .forEach(msg -> {
+                        val message = JsonUtils.deserialize(msg.get().getPayload());
+                        val messageType = message.get("messages").get(0).get("data").get("SyncSupplyEvent").get("TransactionTypeId").asText();
+                        if (messageType.equals("StartSync")) {
+                            context.output(new Tuple2<>(element._1, element._2));
+                        }
+                    });
+
+            }
         });
     }
 
-//    static MapElements<Tuple2<FileWithMeta, Try<PubsubMessage>>, Tuple2<FileWithMeta, Try<PubsubMessage>>> processFailure() {
-//        return MapElements
-//            .into(new TypeDescriptor<Tuple2<FileWithMeta, Try<PubsubMessage>>>() {
-//            })
-//            .via(tuple -> tuple.map2(
-//                maybeJson -> maybeJson.map(jsonNode -> new PubsubMessage(JsonUtils.serializeToBytes(jsonNode), new HashMap<>()))
-//                    .mapFailure(Case($(e -> !(e instanceof ProcessingException)),
-//                        exc -> new ProcessingException(JSON_TO_PUBSUB_MESSAGE_CONVERSION_ERROR, exc))))
-//            );
-//    }
+    private static Peek<Tuple2<FileWithMeta, List<Try<PubsubMessage>>>> logFailures(GcsToPubSubCounter counter) {
+        return Peek.each(failure -> {
+            val errors = failure._2;
+            errors
+                .stream()
+                .filter(row -> row.isFailure())
+                .forEach(err -> {
+                    ProcessingException exc = (ProcessingException) err.failed().get();
+                    val detailedCounter = Match(exc.getType()).of(
+                        Case($(CSV_ROW_TO_OBJECT_CONVERSION_ERROR), counter.csvRowToObjectErrors),
+                        Case($(OBJECT_TO_JSON_CONVERSION_ERROR), counter.objectToJsonErrors),
+                        Case($(JSON_TO_PUBSUB_MESSAGE_CONVERSION_ERROR), counter.jsonToPubSubErrors),
+                        Case($(), counter.untypedErrors)
+                    );
+                    detailedCounter.inc();
+                    counter.totalErrors.inc();
+                    LOG.error(format("Failed to process Row: %s", failure._1), err);
+                });
+        });
+    }
 
     private static Peek<PubsubMessage> countAndLogOutbound(Counter counter) {
         return Peek.each(pubsubMessage -> {

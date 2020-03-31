@@ -290,6 +290,16 @@ public class ItemFullFeedProcessorTest implements Serializable {
             }
 
             @Override
+            public String getFailureBucket() {
+                return null;
+            }
+
+            @Override
+            public void setFailureBucket(String value) {
+
+            }
+
+            @Override
             public ValueProvider<String> getInputPubsubSubscription() {
                 return null;
             }

@@ -16,4 +16,9 @@ public interface GcsOptions extends PipelineOptions {
     String getProcessedBucket();
 
     void setProcessedBucket(String value);
+
+    @Description("The bucket where we need to move files with failures")
+    String getFailureBucket();
+
+    void setFailureBucket(String value);
 }
