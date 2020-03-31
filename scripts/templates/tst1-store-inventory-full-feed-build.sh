@@ -20,8 +20,6 @@ export FILES_TO_PROCESS_BUCKET=gs://store_inventory_full_feed/*.csv
 export OUTPUT_TOPIC=projects/tst1-integration-3ca6/topics/mao-store-inventory-full-feed
 export RUNNER=DataflowRunner
 
-export GOOGLE_APPLICATION_CREDENTIALS=/Users/vpeche/apps/files/gcp/tst1-integration-3ca6-0bff2d5561eb.json
-
 mvn compile exec:java \
 -Dexec.mainClass=com.tailoredbrands.pipeline.pattern.gcs_to_pub_sub.GcsToPubSubWithSyncPipeline \
 -Dexec.args="--project=${PROJECT_ID} \
