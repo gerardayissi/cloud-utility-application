@@ -42,7 +42,7 @@ GOOGLE_APPLICATION_CREDENTIALS=<LOCAL_PATH_TO_FILE>.json;GOOGLE_CLOUD_PROJECT=<G
 ```
 
 ### CI/CD
-CI/CD process integration [here](https://github.com/MensWearhouse/cloud-integrations/blob/poc/README.md)
+CI/CD process integration [here](https://github.com/MensWearhouse/cloud-integrations/blob/poc-cicd/README.md)
 
 ### Resources
 - [Pipelines declaration](https://teams.microsoft.com/l/file/EB58894D-91E6-404B-BE75-B865408B66C0?tenantId=aac81192-f6f6-4e8a-9f5e-a663e2d41612&fileType=xlsx&objectUrl=https%3A%2F%2Ftmw365.sharepoint.com%2Fsites%2Faoprodsupport%2FShared%20Documents%2FGeneral%2F2-%20Discovery-Rqmnts-Design%2FActiveOmni%20Interface%20List.xlsx&baseUrl=https%3A%2F%2Ftmw365.sharepoint.com%2Fsites%2Faoprodsupport&serviceName=teams&threadId=19:b867c41cdeea47a09b362bcd92ad10b7@thread.skype&groupId=cf737fbc-a891-4e85-a5d3-001074ff5b75)
