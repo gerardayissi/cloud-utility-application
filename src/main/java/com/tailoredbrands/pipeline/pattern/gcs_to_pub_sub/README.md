@@ -55,7 +55,7 @@ PCollection<FileIO.Match> matches = pipeline .apply("Read Data",
 6.	If there are data errors, raw data will be sent to another GCS path for review and reprocessing.
 
 ### Input Csv
-- [StoreInventoryFullFeed input] (../../../../../../../test/resources/store_inventory_full_feed/TMW_Store_Inventory_10012019.csv)
+- [StoreInventoryFullFeed input](../../../../../../../test/resources/store_inventory_full_feed/TMW_Store_Inventory_10012019.csv)
 
 ### Output Message
 - [StoreInventoryFullFeed output](../../../../../../resources/json/store_inventory_full_feed/SyncDetail.json)
