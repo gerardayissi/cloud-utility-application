@@ -12,7 +12,7 @@ import org.apache.beam.sdk.values.PCollection;
 
 import java.util.Map;
 
-import static com.tailoredbrands.business_interface.BusinessInterface.*;
+import static com.tailoredbrands.business_interface.BusinessInterface.ITEM_FULL_FEED;
 import static io.vavr.API.Match;
 
 public class GcsToPubSubProcessorFactory {
@@ -21,6 +21,7 @@ public class GcsToPubSubProcessorFactory {
             PCollection<Tuple2<Map<String, String>, Try<JsonNode>>>> from(BusinessInterfaceOptions options) {
 
         val businessInterface = options.getBusinessInterface();
+
         return Match(businessInterface).of(
                 API.Case(API.$(ITEM_FULL_FEED.getName()), new ItemFullFeedProcessor(options))
         );

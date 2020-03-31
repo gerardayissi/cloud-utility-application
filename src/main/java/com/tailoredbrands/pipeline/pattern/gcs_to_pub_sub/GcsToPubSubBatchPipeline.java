@@ -84,7 +84,7 @@ public class GcsToPubSubBatchPipeline {
         processed
                 .get(successTag)
                 .setCoder(PubsubMessageWithAttributesCoder.of())
-                .apply("Count Messages to PubSub", increment(counter.pubsubMessagesWritten))
+                .apply("Count Messages to PubSub", increment(counter.pubSubMessagesWritten))
                 .apply("Write Messages to Pubsub", PubsubIO.writeMessages().to(options.getOutputPubsubTopic()));
 
         return pipeline.run();
