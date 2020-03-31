@@ -124,7 +124,7 @@ public class ItemFullFeedProcessFileFn extends DoFn<FileIO.ReadableFile, Void> {
             val maybeData = processRecord(record);
             if (maybeData.isSuccess()) {
                 pubSubFutures.add(publisher.publish(toPubSubMessage(maybeData)));
-                counter.pubsubMessagesWritten.inc();
+                counter.pubSubMessagesWritten.inc();
             } else {
                 processError(record, maybeData);
             }

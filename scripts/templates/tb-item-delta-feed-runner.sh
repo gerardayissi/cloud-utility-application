@@ -6,6 +6,7 @@ mvn -Pdataflow-runner compile exec:java \
       --stagingLocation=gs://tst1-integration-3ca6-jms-pubsub-df-staging/staging/ \
       --serviceAccount=project-service-account@tst1-integration-3ca6.iam.gserviceaccount.com \
       --subnetwork=https://www.googleapis.com/compute/v1/projects/network-b2b9/regions/us-east1/subnetworks/np-integration4 \
+      --jmsCredentialsSecret=secret_item_delta_feed \
       --jmsProvider=tibco \
       --jmsServerUrl=mqhatstsubcorp.tmw.com \
       --jmsQueue=GOOGLE.CLOUD.PUBLISHER \

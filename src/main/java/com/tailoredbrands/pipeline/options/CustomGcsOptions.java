@@ -10,4 +10,15 @@ public interface CustomGcsOptions extends GcsOptions {
     String getInputFilePattern();
 
     void setInputFilePattern(String value);
+
+    @Validation.Required
+    @Description("The bucket where we need to move processed files")
+    String getProcessedBucket();
+
+    void setProcessedBucket(String value);
+
+    @Description("The bucket where we need to move files with failures")
+    String getFailureBucket();
+
+    void setFailureBucket(String value);
 }
