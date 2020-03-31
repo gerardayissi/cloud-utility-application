@@ -44,3 +44,6 @@ TODO
 
 ### Run Locally
 TODO
+
+# Note:
+Implementation of this pipeline is not complete.
