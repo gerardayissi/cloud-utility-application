@@ -6,6 +6,7 @@ import com.tailoredbrands.pipeline.options.GcsToPubSubOptions;
 import lombok.val;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.PipelineResult;
+import org.apache.beam.sdk.extensions.gcp.options.GcpOptions;
 import org.apache.beam.sdk.io.FileIO;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.transforms.ParDo;
@@ -14,7 +15,10 @@ import org.joda.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
+
 import static com.tailoredbrands.util.Peek.increment;
+import static com.tailoredbrands.util.SecretUtils.resolveSecret;
 
 /**
  * The {@code GcsToPubSubStreamingPipeline} takes incoming data from
@@ -36,8 +40,9 @@ public class GcsToPubSubStreamingPipeline {
     public static PipelineResult run(GcsToPubSubOptions options) throws Exception {
         val pipeline = Pipeline.create(options);
         val counter = new GcsToPubSubCounter(options.getBusinessInterface());
-        val MAOCredentials = ServiceAccountCredentials.fromStream(
-                ClassLoader.getSystemClassLoader().getResourceAsStream("keys/tssls4-pubsubrw.json"));
+        val project = options.as(GcpOptions.class).getProject();
+        val MAOCredentials = ServiceAccountCredentials.fromStream(new ByteArrayInputStream(
+                resolveSecret(project, "MAO-PubSub-RW-Credentials").getBytes()));
         pipeline
                 .apply("Match Files on GCS", FileIO.match()
                         .filepattern(options.getInputFilePattern())
