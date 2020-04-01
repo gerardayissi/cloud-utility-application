@@ -190,7 +190,7 @@
                 <enabled>false</enabled>
             </snapshots>
             <id>nexus-staging-df-pipe</id>
-            <url>http://35.221.54.31:8081/repository/df-pipe/</url>
+            <url>http://35.221.54.31:8081/repository/dataflow-dependency/</url>
         </repository>
     </repositories>
 
