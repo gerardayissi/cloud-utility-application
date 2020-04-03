@@ -313,8 +313,8 @@
                 
                 <artifactSet>
             <excludes>
-                <exclude>com.google.api.grpc:proto-google-cloud-secretmanager-v1</exclude>
-                 <exclude>com.google.api.grpc:proto-google-cloud-secretmanager-v1beta1:jar</exclude>
+                
+                 <exclude>com.google.api.grpc:proto-google-cloud-secretmanager-v1beta1</exclude>
                 
             </excludes>
         </artifactSet>
