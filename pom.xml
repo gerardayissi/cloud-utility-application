@@ -133,7 +133,7 @@
             <artifactId>google-cloud-secretmanager</artifactId>
             <version>0.3.0</version>
         </dependency>
-        <dependency>
+       
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
