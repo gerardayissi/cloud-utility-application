@@ -329,7 +329,7 @@
                             <artifactSet>
                                     <excludes>
                                             
-                                             <exclude>io.grpc:grpc-netty-shaded:*</exclude>
+                                             <exclude>io.grpc:grpc-netty-shaded:1.27.2</exclude>
                                             
                                      </excludes>
         </artifactSet>
