@@ -45,12 +45,7 @@
             </exclusions>
         </dependency>
         
-        <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-netty-shaded</artifactId>
-            <version>1.17.1</version>
-        </dependency>
-             
+                   
         <dependency>
             <groupId>org.apache.beam</groupId>
             <artifactId>beam-sdks-java-io-jdbc</artifactId>
@@ -133,11 +128,7 @@
             <artifactId>auto-service</artifactId>
             <version>1.0-rc6</version>
         </dependency>
-        <dependency>
-            <groupId>com.google.cloud</groupId>
-            <artifactId>google-cloud-secretmanager</artifactId>
-            <version>0.3.0</version>
-        </dependency>
+       
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -163,17 +154,7 @@
             <artifactId>jaxb2-basics-runtime</artifactId>
             <version>1.11.1</version>
         </dependency>
-        <dependency>
-            <groupId>com.google.cloud</groupId>
-            <artifactId>google-cloud-pubsub</artifactId>
-            <version>1.103.1</version>
-        </dependency>
-        <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-protobuf</artifactId>
-            <version>1.17.1</version>
-        </dependency>
-        
+       
 
         <dependency>
             <groupId>org.hamcrest</groupId>
