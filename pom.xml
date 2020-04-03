@@ -326,6 +326,13 @@
                                     </excludes>
                                 </filter>
                             </filters>
+                            <artifactSet>
+                                    <excludes>
+                                             <exclude>io.grpc:*</exclude>
+                                             <exclude>io.grpc:grpc-netty:*</exclude>
+                                            
+                                     </excludes>
+        </artifactSet>
                             <transformers>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
