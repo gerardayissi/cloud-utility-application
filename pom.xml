@@ -164,7 +164,7 @@
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-protobuf</artifactId>
-            <version>1.27.2</version>
+            <version>1.17.1</version>
         </dependency>
 
         <dependency>
@@ -191,7 +191,7 @@
                 <enabled>false</enabled>
             </snapshots>
             <id>nexus-staging-df-pipe</id>
-            <url>http://35.221.54.31:8081/repository/dataflow-dependency/</url>
+            <url>http://tbnexapp601.tmw.com:8081/nexus/repository/dataflow-dependency/</url>
         </repository>
     </repositories>
 
