@@ -191,7 +191,7 @@
                 <enabled>false</enabled>
             </snapshots>
             <id>nexus-staging-df-pipe</id>
-            <url>https://scmnexus.tailoredbrands.com/nexus/repository/dataflow-dependency/</url>
+            <url>http://tbnexapp601.tmw.com:8081/nexus/repository/dataflow-dependency/</url>
         </repository>
     </repositories>
 
