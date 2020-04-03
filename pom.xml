@@ -37,10 +37,15 @@
                 <exclusion>
                     <groupId>com.google.api</groupId>
                     <artifactId>gax-grpc</artifactId>
-                </exclusion>                     
+                </exclusion>                    
                 <exclusion>
                     <groupId>io.grpc</groupId>
                     <artifactId>*</artifactId>
+                </exclusion>
+                     
+                 <exclusion>
+                    <groupId>io.grpc</groupId>
+                    <artifactId>grpc-netty-shaded</artifactId>
                 </exclusion>
                
             </exclusions>
