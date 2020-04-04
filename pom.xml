@@ -314,7 +314,7 @@
                 <artifactSet>
             <excludes>
                 
-                 <exclude>com.google.api.grpc:proto-google-cloud-secretmanager-v1beta1</exclude>
+                 <exclude>com.google.cloud:google-cloud-pubsub</exclude>
                 
             </excludes>
         </artifactSet>
