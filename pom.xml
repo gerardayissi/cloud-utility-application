@@ -315,6 +315,9 @@
             <excludes>
                 
                  <exclude>com.google.cloud:google-cloud-pubsub</exclude>
+                 <exclude>io.grpc:grpc-api:jar</exclude>
+                 <exclude>com.google.api:gax</exclude>
+                
                 
             </excludes>
         </artifactSet>
