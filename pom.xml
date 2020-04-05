@@ -328,7 +328,7 @@
                             </filters>
                             <artifactSet>
             <excludes>
-                <exclude>io.netty:netty-transport</exclude>
+                <exclude>org.apache.beam:beam-vendor-grpc-1_21_0</exclude>
                 
             </excludes>
         </artifactSet>
