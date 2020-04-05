@@ -326,6 +326,12 @@
                                     </excludes>
                                 </filter>
                             </filters>
+                            <artifactSet>
+            <excludes>
+                <exclude>io.netty:netty-transport</exclude>
+                
+            </excludes>
+        </artifactSet>
                             <transformers>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
