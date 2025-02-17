@@ -37,7 +37,6 @@ jobs:
           ingress_settings: ALLOW_ALL
           max_instances: 1
           all_traffic_on_latest_revision: true
-          memory: 512MB
 
       - name: make the url aunthenticated
         run: |
