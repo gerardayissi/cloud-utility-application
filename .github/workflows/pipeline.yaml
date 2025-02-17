@@ -18,10 +18,9 @@ jobs:
           credentials_json: ${{ secrets.GCP_RETAIL_SA }}
           
       - name: Setup Apine Retail GCP Service Account
-        uses: google-github-actions/setup-gcloud@main
+        uses: google-github-actions/setup-gcloud@v2
         with:
           project_id: ${{env.PROJECT}}
-          service_account_key: ${{ secrets.GCP_RETAIL_SA }}
           export_default_credentials: true
 
       - name: deploy cloud function
