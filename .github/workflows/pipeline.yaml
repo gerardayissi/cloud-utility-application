@@ -21,20 +21,19 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
         with:
           project_id: ${{env.PROJECT}}
-          
+
       - name: deploy cloud function
         id: deploy
         uses: google-github-actions/deploy-cloud-functions@main
         with:
           name: GreetingsHTTPApplication
-          runtime: java11
+          runtime: java17
           project_id: ${{env.PROJECT}}
           entry_point: com.google.cloud.GreetingsHTTPApplication
 
       - name: make the url aunthenticated
         run: |
           gcloud functions add-iam-policy-binding GreetingsHTTPApplication --member="allUsers" --role="roles/cloudfunctions.invoker"
-          gcloud functions add-iam-policy-binding GreetingsHTTPApplication --member="allUsers" --role="roles/run.invoker"
 
       - name: test the url
         run: curl "${{ steps.deploy.outputs.url }}"
