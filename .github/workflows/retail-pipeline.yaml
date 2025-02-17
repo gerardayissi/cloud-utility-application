@@ -36,7 +36,6 @@ jobs:
           build_service_account: projects/${{env.PROJECT}}/serviceAccounts/${{env.SA}}
           service_account: ${{env.SA}}
           ingress_settings: ALLOW_ALL
-          max_instances: 1
           all_traffic_on_latest_revision: true
 
       - name: make the url aunthenticated
