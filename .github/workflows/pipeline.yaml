@@ -33,7 +33,8 @@ jobs:
           project_id: ${{env.PROJECT}}
           entry_point: com.google.cloud.GreetingsHTTPApplication
           region: ${{env.REGION}}
-          service_account_email: ${{env.SA}}
+          build_service_account: ${{env.SA}}
+          service_account: ${{env.SA}}
           ingress_settings: ALLOW_ALL
           max_instances: 1
           all_traffic_on_latest_revision: true
@@ -43,5 +44,5 @@ jobs:
           gcloud functions add-iam-policy-binding GreetingsHTTPApplication --member="allUsers" --role="roles/cloudfunctions.invoker"
 
       - name: test the url
-        run: curl "${{ steps.deploy.outputs.url }}"
+        run: curl "${{ steps.deploy.outputs.url }}" -H "Authorization: bearer $(gcloud auth print-identity-token)" -H "Content-Type: application/json" -d '{"name": "Developer"}'
 
