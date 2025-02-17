@@ -44,5 +44,5 @@ jobs:
           gcloud functions add-iam-policy-binding GreetingsHTTPApplication --member="allUsers" --role="roles/cloudfunctions.invoker"
 
       - name: test the url
-        run: curl "${{ steps.deploy.outputs.url }}" -H "Authorization: bearer $(gcloud auth print-identity-token)" -H "Content-Type: application/json" -d '{"name": "Developer"}'
+        run: curl "${{ steps.deploy.outputs.url }}"
 
