@@ -4,7 +4,7 @@ on:
     branches: [ master ]
 env:
   PROJECT: essex-retail
-  SA: project-service-account@essex-retail.iam.gserviceaccount.com
+  SA: projects/essex-retail/serviceAccounts/project-service-account@essex-retail.iam.gserviceaccount.com
   REGION: us-east4
 
 jobs:
