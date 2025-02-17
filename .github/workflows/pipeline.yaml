@@ -5,7 +5,7 @@ on:
 env:
   PROJECT: essex-retail
   SA: project-service-account@essex-retail.iam.gserviceaccount.com
-  REGION: us-east4
+  REGION: us-central1
 
 jobs:
   build:
@@ -25,23 +25,20 @@ jobs:
           project_id: ${{env.PROJECT}}
 
       - name: deploy cloud function
-        id: deploy
-        uses: google-github-actions/deploy-cloud-functions@main
-        with:
-          name: GreetingsHTTPApplication
-          runtime: java17
-          project_id: ${{env.PROJECT}}
-          entry_point: com.google.cloud.GreetingsHTTPApplication
-          region: ${{env.REGION}}
-          build_service_account: projects/${{env.PROJECT}}/serviceAccounts/${{env.SA}}
-          service_account: ${{env.SA}}
-          ingress_settings: ALLOW_ALL
-          max_instances: 1
-          all_traffic_on_latest_revision: true
+        run:  |
+          gcloud functions deploy GreetingsHTTPApp \
+          --gen2 \
+          --region=${{env.REGION}} \
+          --runtime=java17 \
+          --source=${{ github.workspace }} \
+          --source=<source-folder-in-repo> \
+          --entry-point=com.google.cloud.GreetingsHTTPApplication \
+          --service-account=${{env.SA}} \
+          --serve-all-traffic-latest-revision 
 
       - name: make the url aunthenticated
         run: |
-          gcloud functions add-iam-policy-binding GreetingsHTTPApplication --member="allUsers" --role="roles/cloudfunctions.invoker"
+          gcloud functions add-iam-policy-binding GreetingsHTTPApp --member="allUsers" --role="roles/cloudfunctions.invoker"
 
       - name: test the url
         run: curl "${{ steps.deploy.outputs.url }}"
