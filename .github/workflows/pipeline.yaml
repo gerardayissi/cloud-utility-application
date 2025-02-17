@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v1
@@ -31,7 +31,6 @@ jobs:
           --region=${{env.REGION}} \
           --runtime=java17 \
           --source=. \
-          --source=<source-folder-in-repo> \
           --entry-point=com.google.cloud.GreetingsHTTPApplication \
           --service-account=${{env.SA}} \
           --serve-all-traffic-latest-revision 
