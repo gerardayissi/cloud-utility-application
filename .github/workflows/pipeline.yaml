@@ -30,7 +30,7 @@ jobs:
           --gen2 \
           --region=${{env.REGION}} \
           --runtime=java17 \
-          --source=${{ github.workspace }} \
+          --source=. \
           --source=<source-folder-in-repo> \
           --entry-point=com.google.cloud.GreetingsHTTPApplication \
           --service-account=${{env.SA}} \
