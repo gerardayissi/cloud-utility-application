@@ -5,7 +5,7 @@ on:
 env:
   PROJECT: essex-retail
   SA: project-service-account@essex-retail.iam.gserviceaccount.com
-  REGION: us-east4
+  REGION: us-central1
 
 jobs:
   build:
