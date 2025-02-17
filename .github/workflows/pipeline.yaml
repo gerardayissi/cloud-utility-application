@@ -21,8 +21,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
         with:
           project_id: ${{env.PROJECT}}
-          export_default_credentials: true
-
+          
       - name: deploy cloud function
         id: deploy
         uses: google-github-actions/deploy-cloud-functions@main
@@ -35,6 +34,7 @@ jobs:
       - name: make the url aunthenticated
         run: |
           gcloud functions add-iam-policy-binding GreetingsHTTPApplication --member="allUsers" --role="roles/cloudfunctions.invoker"
+          gcloud functions add-iam-policy-binding GreetingsHTTPApplication --member="allUsers" --role="roles/run.invoker"
 
       - name: test the url
         run: curl "${{ steps.deploy.outputs.url }}"
