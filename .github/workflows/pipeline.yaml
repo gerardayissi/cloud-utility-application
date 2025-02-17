@@ -4,8 +4,7 @@ on:
     branches: [ master ]
 env:
   PROJECT: essex-retail
-  SA: projects/essex-retail/serviceAccounts/project-service-account@essex-retail.iam.gserviceaccount.com
-  RETAIL_SA: project-service-account@essex-retail.iam.gserviceaccount.com
+  SA: project-service-account@essex-retail.iam.gserviceaccount.com
   REGION: us-east4
 
 jobs:
@@ -34,8 +33,8 @@ jobs:
           project_id: ${{env.PROJECT}}
           entry_point: com.google.cloud.GreetingsHTTPApplication
           region: ${{env.REGION}}
-          build_service_account: ${{env.SA}}
-          service_account: ${{env.RETAIL_SA}}
+          build_service_account: projects/${{env.PROJECT}}/serviceAccounts/${{env.SA}}
+          service_account: ${{env.SA}}
           ingress_settings: ALLOW_ALL
           max_instances: 1
           all_traffic_on_latest_revision: true
