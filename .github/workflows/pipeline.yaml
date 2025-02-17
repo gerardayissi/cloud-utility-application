@@ -1,7 +1,7 @@
 name: Alpine Retail Deploy Greetings Cloud Function
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
 env:
   PROJECT: essex-retail
 
