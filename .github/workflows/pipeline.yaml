@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Setup Apine Retail GCP Service Account
-        uses: google-github-actions/setup-gcloud@master
+        uses: google-github-actions/setup-gcloud@main
         with:
           project_id: ${{env.PROJECT}}
           service_account_key: ${{ secrets.GCP_RETAIL_SA }}
