@@ -13,6 +13,6 @@ public class GreetingsHTTPApplication implements HttpFunction {
     public void service(HttpRequest request, HttpResponse response)
             throws IOException {
         BufferedWriter writer = response.getWriter();
-        writer.write("APP2 - Retail Order Confirmation: 67890");
+        writer.write("APP2 - Retail Order Confirmation: 678901");
     }
 }
