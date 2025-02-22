@@ -2,6 +2,8 @@ name: Retail Deploy Greetings Cloud Function
 on:
   push:
     branches: [ master ]
+    paths:
+      - app1/**
 env:
   PROJECT: essex-retail
   SA: project-service-account@essex-retail.iam.gserviceaccount.com
@@ -26,7 +28,7 @@ jobs:
 
       - name: deploy cloud function
         run:  |
-          gcloud functions deploy GreetingsHTTPApp \
+          gcloud functions deploy App1 \
           --gen2 \
           --region=${{env.REGION}} \
           --runtime=java17 \
@@ -39,5 +41,5 @@ jobs:
 
       - name: make the url aunthenticated
         run: |
-          gcloud functions add-iam-policy-binding GreetingsHTTPApp --member="allUsers" --role="roles/cloudfunctions.invoker"
+          gcloud functions add-iam-policy-binding App1 --member="allUsers" --role="roles/cloudfunctions.invoker"
 

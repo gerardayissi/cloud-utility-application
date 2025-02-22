@@ -2,6 +2,8 @@ name: Retail Deploy Greetings Cloud Function
 on:
   push:
     branches: [ master ]
+    paths:
+    - app2/**
 env:
   PROJECT: essex-retail
   SA: project-service-account@essex-retail.iam.gserviceaccount.com
@@ -28,10 +30,11 @@ jobs:
         id: deploy
         uses: google-github-actions/deploy-cloud-functions@main
         with:
-          name: GreetingsHTTPApplication
+          name: App2
           runtime: java17
           project_id: ${{env.PROJECT}}
           entry_point: com.google.cloud.GreetingsHTTPApplication
+          source_dir: ./app2
           region: ${{env.REGION}}
           build_service_account: projects/${{env.PROJECT}}/serviceAccounts/${{env.SA}}
           service_account: ${{env.SA}}
@@ -40,7 +43,7 @@ jobs:
 
       - name: make the url aunthenticated
         run: |
-          gcloud functions add-iam-policy-binding GreetingsHTTPApplication --member="allUsers" --role="roles/cloudfunctions.invoker"
+          gcloud functions add-iam-policy-binding App2 --member="allUsers" --role="roles/cloudfunctions.invoker"
 
       - name: test the url
         run: curl "${{ steps.deploy.outputs.url }}"
