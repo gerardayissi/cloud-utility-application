@@ -32,7 +32,7 @@ jobs:
           --gen2 \
           --region=${{env.REGION}} \
           --runtime=java17 \
-          --source=$PWD/app1 \
+          --source=${GITHUB_WORKSPACE}/app1 \
           --entry-point=com.google.cloud.GreetingsHTTPApplication \
           --service-account=${{env.SA}} \
           --trigger-http \
