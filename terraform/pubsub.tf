@@ -14,7 +14,7 @@ resource "google_pubsub_subscription" "demo-subscription" {
   depends_on = [google_pubsub_topic.demo-topic]
 }
 
-resource "google_pubsub_topic" "demo-topic-1" {
-  name = "demo-topic-1"
-  project = var.project_id
-}
+#resource "google_pubsub_topic" "demo-topic-1" {
+  #name = "demo-topic-1"
+  #project = var.project_id
+#}
