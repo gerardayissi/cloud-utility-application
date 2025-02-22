@@ -1,0 +1,52 @@
+name: 'Terragrunt CI'
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - terragrunt/code/**
+permissions:
+  contents: read
+  
+jobs:
+  Terragrunt:
+    name: Terragrunt
+    runs-on: ubuntu-latest
+    environment: production
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+        #Inform a working directory if .tf files are not in root folder
+        working-directory: ./terragrunt/env/tst
+
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    # Install the latest version of Terragrunt CLI and configure the Terragrunt CLI configuration file with a Terragrunt Cloud user API token
+    - name: Setup Terragrunt
+      uses: #**TBD-hashicorp/setup-Terragrunt@v1**
+
+
+    # Initialize a new or existing Terragrunt working directory by creating initial files, loading any remote state, downloading modules, etc.
+    - name: Terragrunt Init
+      run: terragrunt init --terragrunt-non-interactive
+      env:
+        GOOGLE_CREDENTIALS: ${{ secrets.GCP_RETAIL_SA }}
+
+    # Generates an execution plan for Terragrunt
+    - name: Terragrunt Plan
+      run: terragrunt run-all plan --terragrunt-non-interactive
+      env:
+        GOOGLE_CREDENTIALS: ${{ secrets.GCP_RETAIL_SA }}
+
+      # On push to main, build or change infrastructure according to Terragrunt configuration files
+      # Note: It is recommended to set up a required "strict" status check in your repository for "Terragrunt Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
+    - name: Terragrunt Apply
+      #if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      #run: terragrunt apply-all --terragrunt-non-interactive
+      #env:
+        #GOOGLE_CREDENTIALS: ${{ secrets.GCP_RETAIL_SA }}
