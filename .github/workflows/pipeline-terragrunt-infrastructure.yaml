@@ -5,15 +5,17 @@ on:
     branches: [ master ]
     paths:
       - terragrunt/code/**
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
 
 permissions:
   contents: read
   
 jobs:
-  Terragrunt:
-    name: Terragrunt
+  Build:
+    name: Build
     runs-on: ubuntu-latest
-    environment: production
 
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
@@ -27,6 +29,22 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
+  DeployDevPlan:
+    name: DeployDevPlan
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    environment: 
+      name: DevelopmentPlan
+    needs: [Build]
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+        #Inform a working directory if .tf files are not in root folder
+        working-directory: ./terragrunt/env/tst
+
+    steps:
     # Install the latest version of Terragrunt CLI and configure the Terragrunt CLI configuration file with a Terragrunt Cloud user API token
     - name: Setup Terraform v1.2.6
       uses: hashicorp/setup-Terraform@v1
@@ -55,10 +73,25 @@ jobs:
       env:
         GOOGLE_CREDENTIALS: ${{ secrets.GCP_RETAIL_SA }}
 
+  DeployDevApply:
+    name: DeployDevApply
+    runs-on: ubuntu-latest
+    environment: 
+      name: DevelopmentApply
+    needs: [DeployDevPlan]
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+        #Inform a working directory if .tf files are not in root folder
+        working-directory: ./terragrunt/env/tst
+
+    steps:
       # On push to main, build or change infrastructure according to Terragrunt configuration files
       # Note: It is recommended to set up a required "strict" status check in your repository for "Terragrunt Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
     - name: Terragrunt Apply
-      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      #if: github.ref == 'refs/heads/master' && github.event_name == 'push'
       run: terragrunt apply --auto-approve --terragrunt-non-interactive
       env:
         GOOGLE_CREDENTIALS: ${{ secrets.GCP_RETAIL_SA }}
