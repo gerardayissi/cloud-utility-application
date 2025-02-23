@@ -45,6 +45,9 @@ jobs:
         working-directory: ./terragrunt/env/tst
 
     steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
     # Install the latest version of Terragrunt CLI and configure the Terragrunt CLI configuration file with a Terragrunt Cloud user API token
     - name: Setup Terraform v1.2.6
       uses: hashicorp/setup-Terraform@v1
