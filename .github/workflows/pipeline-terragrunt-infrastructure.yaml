@@ -31,7 +31,7 @@ jobs:
 
   DeployDevPlan:
     name: DeployDevPlan
-    if: github.event_name == 'pull_request'
+    #if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     environment: 
       name: DevelopmentPlan
