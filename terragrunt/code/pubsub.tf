@@ -19,7 +19,12 @@ resource "google_pubsub_topic" "demo-topic-1" {
   project = var.project_id
 }
 
-#resource "google_pubsub_topic" "demo-topic-2" {
-  #name = "demo-topic-2-${var.env}"
-  #project = var.project_id
-#}
+resource "google_pubsub_topic" "demo-topic-2" {
+  name = "demo-topic-2-${var.env}"
+  project = var.project_id
+}
+
+resource "google_pubsub_topic" "demo-topic-3" {
+  name = "demo-topic-3-${var.env}"
+  project = var.project_id
+}
