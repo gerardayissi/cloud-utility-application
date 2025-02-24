@@ -88,7 +88,7 @@ jobs:
       run:
         shell: bash
         #Inform a working directory if .tf files are not in root folder
-        working-directory: ./terragrunt/env/tst
+        #working-directory: ./terragrunt/env/tst
 
     steps:
       # On push to main, build or change infrastructure according to Terragrunt configuration files
