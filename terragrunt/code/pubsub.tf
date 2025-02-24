@@ -18,3 +18,8 @@ resource "google_pubsub_subscription" "demo-subscription" {
   #name = "demo-topic-1-${var.env}"
   #project = var.project_id
 #}
+
+resource "google_pubsub_topic" "demo-topic-2" {
+  name = "demo-topic-2-${var.env}"
+  project = var.project_id
+}

@@ -88,11 +88,33 @@ jobs:
       run:
         shell: bash
         #Inform a working directory if .tf files are not in root folder
-        #working-directory: ./terragrunt/env/tst
+        working-directory: ./terragrunt/env/tst
 
     steps:
-      # On push to main, build or change infrastructure according to Terragrunt configuration files
-      # Note: It is recommended to set up a required "strict" status check in your repository for "Terragrunt Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    # Install the latest version of Terragrunt CLI and configure the Terragrunt CLI configuration file with a Terragrunt Cloud user API token
+    - name: Setup Terraform v1.2.6
+      uses: hashicorp/setup-Terraform@v1
+      with:
+        terraform_version: 1.2.6
+        terraform_wrapper: true
+    - name: Setup Terraform version
+      run: terraform --version
+    - name: Setup Terraform wrapper path
+      run: which terraform
+
+    - name: Setup Terragrunt version 0.21.13
+      uses: autero1/action-terragrunt@v1.1.0
+      with:
+        terragrunt_version: 0.21.13
+
+    # Initialize a new or existing Terragrunt working directory by creating initial files, loading any remote state, downloading modules, etc.
+    - name: Terragrunt Init
+      run: terragrunt init --terragrunt-non-interactive
+      env:
+        GOOGLE_CREDENTIALS: ${{ secrets.GCP_RETAIL_SA }}
     - name: Terragrunt Apply
       #if: github.ref == 'refs/heads/master' && github.event_name == 'push'
       run: terragrunt apply --auto-approve --terragrunt-non-interactive
