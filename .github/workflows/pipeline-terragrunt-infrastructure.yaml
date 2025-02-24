@@ -120,3 +120,190 @@ jobs:
       run: terragrunt apply --auto-approve --terragrunt-non-interactive
       env:
         GOOGLE_CREDENTIALS: ${{ secrets.GCP_RETAIL_SA }}
+
+
+
+  DeployStagePlan:
+    name: Stage - Terragrunt Plan
+    #if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    environment: 
+      name: StagePlan
+    needs: [DeployDevApply]
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+        #Inform a working directory if .tf files are not in root folder
+        working-directory: ./terragrunt/env/stg
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    # Install the latest version of Terragrunt CLI and configure the Terragrunt CLI configuration file with a Terragrunt Cloud user API token
+    - name: Setup Terraform v1.2.6
+      uses: hashicorp/setup-Terraform@v1
+      with:
+        terraform_version: 1.2.6
+        terraform_wrapper: true
+    - name: Setup Terraform version
+      run: terraform --version
+    - name: Setup Terraform wrapper path
+      run: which terraform
+
+    - name: Setup Terragrunt version 0.21.13
+      uses: autero1/action-terragrunt@v1.1.0
+      with:
+        terragrunt_version: 0.21.13
+
+    # Initialize a new or existing Terragrunt working directory by creating initial files, loading any remote state, downloading modules, etc.
+    - name: Terragrunt Init
+      run: terragrunt init --terragrunt-non-interactive
+      env:
+        GOOGLE_CREDENTIALS: ${{ secrets.GCP_RETAIL_SA }}
+
+    # Generates an execution plan for Terragrunt
+    - name: Terragrunt Plan
+      run: terragrunt plan --terragrunt-non-interactive
+      env:
+        GOOGLE_CREDENTIALS: ${{ secrets.GCP_RETAIL_SA }}
+
+  DeployStageApply:
+    name: Stage - Terragrunt Apply
+    runs-on: ubuntu-latest
+    environment: 
+      name: StageApply
+    needs: [DeployStagePlan]
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+        #Inform a working directory if .tf files are not in root folder
+        working-directory: ./terragrunt/env/stg
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    # Install the latest version of Terragrunt CLI and configure the Terragrunt CLI configuration file with a Terragrunt Cloud user API token
+    - name: Setup Terraform v1.2.6
+      uses: hashicorp/setup-Terraform@v1
+      with:
+        terraform_version: 1.2.6
+        terraform_wrapper: true
+    - name: Setup Terraform version
+      run: terraform --version
+    - name: Setup Terraform wrapper path
+      run: which terraform
+
+    - name: Setup Terragrunt version 0.21.13
+      uses: autero1/action-terragrunt@v1.1.0
+      with:
+        terragrunt_version: 0.21.13
+
+    # Initialize a new or existing Terragrunt working directory by creating initial files, loading any remote state, downloading modules, etc.
+    - name: Terragrunt Init
+      run: terragrunt init --terragrunt-non-interactive
+      env:
+        GOOGLE_CREDENTIALS: ${{ secrets.GCP_RETAIL_SA }}
+    - name: Terragrunt Apply
+      #if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      run: terragrunt apply --auto-approve --terragrunt-non-interactive
+      env:
+        GOOGLE_CREDENTIALS: ${{ secrets.GCP_RETAIL_SA }}
+
+
+  DeployProdPlan:
+    name: Prod - Terragrunt Plan
+    #if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    environment: 
+      name: ProductionPlan
+    needs: [DeployStageApply]
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+        #Inform a working directory if .tf files are not in root folder
+        working-directory: ./terragrunt/env/prd
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    # Install the latest version of Terragrunt CLI and configure the Terragrunt CLI configuration file with a Terragrunt Cloud user API token
+    - name: Setup Terraform v1.2.6
+      uses: hashicorp/setup-Terraform@v1
+      with:
+        terraform_version: 1.2.6
+        terraform_wrapper: true
+    - name: Setup Terraform version
+      run: terraform --version
+    - name: Setup Terraform wrapper path
+      run: which terraform
+
+    - name: Setup Terragrunt version 0.21.13
+      uses: autero1/action-terragrunt@v1.1.0
+      with:
+        terragrunt_version: 0.21.13
+
+    # Initialize a new or existing Terragrunt working directory by creating initial files, loading any remote state, downloading modules, etc.
+    - name: Terragrunt Init
+      run: terragrunt init --terragrunt-non-interactive
+      env:
+        GOOGLE_CREDENTIALS: ${{ secrets.GCP_RETAIL_SA }}
+
+    # Generates an execution plan for Terragrunt
+    - name: Terragrunt Plan
+      run: terragrunt plan --terragrunt-non-interactive
+      env:
+        GOOGLE_CREDENTIALS: ${{ secrets.GCP_RETAIL_SA }}
+
+  DeployProdApply:
+    name: Prod - Terragrunt Apply
+    runs-on: ubuntu-latest
+    environment: 
+      name: ProductionApply
+    needs: [DeployProdPlan]
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+        #Inform a working directory if .tf files are not in root folder
+        working-directory: ./terragrunt/env/prd
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    # Install the latest version of Terragrunt CLI and configure the Terragrunt CLI configuration file with a Terragrunt Cloud user API token
+    - name: Setup Terraform v1.2.6
+      uses: hashicorp/setup-Terraform@v1
+      with:
+        terraform_version: 1.2.6
+        terraform_wrapper: true
+    - name: Setup Terraform version
+      run: terraform --version
+    - name: Setup Terraform wrapper path
+      run: which terraform
+
+    - name: Setup Terragrunt version 0.21.13
+      uses: autero1/action-terragrunt@v1.1.0
+      with:
+        terragrunt_version: 0.21.13
+
+    # Initialize a new or existing Terragrunt working directory by creating initial files, loading any remote state, downloading modules, etc.
+    - name: Terragrunt Init
+      run: terragrunt init --terragrunt-non-interactive
+      env:
+        GOOGLE_CREDENTIALS: ${{ secrets.GCP_RETAIL_SA }}
+    - name: Terragrunt Apply
+      #if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      run: terragrunt apply --auto-approve --terragrunt-non-interactive
+      env:
+        GOOGLE_CREDENTIALS: ${{ secrets.GCP_RETAIL_SA }}
