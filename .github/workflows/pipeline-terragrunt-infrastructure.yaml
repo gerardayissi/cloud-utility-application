@@ -5,8 +5,8 @@ on:
     branches: [ master ]
     paths:
       - terragrunt/code/**
-  #pull_request:
-    #branches: [ master ]
+  pull_request:
+    branches: [ master ]
   workflow_dispatch:
 
 permissions:
@@ -31,7 +31,7 @@ jobs:
 
   DeployDevPlan:
     name: Dev - Terragrunt Plan
-    #if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     environment: 
       name: DevelopmentPlan
@@ -125,7 +125,6 @@ jobs:
 
   DeployStagePlan:
     name: Stage - Terragrunt Plan
-    #if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     environment: 
       name: StagePlan
@@ -218,7 +217,6 @@ jobs:
 
   DeployProdPlan:
     name: Prod - Terragrunt Plan
-    #if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     environment: 
       name: ProductionPlan
