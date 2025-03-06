@@ -16,7 +16,7 @@ def hello_pubsub(cloud_event):
         creator=getconn,
    )
    with pool.connect() as db_conn:
-        # query database
+        # query database in postgres
         result = db_conn.execute(text("SELECT * from users")).fetchall()
 
         # Do something with the results
