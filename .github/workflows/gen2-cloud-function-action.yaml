@@ -1,0 +1,44 @@
+name: Retail Deploy Greetings Cloud Function
+on:
+  push:
+    branches: [ master ]
+    paths:
+    - gen2-cloud-function/**
+env:
+  PROJECT: essex-retail
+  SA: project-service-account@essex-retail.iam.gserviceaccount.com
+  REGION: us-central1
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_RETAIL_SA }}
+          
+      - name: Setup Apine Retail GCP Service Account
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{env.PROJECT}}
+
+      - name: deploy cloud function
+        id: deploy
+        uses: google-github-actions/deploy-cloud-functions@main
+        with:
+          name: gen2-postgres-cloud-function
+          runtime: python39
+          project_id: ${{env.PROJECT}}
+          entry_point: hello_pubsub
+          source_dir: ./gen2-cloud-function
+          region: ${{env.REGION}}
+          build_service_account: projects/${{env.PROJECT}}/serviceAccounts/${{env.SA}}
+          service_account: ${{env.SA}}
+          ingress_settings: ALLOW_ALL
+          event_trigger_pubsub_topic: test-topic
+          all_traffic_on_latest_revision: true
+
